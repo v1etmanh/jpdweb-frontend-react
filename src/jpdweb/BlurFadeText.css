@@ -1,0 +1,15 @@
+/* BlurFadeText.css */
+.blur-fade {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(20px);
+  animation: fadeInBlur 1.2s ease-out forwards;
+}
+
+@keyframes fadeInBlur {
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
