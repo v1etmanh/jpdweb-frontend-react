@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-export default function CourseSpecificComponent({ relatedCourses = [] }) {
+export default function CourseDescription({ relatedCourses = [] }) {
   // Enhanced course data structure
   const courses = [
     {
