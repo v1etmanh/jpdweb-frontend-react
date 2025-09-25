@@ -48,6 +48,26 @@ const mockData = {
       course_img: "https://img-c.udemycdn.com/course/240x135/362070_d944_2.jpg",
       progress: 0
     }
+  ],
+   myCourse: [
+    {
+      courseId: 5,
+      course_name: "Machine Learning A-Z",
+      course_img: "https://img-c.udemycdn.com/course/240x135/950390_270f_3.jpg",
+      progress: 0
+    },
+    {
+      courseId: 6,
+      course_name: "The Web Developer Bootcamp 2024",
+      course_img: "https://img-c.udemycdn.com/course/240x135/625204_436a_3.jpg",
+      progress: 0
+    },
+    {
+      courseId: 7,
+      course_name: "AWS Certified Solutions Architect",
+      course_img: "https://img-c.udemycdn.com/course/240x135/362070_d944_2.jpg",
+      progress: 0
+    }
   ]
 };
 
@@ -56,11 +76,12 @@ export default function MyLearningComponent() {
   const [courses, setCourses] = useState([]);
   const [wishlists, setWishlists] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
+  const[myCourse,setMycourse]=useState([])
   useEffect(() => {
     // Simulate API call
     setCourses(mockData.courses);
     setWishlists(mockData.wishlists);
+   setMycourse(mockData.myCourse);
   }, []);
 
   const filteredCourses = courses.filter(course =>
@@ -70,7 +91,9 @@ export default function MyLearningComponent() {
   const filteredWishlists = wishlists.filter(course =>
     course.course_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+const filteredMyCourse = myCourse.filter(course =>
+    course.course_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const CourseCard = ({ course, isWishlist = false }) => (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm border hover:shadow-md transition-all duration-300 cursor-pointer group">
       <div className="relative">
@@ -158,6 +181,16 @@ export default function MyLearningComponent() {
           >
             Wishlist ({wishlists.length})
           </button>
+          <button 
+  className={`px-6 py-3 border-2 font-semibold rounded transition-all ${
+    activeTab === 'myCourse'
+      ? 'border-gray-900 bg-gray-900 text-white'
+      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+  }`}
+  onClick={() => setActiveTab('myCourse')}
+>
+  MyCourse ({myCourse.length})
+</button>
         </div>
 
         {/* Search */}
@@ -186,6 +219,12 @@ export default function MyLearningComponent() {
             <CourseCard key={course.courseId} course={course} isWishlist={true} />
           ))
         }
+       {activeTab === 'myCourse' && 
+  filteredMyCourse.map(course => (
+    <CourseCard key={course.courseId} course={course} isWishlist={false} />
+  ))
+}
+
       </div>
 
       {/* Empty State */}

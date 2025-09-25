@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { 
   Upload, 
   Image, 
@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   Save
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // Component InputField được tách ra ngoài để tránh re-render
 const InputField = React.memo(({ label, name, value, onChange, error, type = "text", textarea = false, placeholder, required = false }) => (
@@ -60,12 +61,14 @@ const CreateCourseForm = () => {
     language: 'Vietnamese',
     price: '',
     urlImg: '',
+     courseType: '',
     imageFile: null
   });
-
+  const[courseType,setCourseType]=useState(null)
+  
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const[isShowPrice,setIsShowPrice]=useState(false)
   const languages = useMemo(() => [
     { value: 'Vietnamese', label: 'Tiếng Việt' },
     { value: 'English', label: 'English' },
@@ -73,7 +76,19 @@ const CreateCourseForm = () => {
     { value: 'Korean', label: '한국어' },
     { value: 'Chinese', label: '中文' }
   ], []);
+  const[isUpdateCertifate,setIsUpdateCertificate]=useState(false)
+  const nav=useNavigate()
+useEffect(()=>{
+if(courseType=="commercial")
 
+  {
+   setIsShowPrice(true)
+  }
+  else {
+    setIsShowPrice(false)
+  }
+
+},[courseType])
   const handleInputChange = useCallback((field, value) => {
     setCourseData(prev => ({
       ...prev,
@@ -188,8 +203,14 @@ const CreateCourseForm = () => {
 
   const handleSubmit = useCallback(async () => {
     if (!validateStep(3)) return;
-
+      
     setIsSubmitting(true);
+   if(courseData.courseType == "commercial"){ // Sửa thành ===
+    if(isUpdateCertifate == false){ // Sửa thành isUpdateCertificate và ===
+      nav("/upload_profile")
+      return; // Thêm return để thoát function
+    }
+  }
     try {
       // Here you would make API call to create course
       const formData = new FormData();
@@ -199,7 +220,7 @@ const CreateCourseForm = () => {
         } else if (key !== 'imageFile' && key !== 'urlImg') {
           formData.append(key, courseData[key]);
         }
-      });
+      }  );
 
       console.log('Course data:', courseData);
       
@@ -385,17 +406,27 @@ const CreateCourseForm = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <InputField
-                    label="Giá khóa học (VNĐ)"
-                    name="price"
-                    value={courseData.price}
-                    onChange={handleInputChange}
-                    error={errors.price}
-                    type="number"
-                    placeholder="499000"
-                    required
-                  />
-
+             <select
+    id="courseType"
+    name="courseType"
+    value={courseData.courseType}
+   onChange={(e) => {
+  const value = e.target.value;
+  setCourseType(value);
+  handleInputChange('courseType', value); // Cập nhật vào courseData
+}}
+    required
+    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+  >
+    <option value="">-- Select type --</option>
+    <option value="public">Public</option>
+    <option value="private">Private</option>
+    <option value="commercial">Commercial</option>
+  </select>
+{isShowPrice&& <InputField label="Giá khóa học (VNĐ)" 
+name="price" value={courseData.price} 
+onChange={handleInputChange} error={errors.price} 
+type="number" placeholder="499000" required />}
                   {revenueInfo && (
                     <div className="mt-4 p-4 bg-blue-50 rounded-lg">
                       <h4 className="font-medium text-blue-900 mb-2">Dự kiến thu nhập:</h4>

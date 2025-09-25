@@ -479,3 +479,210 @@ export const mockPictureAndQuestionsData = [
     ]
   }
 ];
+export const  VideoMock={
+videoUrl:"https://www.youtube.com/watch?v=heMYSOZoT3c"
+}
+
+// mockData.js
+export const coursesData = [
+  {
+    id: 1,
+    name: "React Fundamentals",
+    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=300&h=200&fit=crop",
+    price: 2500000,
+    studentCount: 1245,
+    rating: 4.8,
+    revenue: "156,250,000",
+    createdDate: "2024-01-15",
+  },
+  {
+    id: 2,
+    name: "Advanced JavaScript",
+    image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=300&h=200&fit=crop",
+    price: 3200000,
+    studentCount: 890,
+    rating: 4.9,
+    revenue: "284,800,000",
+    createdDate: "2024-02-20",
+  },
+  {
+    id: 3,
+    name: "Node.js Backend Development",
+    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=300&h=200&fit=crop",
+    price: 4500000,
+    studentCount: 567,
+    rating: 4.7,
+    revenue: "255,150,000",
+    createdDate: "2024-03-10",
+  }
+];
+
+export const studentsData = {
+  1: [
+    {
+      id: 1,
+      email: "nguyen.van.a@email.com",
+      registerDate: "2024-08-15",
+      progress: 75
+    },
+    {
+      id: 2,
+      email: "tran.thi.b@email.com",
+      registerDate: "2024-08-20",
+      progress: 92
+    },
+    {
+      id: 3,
+      email: "le.van.c@email.com",
+      registerDate: "2024-09-01",
+      progress: 45
+    }
+  ],
+  2: [
+    {
+      id: 4,
+      email: "pham.thi.d@email.com",
+      registerDate: "2024-07-10",
+      progress: 88
+    },
+    {
+      id: 5,
+      email: "hoang.van.e@email.com",
+      registerDate: "2024-08-25",
+      progress: 67
+    }
+  ],
+  3: [
+    {
+      id: 6,
+      email: "vu.thi.f@email.com",
+      registerDate: "2024-09-05",
+      progress: 23
+    }
+  ]
+};
+
+export const feedbackData = {
+  1: [
+    {
+      id: 1,
+      email: "nguyen.van.a@email.com",
+      rating: 5,
+      feedback: "Khóa học rất hay và dễ hiểu. Giảng viên nhiệt tình hướng dẫn.",
+      createdDate: "2024-09-20"
+    },
+    {
+      id: 2,
+      email: "tran.thi.b@email.com",
+      rating: 4,
+      feedback: "Nội dung phong phú, tuy nhiên một số phần hơi khó hiểu.",
+      createdDate: "2024-09-18"
+    },
+    {
+      id: 3,
+      email: "le.van.c@email.com",
+      rating: 5,
+      feedback: "Tuyệt vời! Đã học được rất nhiều kiến thức hữu ích.",
+      createdDate: "2024-09-15"
+    }
+  ],
+  2: [
+    {
+      id: 4,
+      email: "pham.thi.d@email.com",
+      rating: 5,
+      feedback: "Khóa học chất lượng cao, rất đáng đầu tư.",
+      createdDate: "2024-09-22"
+    }
+  ],
+  3: [
+    {
+      id: 5,
+      email: "vu.thi.f@email.com",
+      rating: 4,
+      feedback: "Khóa học tốt nhưng cần thêm thời gian để hoàn thành.",
+      createdDate: "2024-09-25"
+    }
+  ]
+};
+// MockData.js
+export const coursesByType = {
+  public: [
+    {
+      id: 1,
+      name: "React Cơ Bản",
+      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=300&h=200&fit=crop",
+      studentCount: 1245,
+      reviewCount: 234,
+      averageRating: 4.8,
+      createdDate: "2024-01-15"
+    },
+    {
+      id: 2,
+      name: "JavaScript ES6+",
+      image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=300&h=200&fit=crop",
+      studentCount: 890,
+      reviewCount: 187,
+      averageRating: 4.6,
+      createdDate: "2024-02-20"
+    },
+    {
+      id: 3,
+      name: "HTML & CSS Responsive",
+      image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=300&h=200&fit=crop",
+      studentCount: 2100,
+      reviewCount: 445,
+      averageRating: 4.9,
+      createdDate: "2024-01-08"
+    }
+  ],
+  private: [
+    {
+      id: 4,
+      name: "Advanced React Patterns",
+      image: "https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?w=300&h=200&fit=crop",
+      studentCount: 156,
+      reviewCount: 89,
+      averageRating: 4.9,
+      createdDate: "2024-03-12"
+    },
+    {
+      id: 5,
+      name: "System Design Intensive",
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300&h=200&fit=crop",
+      studentCount: 78,
+      reviewCount: 45,
+      averageRating: 4.7,
+      createdDate: "2024-04-05"
+    }
+  ],
+  commercial: [
+    {
+      id: 6,
+      name: "Enterprise React Development",
+      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&h=200&fit=crop",
+      studentCount: 340,
+      reviewCount: 125,
+      averageRating: 4.8,
+      createdDate: "2024-02-28"
+    },
+    {
+      id: 7,
+      name: "Microservices Architecture",
+      image: "https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=300&h=200&fit=crop",
+      studentCount: 267,
+      reviewCount: 98,
+      averageRating: 4.6,
+      createdDate: "2024-03-15"
+    },
+    {
+      id: 8,
+      name: "Cloud Infrastructure Management",
+      image: "https://images.unsplash.com/photo-1559966996-61f03f7e6d7d?w=300&h=200&fit=crop",
+      studentCount: 189,
+      reviewCount: 76,
+      averageRating: 4.4,
+      createdDate: "2024-04-10"
+    }
+  ]
+};

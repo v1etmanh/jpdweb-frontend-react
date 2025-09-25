@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Users, 
   DollarSign, 
@@ -11,8 +11,18 @@ import {
   MessageSquare,
   Download
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const CreatorHomePage = () => { const [selectedPeriod, setSelectedPeriod] = useState('thisMonth');
+
+  const nav=useNavigate();
+  const[isUpdateProfile,setUpadateProfile]=useState(true)
+  useEffect(()=>{
+  if(isUpdateProfile==false){
+    nav("/creator/updateProfile")
+  }
+
+  },[])
 
   // Mock data
   const stats = {

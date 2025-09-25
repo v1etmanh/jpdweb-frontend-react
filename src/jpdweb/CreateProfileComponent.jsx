@@ -1,13 +1,13 @@
-import { CheckIcon, ChevronRightIcon } from "lucide-react";
+import { CheckIcon, ChevronRightIcon, UploadIcon, XIcon } from "lucide-react";
 import { useRef, useState } from "react";
-
 
 export default function CreatorProfileComponent() {
     const states = [
-        { key: 'info', title: 'Thông tin cá nhân', description: 'Điền thông tin cơ bản của bạn' },
-        { key: 'image', title: 'Ảnh đại diện', description: 'Tải lên ảnh profile của bạn' },
-        { key: 'noticeTime', title: 'Điều khoản', description: 'Đọc và đồng ý điều khoản' },
-        { key: 'payment', title: 'Thanh toán', description: 'Thiết lập phương thức thanh toán' }
+        { key: 'info', title: 'Thông tin cá nhân', description: 'Điền thông tin cơ bản của bạn', required: true },
+        { key: 'image', title: 'Ảnh đại diện', description: 'Tải lên ảnh profile của bạn', required: true },
+        { key: 'noticeTime', title: 'Điều khoản', description: 'Đọc và đồng ý điều khoản', required: true },
+        { key: 'certification', title: 'Chứng chỉ cá nhân', description: 'Chứng minh trình độ học vấn của bạn', required: false },
+        { key: 'payment', title: 'Thanh toán', description: 'Thiết lập phương thức thanh toán', required: false }
     ];
     
     const [currentStep, setCurrentStep] = useState(0);
@@ -18,6 +18,7 @@ export default function CreatorProfileComponent() {
         bio: '',
         profileImage: null,
         agreedToTerms: false,
+        certificates: [], // Array để lưu nhiều chứng chỉ
         paymentMethod: ''
     });
 
@@ -31,6 +32,33 @@ export default function CreatorProfileComponent() {
         if (currentStep > 0) {
             setCurrentStep(prev => prev - 1);
         }
+    };
+
+    const handleSkipStep = () => {
+        if (!states[currentStep].required) {
+            handleNext();
+        }
+    };
+
+    const handleCertificateUpload = (e) => {
+        const files = Array.from(e.target.files);
+        const newCertificates = files.map(file => ({
+            id: Date.now() + Math.random(),
+            file: file,
+            name: file.name
+        }));
+        
+        setFormData({
+            ...formData,
+            certificates: [...formData.certificates, ...newCertificates]
+        });
+    };
+
+    const removeCertificate = (id) => {
+        setFormData({
+            ...formData,
+            certificates: formData.certificates.filter(cert => cert.id !== id)
+        });
     };
 
     const renderStepContent = () => {
@@ -156,10 +184,103 @@ export default function CreatorProfileComponent() {
                     </div>
                 );
 
+            case 'certification':
+                return (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xl font-semibold text-gray-900">Chứng chỉ cá nhân</h3>
+                            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                Tùy chọn
+                            </span>
+                        </div>
+                        <p className="text-gray-600 text-sm">
+                            Tải lên các chứng chỉ, bằng cấp để chứng minh trình độ chuyên môn của bạn. 
+                            Điều này sẽ giúp tăng độ tin cậy với học viên.
+                        </p>
+                        
+                        {/* Upload Area */}
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                            <UploadIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <input
+                                type="file"
+                                accept="image/*,.pdf"
+                                multiple
+                                className="hidden"
+                                id="certificateUpload"
+                                onChange={handleCertificateUpload}
+                            />
+                            <label
+                                htmlFor="certificateUpload"
+                                className="cursor-pointer"
+                            >
+                                <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                                    Nhấn để tải lên
+                                </span>
+                                <span className="text-sm text-gray-500"> hoặc kéo thả file vào đây</span>
+                            </label>
+                            <p className="text-xs text-gray-400 mt-2">
+                                Hỗ trợ: JPG, PNG, PDF. Tối đa 5MB mỗi file
+                            </p>
+                        </div>
+
+                        {/* Certificate List */}
+                        {formData.certificates.length > 0 && (
+                            <div className="space-y-3">
+                                <h4 className="text-sm font-medium text-gray-900">
+                                    Chứng chỉ đã tải lên ({formData.certificates.length})
+                                </h4>
+                                {formData.certificates.map((certificate) => (
+                                    <div 
+                                        key={certificate.id}
+                                        className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
+                                    >
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-10 h-10 bg-blue-100 rounded-md flex items-center justify-center">
+                                                {certificate.file.type.startsWith('image/') ? (
+                                                    <img 
+                                                        src={URL.createObjectURL(certificate.file)}
+                                                        alt="Certificate"
+                                                        className="w-full h-full object-cover rounded-md"
+                                                    />
+                                                ) : (
+                                                    <span className="text-blue-600 text-xs font-medium">PDF</span>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    {certificate.name}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    {(certificate.file.size / 1024 / 1024).toFixed(2)} MB
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => removeCertificate(certificate.id)}
+                                            className="text-red-500 hover:text-red-700"
+                                        >
+                                            <XIcon className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                );
+
             case 'payment':
                 return (
                     <div className="space-y-6">
-                        <h3 className="text-xl font-semibold text-gray-900">Phương thức thanh toán</h3>
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xl font-semibold text-gray-900">Phương thức thanh toán</h3>
+                            <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                Tùy chọn
+                            </span>
+                        </div>
+                        <p className="text-gray-600 text-sm">
+                            Thiết lập phương thức nhận thanh toán khi có học viên mua khóa học của bạn.
+                            Bạn có thể cập nhật thông tin này sau.
+                        </p>
                         <div className="space-y-4">
                             {['PayPal', 'Thẻ tín dụng', 'Chuyển khoản ngân hàng'].map((method) => (
                                 <div key={method} className="flex items-center">
@@ -186,6 +307,25 @@ export default function CreatorProfileComponent() {
         }
     };
 
+    const canProceed = () => {
+        const currentState = states[currentStep];
+        
+        // Nếu bước hiện tại không bắt buộc, luôn cho phép tiếp tục
+        if (!currentState.required) return true;
+        
+        // Kiểm tra validation cho các bước bắt buộc
+        switch (currentState.key) {
+            case 'info':
+                return formData.fullName && formData.email;
+            case 'image':
+                return formData.profileImage;
+            case 'noticeTime':
+                return formData.agreedToTerms;
+            default:
+                return true;
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white">
             {/* Progress Steps */}
@@ -205,11 +345,18 @@ export default function CreatorProfileComponent() {
                                 )}
                             </div>
                             <div className="ml-3">
-                                <p className={`text-sm font-medium ${
-                                    index <= currentStep ? 'text-blue-600' : 'text-gray-400'
-                                }`}>
-                                    {state.title}
-                                </p>
+                                <div className="flex items-center space-x-2">
+                                    <p className={`text-sm font-medium ${
+                                        index <= currentStep ? 'text-blue-600' : 'text-gray-400'
+                                    }`}>
+                                        {state.title}
+                                    </p>
+                                    {!state.required && (
+                                        <span className="text-xs text-gray-400 bg-gray-100 px-1 rounded">
+                                            tùy chọn
+                                        </span>
+                                    )}
+                                </div>
                                 <p className="text-xs text-gray-500">{state.description}</p>
                             </div>
                             {index < states.length - 1 && (
@@ -238,17 +385,32 @@ export default function CreatorProfileComponent() {
                 >
                     Quay lại
                 </button>
-                <button
-                    onClick={handleNext}
-                    disabled={currentStep === states.length - 1}
-                    className={`px-6 py-2 rounded-md ${
-                        currentStep === states.length - 1
-                            ? 'bg-green-600 text-white hover:bg-green-700'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
-                >
-                    {currentStep === states.length - 1 ? 'Hoàn thành' : 'Tiếp theo'}
-                </button>
+                
+                <div className="flex space-x-3">
+                    {/* Skip Button - chỉ hiện với các bước không bắt buộc */}
+                    {!states[currentStep].required && currentStep < states.length - 1 && (
+                        <button
+                            onClick={handleSkipStep}
+                            className="px-6 py-2 border border-gray-300 text-gray-600 rounded-md hover:bg-gray-50"
+                        >
+                            Bỏ qua
+                        </button>
+                    )}
+                    
+                    <button
+                        onClick={handleNext}
+                        disabled={currentStep === states.length - 1 || (states[currentStep].required && !canProceed())}
+                        className={`px-6 py-2 rounded-md ${
+                            currentStep === states.length - 1
+                                ? 'bg-green-600 text-white hover:bg-green-700'
+                                : canProceed()
+                                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                    >
+                        {currentStep === states.length - 1 ? 'Hoàn thành' : 'Tiếp theo'}
+                    </button>
+                </div>
             </div>
         </div>
     );

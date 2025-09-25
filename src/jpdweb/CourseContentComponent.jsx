@@ -21,7 +21,8 @@ import {
   writingMock,
   mockParagraphsData,
   mockPictureAndQuestionsData,
-  flashcards
+  flashcards,
+  VideoMock
 } from "./MockData" // Adjust path as needed
 
 export default function CourseContentComponent() {
@@ -70,7 +71,7 @@ export default function CourseContentComponent() {
           mockData = { contentType, data: mockPassageData }
         } else if (id === 9) {
           contentType = 'VIDEO'
-          mockData = { contentType, data: urlvideo.videoUrl }
+          mockData = { contentType, data: VideoMock.videoUrl }
         } else if (id === 10) {
           contentType = 'PDF'
           mockData = { contentType, data: { courseId: 1, pdfId: 2 } }
