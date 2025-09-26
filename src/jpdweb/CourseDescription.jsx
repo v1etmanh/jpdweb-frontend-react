@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-export default function CourseDescription({ relatedCourses = [] }) {
+export default function CourseDescription( ) {
   // Enhanced course data structure
   const courses = [
     {
@@ -118,6 +118,121 @@ export default function CourseDescription({ relatedCourses = [] }) {
       featured: true,
       guaranteeInfo: "30-Day Money-Back Guarantee"
     },
+    {
+      id: 1,
+      creator: { 
+        name: "Nguyen Van A", 
+        description: "Giáo viên tiếng Anh nhiều năm kinh nghiệm",
+        bio: "Có hơn 10 năm kinh nghiệm giảng dạy tiếng Anh tại các trung tâm uy tín. Chuyên gia về phương pháp giao tiếp thực tế.",
+        email: "a@gmail.com",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100",
+        totalStudents: 15000,
+        totalCourses: 8,
+        rating: 4.8
+      },
+      name: "Tiếng Anh Giao Tiếp Cơ Bản",
+      description: "Khóa học giúp bạn nắm vững các mẫu câu và từ vựng thông dụng trong giao tiếp hàng ngày.",
+      longDescription: "Khóa học được thiết kế dành cho người mới bắt đầu học tiếng Anh. Bạn sẽ học cách giao tiếp tự nhiên trong các tình huống thực tế như: chào hỏi, mua sắm, đặt món ăn, hỏi đường, và nhiều tình huống khác.",
+      rating: 4.7,
+      totalRatings: 2856,
+      numberModuleType: 12,
+      numberstudent: 3200,
+      img: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
+      price: 200,
+      originalPrice: 350,
+      discount: 43,
+      currency: "USD",
+      lastUpdated: "2/2025",
+      language: "Tiếng Việt",
+      subtitles: ["English", "Tiếng Việt"],
+      level: "Beginner",
+      duration: "8.5 giờ",
+      totalLectures: 45,
+      hasLifetimeAccess: true,
+      hasMobileAccess: true,
+      hasCertificate: true,
+      hasClosedCaptions: true,
+      
+      // What you'll learn
+      learningOutcomes: [
+        "Giao tiếp tự tin trong các tình huống hàng ngày",
+        "Nắm vững 500+ từ vựng thông dụng",
+        "Phát âm chuẩn theo giọng Mỹ",
+        "Hiểu và sử dụng các mẫu câu cơ bản",
+        "Luyện nghe hiểu với native speakers",
+        "Xây dựng nền tảng ngữ pháp vững chắc"
+      ],
+
+      // Course requirements
+      requirements: [
+        "Không cần kiến thức tiếng Anh trước đó",
+        "Có máy tính hoặc điện thoại để học online",
+        "Dành 30 phút mỗi ngày để luyện tập",
+        "Tinh thần học hỏi và kiên trì"
+      ],
+
+      // Course content structure
+      curriculum: [
+        {
+          section: "Giới thiệu khóa học",
+          lectures: 3,
+          duration: "15 phút",
+          topics: ["Cách học hiệu quả", "Giới thiệu giảng viên", "Mục tiêu khóa học"]
+        },
+        {
+          section: "Bảng chữ cái và phát âm",
+          lectures: 5,
+          duration: "45 phút",
+          topics: ["26 chữ cái tiếng Anh", "Phát âm chuẩn", "Luyện tập phát âm"]
+        },
+        {
+          section: "Chào hỏi và làm quen",
+          lectures: 6,
+          duration: "1 giờ",
+          topics: ["Các cách chào hỏi", "Tự giới thiệu", "Hỏi thông tin cá nhân"]
+        },
+        {
+          section: "Gia đình và bạn bè",
+          lectures: 8,
+          duration: "1.5 giờ",
+          topics: ["Từ vựng về gia đình", "Miêu tả người", "Nói về mối quan hệ"]
+        }
+      ],
+
+      feedback: [
+        { 
+          user: "Minh Anh", 
+          context: "Khóa học rất dễ hiểu, giảng viên nhiệt tình. Tôi đã cải thiện được khả năng giao tiếp rất nhiều.", 
+          createAt: "2025-09-01",
+          rating: 5,
+          avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b742?w=50"
+        },
+        { 
+          user: "Thanh Long", 
+          context: "Nội dung khóa học phong phú, bài tập thực hành nhiều. Rất recommend!", 
+          createAt: "2025-09-05",
+          rating: 5,
+          avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50"
+        },
+        {
+          user: "Hương Giang",
+          context: "Phương pháp giảng dạy hiệu quả, sau 2 tháng học tôi đã tự tin giao tiếp cơ bản.",
+          createAt: "2025-08-28",
+          rating: 4,
+          avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50"
+        }
+      ],
+
+      tags: ["English", "Communication", "Beginner", "Conversation"],
+      category: "Language Learning",
+      subcategory: "English",
+      
+      // Promotional info
+      bestSeller: true,
+      featured: true,
+      guaranteeInfo: "30-Day Money-Back Guarantee"
+    }
+    
     // Add similar enhanced structure for other courses...
   ];
 

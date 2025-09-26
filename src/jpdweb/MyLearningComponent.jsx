@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Clock, BookOpen, Heart, Star, MoreHorizontal, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // Mock Data - Simple Format
 const mockData = {
@@ -83,6 +84,7 @@ export default function MyLearningComponent() {
     setWishlists(mockData.wishlists);
    setMycourse(mockData.myCourse);
   }, []);
+  const nav=useNavigate()
 
   const filteredCourses = courses.filter(course =>
     course.course_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -132,7 +134,8 @@ const filteredMyCourse = myCourse.filter(course =>
         
         <div className="flex items-center justify-between">
           {!isWishlist ? (
-            <button className="flex items-center gap-2 text-purple-600 font-semibold text-sm hover:text-purple-700 transition-colors">
+            <button className="flex items-center gap-2 text-purple-600 font-semibold text-sm hover:text-purple-700 transition-colors"
+            onClick={()=>{nav(`/course/content_overview/${course.courseId}`) }}>
               <Play size={14} />
               Continue Learning
             </button>
