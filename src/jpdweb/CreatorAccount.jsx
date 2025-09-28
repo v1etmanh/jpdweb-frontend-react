@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle, AlertCircle, User, Camera, FileText, Award, CreditCard } from 'lucide-react';
 
 const CreatorAccountInfo = () => {
@@ -168,5 +168,15 @@ const CreatorAccountInfo = () => {
     </div>
   );
 };
+export const ContentCreatorPolicy = () => {
+  const [html, setHtml] = useState("");
 
+  useEffect(() => {
+    fetch("/policy.html")
+      .then((res) => res.text())
+      .then((data) => setHtml(data));
+  }, []);
+
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+};
 export default CreatorAccountInfo;

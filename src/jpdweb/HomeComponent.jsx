@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import home1 from '../images/home1.png';
 import BlurFadeText from '../jpdweb/BlurFadeText';
@@ -6,6 +6,11 @@ import flashcard from '../images/flashcard.png';
 import AIvoice from '../images/AIvoice.png'
 import qiuz from '../images/qiuz.png'
 import { Search } from "lucide-react";
+import PolicyModal from './PolicyModal';
+import PolicyModalDetail from './PolicyModalDetail';
+import ReactDOM from "react-dom";
+
+
 
 // Mock data cho các khóa học
 const lCourses = [
@@ -184,11 +189,16 @@ export default function HomepageComponent() {
     const [ratingCourses, setRatingCourses] = useState([])
     const [newCourses, setNewCourses] = useState([])
     const [name,setName]=useState("")
+    const [showPolicyPopup, setShowPolicyPopup] = useState(false);
+const [showDetail, setShowDetail] = useState(false);
+
    const nav=useNavigate()
     useEffect(() => {
         setLargesCourses(lCourses)
         setNewCourses(nCourses)
         setRatingCourses(rCourses)
+setShowPolicyPopup(true); // luôn hiển thị modal
+
     }, [])
 
     return (
@@ -342,6 +352,27 @@ export default function HomepageComponent() {
                     </div>
                 </section>
             </div>
+ 
+{showPolicyPopup && (
+  <PolicyModal
+  onAccept={() => setShowPolicyPopup(false)}
+  onDecline={() => setShowPolicyPopup(false)}
+  onOpenDetail={() => { 
+    setShowPolicyPopup(false); // tắt modal nhỏ
+    setShowDetail(true);       // mở modal chi tiết
+  }}
+/>
+
+)}
+
+{showDetail && (
+  <PolicyModalDetail
+    isOpen={showDetail}
+    onClose={() => setShowDetail(false)}
+  />
+)}
+
+
         </div>
     );
 }
