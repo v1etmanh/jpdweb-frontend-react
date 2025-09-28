@@ -1,10 +1,10 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import HomepageComponent from "./HomeComponent";
-import CoursesResultComponent from "./CoursesResultComponent";
+import HomePage from "../pages/HomePage";
+import CourseResultPage from "../pages/CourseResultPage";
 import './JpdWebStyle.css'
-import CourseDescription from "./CourseDescription";
-import MyLearningComponent from "./MyLearningComponent";
-import CourseContentComponent from "./CourseContentComponent";
+import CourseDescriptionPage from "../pages/CourseDescriptionPage";
+import MyLearningPage from "../pages/MyLearningPage";
+import CourseContentPage from "../pages/CourseContentPage";
 import HeaderComponent from "./HeaderComponent";
 import CreatorHomePage from "./CreateHomePage";
 import CreatorProfileComponent from "./CreateProfileComponent";
@@ -22,7 +22,7 @@ import CoursesTable from "./CourseTable";
 import CourseDetail from "./CourseCommercialDetailComponent";
 import CoursesList from "./CreatorCourseList";
 import CreatorAccountInfo from "./CreatorAccount";
-import CourseContentOverviewComponent from "./CourseContentOverviewComponent";
+import CourseOverviewPage from "../pages/CourseOverviewPage";
 
 
 export default function JpdWebComponent(){
@@ -188,27 +188,22 @@ return (<div>
   <Sidebar />
 </div>}
     <div className="main-content bg-white">
-                        <Routes>
-                        <Route path="/" element={<HomepageComponent></HomepageComponent>}></Route>
-                         <Route path="/mylearning" element={<MyLearningComponent></MyLearningComponent>}></Route>
-                        <Route path="/course_result/:name" element={<CoursesResultComponent></CoursesResultComponent>}></Route>
-                        <Route path="/course/specific/:id" element={<CourseDescription></CourseDescription>}></Route>
-                         <Route path="/course/content_overview/:id" element={<CourseContentOverviewComponent></CourseContentOverviewComponent>}></Route>
-                        <Route
-  path="/course/content/:moduleid/:contentid"
-  element={<CourseContentComponent />}
-/>
-   <Route path="/creator/commercial/dashboard" element={<CreatorHomePage></CreatorHomePage>}></Route>
-    <Route path="/upload_profile" element={<CreatorProfileComponent></CreatorProfileComponent>}></Route>
-   <Route path="/creator/course_manage" element={<CourseManagementInterface></CourseManagementInterface>}></Route>
-   <Route path="/creator/create_course" element={<CreateCourseForm></CreateCourseForm>}></Route>
-   <Route path="/creator/commercial/courseDetail" element={<CoursesTable></CoursesTable>}></Route>
-      <Route path="/creator/commercial/courseDetail/:courseId" element={<CourseDetail></CourseDetail>}></Route>
+        <Routes>
+            <Route path="/" element={<HomePage></HomePage>}></Route>
+            <Route path="/mylearning" element={<MyLearningPage></MyLearningPage>}></Route>
+            <Route path="/course_result/:name" element={<CourseResultPage></CourseResultPage>}></Route>
+            <Route path="/course/specific/:id" element={<CourseDescriptionPage></CourseDescriptionPage>}></Route>
+            <Route path="/course/content_overview/:id" element={<CourseOverviewPage/>}></Route>
+            <Route path="/course/content/:moduleid/:contentid" element={<CourseContentPage/>}/>
+            <Route path="/creator/commercial/dashboard" element={<CreatorHomePage></CreatorHomePage>}></Route>
+            <Route path="/upload_profile" element={<CreatorProfileComponent></CreatorProfileComponent>}></Route>
+            <Route path="/creator/course_manage" element={<CourseManagementInterface></CourseManagementInterface>}></Route>
+            <Route path="/creator/create_course" element={<CreateCourseForm></CreateCourseForm>}></Route>
+            <Route path="/creator/commercial/courseDetail" element={<CoursesTable></CoursesTable>}></Route>
+            <Route path="/creator/commercial/courseDetail/:courseId" element={<CourseDetail></CourseDetail>}></Route>
             <Route path="/creator/courseList" element={<CoursesList></CoursesList>}></Route>
-             <Route path="/creator/profile" element={<CreatorAccountInfo></CreatorAccountInfo>}></Route>
-            
-                             </Routes>
-                          
+            <Route path="/creator/profile" element={<CreatorAccountInfo></CreatorAccountInfo>}></Route>
+            </Routes>
                     </div>
                     <FooterComponent></FooterComponent>
                     </BrowserRouter>
