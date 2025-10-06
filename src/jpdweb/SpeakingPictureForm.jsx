@@ -1,9 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Plus, 
   Trash2, 
   Image, 
-  Upload, 
   Eye, 
   EyeOff,
   MessageSquare,
@@ -11,18 +10,21 @@ import {
   AlertCircle,
   Lightbulb,
   RotateCcw,
-  Link,
-  X
+  X,
+  Loader2,
+  Upload
 } from 'lucide-react';
+import { saveImg } from './api/ApiConnect';
 
-const SpeakingPictureForm = ({ onSubmit }) => {
+const SpeakingPictureForm = ({ onSubmit, initialData, onDelete }) => {
   const [pictureQuestions, setPictureQuestions] = useState([
     {
+      mcId: null,
       pictureUrl: '',
-      pictureFile: null,
       picturePreview: null,
       speakingPictureListQuestions: [
         {
+          id: null,
           question: '',
           answer: ''
         }
@@ -31,17 +33,60 @@ const SpeakingPictureForm = ({ onSubmit }) => {
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activePreview, setActivePreview] = useState({});
-  
-  const fileInputRefs = useRef({});
+  const [uploadingIndexes, setUploadingIndexes] = useState(new Set());
+  const hasLoadedInitialData = useRef(false);
 
-  // Thêm picture question mới
+  // Load initial data
+  useEffect(() => {
+    if (initialData && Array.isArray(initialData) && initialData.length > 0 && !hasLoadedInitialData.current) {
+      const loadedPictureQuestions = initialData.map(item => {
+        const loadedQuestions = (item.speakingPictureListQuestions || []).map(q => ({
+          id: q.id || null,
+          question: q.question || '',
+          answer: q.answer || ''
+        }));
+
+        if (loadedQuestions.length === 0) {
+          loadedQuestions.push({
+            id: null,
+            question: '',
+            answer: ''
+          });
+        }
+
+        return {
+          mcId: item.mcId || null,
+          pictureUrl: item.pictureUrl || '',
+          picturePreview: null,
+          speakingPictureListQuestions: loadedQuestions
+        };
+      });
+
+      setPictureQuestions(loadedPictureQuestions);
+      hasLoadedInitialData.current = true;
+    }
+  }, [initialData]);
+
+  // Cleanup URLs on unmount
+  useEffect(() => {
+    return () => {
+      pictureQuestions.forEach(pq => {
+        if (pq.picturePreview) {
+          URL.revokeObjectURL(pq.picturePreview);
+        }
+      });
+    };
+  }, [pictureQuestions]);
+
+  // Add new picture question
   const addPictureQuestion = () => {
     const newPictureQuestion = {
+      mcId: null,
       pictureUrl: '',
-      pictureFile: null,
       picturePreview: null,
       speakingPictureListQuestions: [
         {
+          id: null,
           question: '',
           answer: ''
         }
@@ -50,92 +95,146 @@ const SpeakingPictureForm = ({ onSubmit }) => {
     setPictureQuestions([...pictureQuestions, newPictureQuestion]);
   };
 
-  // Xóa picture question
-  const removePictureQuestion = (pictureIndex) => {
-    if (pictureQuestions.length > 1) {
-      const newPictureQuestions = pictureQuestions.filter((_, i) => i !== pictureIndex);
-      
-      // Cleanup preview URL
-      if (pictureQuestions[pictureIndex].picturePreview) {
-        URL.revokeObjectURL(pictureQuestions[pictureIndex].picturePreview);
+  // Remove picture question
+  const removePictureQuestion = async (pictureIndex) => {
+    const pictureQuestion = pictureQuestions[pictureIndex];
+    if (!pictureQuestion) return;
+
+    const confirmed = window.confirm("Bạn có chắc muốn xóa bộ câu hỏi này và tất cả câu hỏi liên quan?");
+    if (!confirmed) return;
+
+    try {
+      if (pictureQuestion.mcId && onDelete) {
+        await onDelete(pictureQuestion.mcId);
       }
-      
-      setPictureQuestions(newPictureQuestions);
+
+      if (pictureQuestion.picturePreview) {
+        URL.revokeObjectURL(pictureQuestion.picturePreview);
+      }
+
+      setPictureQuestions(prev => prev.filter((_, i) => i !== pictureIndex));
+    } catch (err) {
+      console.error("Lỗi khi xóa bộ câu hỏi:", err);
+      alert("Xóa thất bại, vui lòng thử lại.");
     }
   };
 
-  // Cập nhật picture URL
+  // Update picture URL
   const updatePictureUrl = (pictureIndex, value) => {
-    const newPictureQuestions = [...pictureQuestions];
-    newPictureQuestions[pictureIndex].pictureUrl = value;
-    setPictureQuestions(newPictureQuestions);
+    setPictureQuestions(prev => {
+      const newQuestions = [...prev];
+      newQuestions[pictureIndex].pictureUrl = value;
+      return newQuestions;
+    });
   };
 
-  // Xử lý upload hình ảnh
-  const handleImageUpload = (pictureIndex, file) => {
-    if (file && file.type.startsWith('image/')) {
-      const newPictureQuestions = [...pictureQuestions];
+  // Handle image upload
+  const handleImageUpload = async (index, file) => {
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Kích thước ảnh không được vượt quá 5MB');
+      return;
+    }
+
+    setUploadingIndexes(prev => new Set([...prev, index]));
+
+    try {
+      const formData = new FormData();
+      formData.append('img', file);
+      const response = await saveImg(formData);
+      const downloadUrl = response.data;
+
+      if (!downloadUrl) {
+        throw new Error('Không nhận được URL từ server');
+      }
+
+      updatePictureUrl(index, downloadUrl);
+      console.log(`Ảnh đã upload thành công: ${downloadUrl}`);
       
-      // Cleanup previous preview URL
-      if (newPictureQuestions[pictureIndex].picturePreview) {
-        URL.revokeObjectURL(newPictureQuestions[pictureIndex].picturePreview);
+    } catch (error) {
+      console.error('Lỗi khi upload ảnh:', error);
+      alert('Upload ảnh thất bại. Vui lòng thử lại.');
+    } finally {
+      setUploadingIndexes(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(index);
+        return newSet;
+      });
+    }
+  };
+
+  // Remove image
+  const removeImage = (pictureIndex) => {
+    setPictureQuestions(prev => {
+      const newQuestions = [...prev];
+      
+      if (newQuestions[pictureIndex].picturePreview) {
+        URL.revokeObjectURL(newQuestions[pictureIndex].picturePreview);
       }
       
-      newPictureQuestions[pictureIndex].pictureFile = file;
-      newPictureQuestions[pictureIndex].picturePreview = URL.createObjectURL(file);
-      newPictureQuestions[pictureIndex].pictureUrl = ''; // Clear URL input
-      setPictureQuestions(newPictureQuestions);
-    } else {
-      alert('Vui lòng chọn file hình ảnh hợp lệ!');
-    }
+      newQuestions[pictureIndex].picturePreview = null;
+      newQuestions[pictureIndex].pictureUrl = '';
+      return newQuestions;
+    });
   };
 
-  // Xóa hình ảnh
-  const removeImage = (pictureIndex) => {
-    const newPictureQuestions = [...pictureQuestions];
-    
-    if (newPictureQuestions[pictureIndex].picturePreview) {
-      URL.revokeObjectURL(newPictureQuestions[pictureIndex].picturePreview);
-    }
-    
-    newPictureQuestions[pictureIndex].pictureFile = null;
-    newPictureQuestions[pictureIndex].picturePreview = null;
-    newPictureQuestions[pictureIndex].pictureUrl = '';
-    setPictureQuestions(newPictureQuestions);
-  };
-
-  // Thêm câu hỏi cho picture
+  // Add question
   const addQuestion = (pictureIndex) => {
-    const newPictureQuestions = [...pictureQuestions];
-    newPictureQuestions[pictureIndex].speakingPictureListQuestions.push({
-      question: '',
-      answer: ''
+    setPictureQuestions(prev => {
+      const newQuestions = [...prev];
+      newQuestions[pictureIndex].speakingPictureListQuestions.push({
+        id: null,
+        question: '',
+        answer: ''
+      });
+      return newQuestions;
     });
-    setPictureQuestions(newPictureQuestions);
   };
 
-  // Xóa câu hỏi
+  // Remove question
   const removeQuestion = (pictureIndex, questionIndex) => {
-    const newPictureQuestions = [...pictureQuestions];
-    if (newPictureQuestions[pictureIndex].speakingPictureListQuestions.length > 1) {
-      newPictureQuestions[pictureIndex].speakingPictureListQuestions.splice(questionIndex, 1);
-      setPictureQuestions(newPictureQuestions);
-    }
-  };
-
-  // Cập nhật câu hỏi
-  const updateQuestion = (pictureIndex, questionIndex, field, value) => {
-    const newPictureQuestions = [...pictureQuestions];
-    newPictureQuestions[pictureIndex].speakingPictureListQuestions[questionIndex][field] = value;
-    setPictureQuestions(newPictureQuestions);
-  };
-
-  // Toggle preview hình ảnh
-  const toggleImagePreview = (pictureIndex) => {
-    setActivePreview({
-      ...activePreview,
-      [pictureIndex]: !activePreview[pictureIndex]
+    setPictureQuestions(prev => {
+      const newQuestions = [...prev];
+      if (newQuestions[pictureIndex].speakingPictureListQuestions.length > 1) {
+        newQuestions[pictureIndex].speakingPictureListQuestions.splice(questionIndex, 1);
+      }
+      return newQuestions;
     });
+  };
+
+  // Update question
+  const updateQuestion = (pictureIndex, questionIndex, field, value) => {
+    setPictureQuestions(prev => {
+      const newQuestions = [...prev];
+      newQuestions[pictureIndex].speakingPictureListQuestions[questionIndex][field] = value;
+      return newQuestions;
+    });
+  };
+
+  // Toggle image preview
+  const toggleImagePreview = (pictureIndex) => {
+    setActivePreview(prev => ({
+      ...prev,
+      [pictureIndex]: !prev[pictureIndex]
+    }));
+  };
+
+  // Validate URL format
+  const isValidUrl = (url) => {
+    if (!url || !url.trim()) return false;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   // Validate form
@@ -143,19 +242,21 @@ const SpeakingPictureForm = ({ onSubmit }) => {
     for (let i = 0; i < pictureQuestions.length; i++) {
       const pictureQuestion = pictureQuestions[i];
       
-      // Kiểm tra có hình ảnh
-      if (!pictureQuestion.pictureFile && !pictureQuestion.pictureUrl.trim()) {
+      if (!pictureQuestion.pictureUrl.trim()) {
         alert(`Bộ câu hỏi ${i + 1}: Cần có hình ảnh (file hoặc URL)!`);
         return false;
       }
 
-      // Kiểm tra có ít nhất 1 câu hỏi
+      if (!isValidUrl(pictureQuestion.pictureUrl)) {
+        alert(`Bộ câu hỏi ${i + 1}: URL hình ảnh không hợp lệ!`);
+        return false;
+      }
+
       if (pictureQuestion.speakingPictureListQuestions.length === 0) {
         alert(`Bộ câu hỏi ${i + 1}: Cần có ít nhất 1 câu hỏi!`);
         return false;
       }
 
-      // Kiểm tra từng câu hỏi
       for (let j = 0; j < pictureQuestion.speakingPictureListQuestions.length; j++) {
         const question = pictureQuestion.speakingPictureListQuestions[j];
         
@@ -173,6 +274,29 @@ const SpeakingPictureForm = ({ onSubmit }) => {
     return true;
   };
 
+  // Reset form
+  const resetForm = () => {
+    pictureQuestions.forEach(pq => {
+      if (pq.picturePreview) {
+        URL.revokeObjectURL(pq.picturePreview);
+      }
+    });
+    
+    setPictureQuestions([{
+      mcId: null,
+      pictureUrl: '',
+      picturePreview: null,
+      speakingPictureListQuestions: [
+        {
+          id: null,
+          question: '',
+          answer: ''
+        }
+      ]
+    }]);
+    hasLoadedInitialData.current = false;
+  };
+
   // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -184,54 +308,24 @@ const SpeakingPictureForm = ({ onSubmit }) => {
     setIsSubmitting(true);
     
     try {
-      // Create FormData for file uploads
-      const formData = new FormData();
+      const pictureQuestionsData = pictureQuestions.map(pictureQuestion => ({
+        mcId: pictureQuestion.mcId,
+        typeOfContent: "SPEAKING_PICTURE",
+        pictureUrl: pictureQuestion.pictureUrl.trim(),
+        speakingPictureListQuestions: pictureQuestion.speakingPictureListQuestions.map(q => ({
+          id: q.id,
+          question: q.question.trim(),
+          answer: q.answer.trim()
+        }))
+      }));
       
-      const pictureQuestionsData = pictureQuestions.map((pictureQuestion, index) => {
-        const data = {
-          speakingPictureListQuestions: pictureQuestion.speakingPictureListQuestions.map(q => ({
-            question: q.question.trim(),
-            answer: q.answer.trim()
-          }))
-        };
-        
-        if (pictureQuestion.pictureFile) {
-          formData.append(`imageFile_${index}`, pictureQuestion.pictureFile);
-          data.hasImageFile = true;
-          data.imageFileName = pictureQuestion.pictureFile.name;
-        } else if (pictureQuestion.pictureUrl.trim()) {
-          data.pictureUrl = pictureQuestion.pictureUrl.trim();
-        }
-        
-        return data;
-      });
+      await onSubmit(pictureQuestionsData);
       
-      formData.append('pictureQuestions', JSON.stringify(pictureQuestionsData));
-      formData.append('moduleId', '1'); // Replace with actual module ID
-      
-      await onSubmit(formData);
-      
-      // Reset form and cleanup URLs
-      pictureQuestions.forEach(pq => {
-        if (pq.picturePreview) {
-          URL.revokeObjectURL(pq.picturePreview);
-        }
-      });
-      
-      setPictureQuestions([{
-        pictureUrl: '',
-        pictureFile: null,
-        picturePreview: null,
-        speakingPictureListQuestions: [
-          {
-            question: '',
-            answer: ''
-          }
-        ]
-      }]);
+      resetForm();
+      alert('Upload câu hỏi Speaking Picture thành công!');
     } catch (error) {
       console.error('Error submitting speaking picture questions:', error);
-      alert('Có lỗi xảy ra khi gửi câu hỏi Speaking Picture!');
+      alert(error.message || 'Có lỗi xảy ra khi gửi câu hỏi Speaking Picture!');
     } finally {
       setIsSubmitting(false);
     }
@@ -243,7 +337,7 @@ const SpeakingPictureForm = ({ onSubmit }) => {
         <div className="flex items-center gap-3 mb-2">
           <Image className="w-8 h-8 text-purple-600" />
           <h2 className="text-2xl font-bold text-gray-800">
-            Thêm Câu Hỏi Speaking Picture
+            Quản lý Câu Hỏi Speaking Picture
           </h2>
         </div>
         <p className="text-gray-600">
@@ -251,12 +345,12 @@ const SpeakingPictureForm = ({ onSubmit }) => {
         </p>
       </div>
 
-      {/* Hướng dẫn */}
+      {/* Instructions */}
       <div className="mb-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
           <Lightbulb className="w-6 h-6 text-purple-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-semibold text-purple-800 mb-2">💡 Hướng dẫn tạo câu hỏi Speaking Picture:</h4>
+            <h4 className="font-semibold text-purple-800 mb-2">Hướng dẫn tạo câu hỏi Speaking Picture:</h4>
             <ul className="text-sm text-purple-700 space-y-1 list-disc list-inside">
               <li>Chọn hình ảnh rõ nét, phù hợp với chủ đề học tập</li>
               <li>Tạo câu hỏi khuyến khích học sinh mô tả, phân tích hình ảnh</li>
@@ -321,88 +415,74 @@ const SpeakingPictureForm = ({ onSubmit }) => {
                   Hình ảnh <span className="text-red-500">*</span>
                 </h4>
 
-                {/* Image URL Input */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    URL Hình ảnh
-                  </label>
-                  <div className="flex gap-2">
+                {!pictureQuestion.pictureUrl ? (
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id={`image-${pictureIndex}`}
+                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          handleImageUpload(pictureIndex, file);
+                        }
+                      }}
+                      disabled={uploadingIndexes.has(pictureIndex)}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor={`image-${pictureIndex}`}
+                      className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-colors ${
+                        uploadingIndexes.has(pictureIndex) ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {uploadingIndexes.has(pictureIndex) ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin text-purple-600" />
+                          <span className="text-sm text-purple-600">Đang upload...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-5 h-5 text-gray-400" />
+                          <span className="text-sm text-gray-600">
+                            Click để chọn ảnh (JPG, PNG, GIF, max 5MB)
+                          </span>
+                        </>
+                      )}
+                    </label>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-sm font-medium text-gray-700">
+                        URL Hình ảnh
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => removeImage(pictureIndex)}
+                        className="text-sm text-red-600 hover:text-red-700 flex items-center gap-1 font-medium"
+                      >
+                        <X className="w-4 h-4" />
+                        Xóa ảnh
+                      </button>
+                    </div>
                     <input
                       type="url"
                       value={pictureQuestion.pictureUrl}
                       onChange={(e) => updatePictureUrl(pictureIndex, e.target.value)}
                       placeholder="https://example.com/image.jpg"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      disabled={!!pictureQuestion.pictureFile}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
-                    <Link className="w-5 h-5 text-gray-400 self-center" />
-                  </div>
-                </div>
+                 {pictureQuestion.pictureUrl && (
+  <div className="mt-3 flex justify-center">
+    <img
+      src={pictureQuestion.pictureUrl}
+      alt="Preview"
+      className="max-h-60 rounded border border-gray-300 shadow-sm"
+    />
+  </div>
+)}
 
-                <div className="text-center text-gray-500 text-sm mb-4">hoặc</div>
-
-                {/* Image Upload */}
-                {!pictureQuestion.pictureFile ? (
-                  <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 transition-colors">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(pictureIndex, e.target.files[0])}
-                      className="hidden"
-                      ref={(el) => fileInputRefs.current[pictureIndex] = el}
-                    />
-                    <Upload className="w-12 h-12 text-gray-400 mb-2" />
-                    <button
-                      type="button"
-                      onClick={() => fileInputRefs.current[pictureIndex]?.click()}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                      disabled={!!pictureQuestion.pictureUrl.trim()}
-                    >
-                      Chọn hình ảnh
-                    </button>
-                    <p className="text-xs text-gray-500 mt-2">
-                      JPG, PNG, GIF tối đa 5MB
-                    </p>
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Image className="w-5 h-5 text-purple-600" />
-                        <span className="text-sm font-medium text-gray-700">
-                          Hình ảnh đã tải lên
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeImage(pictureIndex)}
-                        className="p-1 text-red-500 hover:text-red-700 transition-colors"
-                        title="Xóa hình ảnh"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      <span>Tên file: {pictureQuestion.pictureFile.name}</span>
-                      <span className="ml-4">
-                        Kích thước: {(pictureQuestion.pictureFile.size / 1024 / 1024).toFixed(2)} MB
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Image Preview */}
-                {activePreview[pictureIndex] && (pictureQuestion.picturePreview || pictureQuestion.pictureUrl) && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Xem trước hình ảnh:</p>
-                    <div className="flex justify-center">
-                      <img
-                        src={pictureQuestion.picturePreview || pictureQuestion.pictureUrl}
-                        alt="Preview"
-                        className="max-w-full max-h-96 rounded-lg shadow-md object-contain"
-                        onError={() => alert('Không thể tải hình ảnh. Vui lòng kiểm tra URL!')}
-                      />
-                    </div>
                   </div>
                 )}
               </div>
@@ -429,7 +509,6 @@ const SpeakingPictureForm = ({ onSubmit }) => {
                     key={questionIndex}
                     className="bg-white border border-gray-200 rounded-lg p-5"
                   >
-                    {/* Header câu hỏi */}
                     <div className="flex items-center justify-between mb-4">
                       <h5 className="text-md font-semibold text-gray-800 flex items-center gap-2">
                         <span className="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
@@ -450,7 +529,6 @@ const SpeakingPictureForm = ({ onSubmit }) => {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      {/* Câu hỏi */}
                       <div>
                         <label 
                           htmlFor={`question-${pictureIndex}-${questionIndex}`}
@@ -468,7 +546,6 @@ const SpeakingPictureForm = ({ onSubmit }) => {
                         />
                       </div>
 
-                      {/* Gợi ý trả lời */}
                       <div>
                         <label 
                           htmlFor={`answer-${pictureIndex}-${questionIndex}`}
@@ -493,7 +570,7 @@ const SpeakingPictureForm = ({ onSubmit }) => {
           </div>
         ))}
 
-        {/* Nút điều khiển */}
+        {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between pt-6 border-t-2 border-gray-200">
           <button
             type="button"
@@ -507,24 +584,7 @@ const SpeakingPictureForm = ({ onSubmit }) => {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => {
-                pictureQuestions.forEach(pq => {
-                  if (pq.picturePreview) {
-                    URL.revokeObjectURL(pq.picturePreview);
-                  }
-                });
-                setPictureQuestions([{
-                  pictureUrl: '',
-                  pictureFile: null,
-                  picturePreview: null,
-                  speakingPictureListQuestions: [
-                    {
-                      question: '',
-                      answer: ''
-                    }
-                  ]
-                }]);
-              }}
+              onClick={resetForm}
               className="flex items-center gap-2 px-6 py-3 text-gray-600 border-2 border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors font-medium"
             >
               <RotateCcw className="w-4 h-4" />
@@ -542,13 +602,13 @@ const SpeakingPictureForm = ({ onSubmit }) => {
                   Đang gửi...
                 </span>
               ) : (
-                'Gửi Câu Hỏi Speaking Picture'
+                'Upload Câu Hỏi'
               )}
             </button>
           </div>
         </div>
 
-        {/* Thống kê */}
+        {/* Statistics */}
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
             <AlertCircle className="w-5 h-5 text-amber-600" />
@@ -568,7 +628,7 @@ const SpeakingPictureForm = ({ onSubmit }) => {
             <div className="bg-white p-3 rounded border-l-4 border-blue-500">
               <div className="font-medium text-gray-700">Có hình ảnh</div>
               <div className="text-2xl font-bold text-blue-600">
-                {pictureQuestions.filter(pq => pq.pictureFile || pq.pictureUrl.trim()).length}
+                {pictureQuestions.filter(pq => pq.pictureUrl.trim()).length}
               </div>
             </div>
           </div>

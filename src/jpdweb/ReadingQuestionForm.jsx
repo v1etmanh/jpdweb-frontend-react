@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Plus, 
   Trash2, 
@@ -11,20 +11,22 @@ import {
   Lightbulb
 } from 'lucide-react';
 
-const ReadingQuestionForm = ({ onSubmit }) => {
+const ReadingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
   const [passages, setPassages] = useState([
     {
+      mcId: null,
       title: '',
       content: '',
-      questions: [
+      readingQuestion: [
         {
+          rqId: null,
           question: '',
           feedBack: '',
           readingQuestionOptions: [
-            { optionText: '', isCorrect: false },
-            { optionText: '', isCorrect: false },
-            { optionText: '', isCorrect: false },
-            { optionText: '', isCorrect: false }
+            { id: null, optionText: '', correct: false },
+            { id: null, optionText: '', correct: false },
+            { id: null, optionText: '', correct: false },
+            { id: null, optionText: '', correct: false }
           ]
         }
       ]
@@ -32,21 +34,82 @@ const ReadingQuestionForm = ({ onSubmit }) => {
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activePreview, setActivePreview] = useState(null);
+  const hasLoadedInitialData = useRef(false);
+
+  // Load dữ liệu đầu vào
+  useEffect(() => {
+    if (initialData && Array.isArray(initialData) && initialData.length > 0 && !hasLoadedInitialData.current) {
+      const loadedPassages = initialData.map(item => {
+        // Load questions
+        const loadedQuestions = (item.readingQuestion || []).map(q => {
+          // Đảm bảo có đủ 4 options
+          const loadedOptions = q.readingQuestionOptions || [];
+          const normalizedOptions = [
+            ...loadedOptions.map(opt => ({
+              id: opt.id || null,
+              optionText: opt.optionText || '',
+              correct: opt.correct || false
+            })),
+            // Thêm options rỗng nếu < 4
+            ...Array(Math.max(0, 4 - loadedOptions.length)).fill({
+              id: null,
+              optionText: '',
+              correct: false
+            })
+          ];
+
+          return {
+            rqId: q.rqId || null,
+            question: q.question || '',
+            feedBack: q.feedBack || '',
+            readingQuestionOptions: normalizedOptions
+          };
+        });
+
+        // Nếu không có question nào, thêm 1 question mặc định
+        if (loadedQuestions.length === 0) {
+          loadedQuestions.push({
+            rqId: null,
+            question: '',
+            feedBack: '',
+            readingQuestionOptions: [
+              { id: null, optionText: '', correct: false },
+              { id: null, optionText: '', correct: false },
+              { id: null, optionText: '', correct: false },
+              { id: null, optionText: '', correct: false }
+            ]
+          });
+        }
+
+        return {
+          mcId: item.mcId || null,
+          title: item.title || '',
+          content: item.content || '',
+          readingQuestion: loadedQuestions
+        };
+      });
+
+      setPassages(loadedPassages);
+      hasLoadedInitialData.current = true;
+    }
+  }, [initialData]);
 
   // Thêm passage mới
   const addPassage = () => {
     const newPassage = {
+      mcId: null,
       title: '',
       content: '',
-      questions: [
+      readingQuestion: [
         {
+          rqId: null,
           question: '',
           feedBack: '',
           readingQuestionOptions: [
-            { optionText: '', isCorrect: false },
-            { optionText: '', isCorrect: false },
-            { optionText: '', isCorrect: false },
-            { optionText: '', isCorrect: false }
+            { id: null, optionText: '', correct: false },
+            { id: null, optionText: '', correct: false },
+            { id: null, optionText: '', correct: false },
+            { id: null, optionText: '', correct: false }
           ]
         }
       ]
@@ -54,11 +117,22 @@ const ReadingQuestionForm = ({ onSubmit }) => {
     setPassages([...passages, newPassage]);
   };
 
-  // Xóa passage
-  const removePassage = (passageIndex) => {
-    if (passages.length > 1) {
-      const newPassages = passages.filter((_, i) => i !== passageIndex);
-      setPassages(newPassages);
+  // Xóa passage (có gọi API onDelete nếu có mcId)
+  const removePassage = async (passageIndex) => {
+    const passage = passages[passageIndex];
+    if (!passage) return;
+
+    const confirmed = window.confirm("Bạn có chắc muốn xóa đoạn văn này và tất cả câu hỏi liên quan?");
+    if (!confirmed) return;
+
+    try {
+      if (passage.mcId) {
+        await onDelete(passage.mcId);
+      }
+      setPassages(prev => prev.filter((_, i) => i !== passageIndex));
+    } catch (err) {
+      console.error("Lỗi khi xóa đoạn văn:", err);
+      alert("Xóa thất bại, vui lòng thử lại.");
     }
   };
 
@@ -73,24 +147,25 @@ const ReadingQuestionForm = ({ onSubmit }) => {
   const addQuestion = (passageIndex) => {
     const newPassages = [...passages];
     const newQuestion = {
+      rqId: null,
       question: '',
       feedBack: '',
       readingQuestionOptions: [
-        { optionText: '', isCorrect: false },
-        { optionText: '', isCorrect: false },
-        { optionText: '', isCorrect: false },
-        { optionText: '', isCorrect: false }
+        { id: null, optionText: '', correct: false },
+        { id: null, optionText: '', correct: false },
+        { id: null, optionText: '', correct: false },
+        { id: null, optionText: '', correct: false }
       ]
     };
-    newPassages[passageIndex].questions.push(newQuestion);
+    newPassages[passageIndex].readingQuestion.push(newQuestion);
     setPassages(newPassages);
   };
 
   // Xóa câu hỏi
   const removeQuestion = (passageIndex, questionIndex) => {
     const newPassages = [...passages];
-    if (newPassages[passageIndex].questions.length > 1) {
-      newPassages[passageIndex].questions.splice(questionIndex, 1);
+    if (newPassages[passageIndex].readingQuestion.length > 1) {
+      newPassages[passageIndex].readingQuestion.splice(questionIndex, 1);
       setPassages(newPassages);
     }
   };
@@ -98,16 +173,16 @@ const ReadingQuestionForm = ({ onSubmit }) => {
   // Cập nhật câu hỏi
   const updateQuestion = (passageIndex, questionIndex, field, value) => {
     const newPassages = [...passages];
-    newPassages[passageIndex].questions[questionIndex][field] = value;
+    newPassages[passageIndex].readingQuestion[questionIndex][field] = value;
     setPassages(newPassages);
   };
 
   // Thêm option cho câu hỏi
   const addOption = (passageIndex, questionIndex) => {
     const newPassages = [...passages];
-    const question = newPassages[passageIndex].questions[questionIndex];
+    const question = newPassages[passageIndex].readingQuestion[questionIndex];
     if (question.readingQuestionOptions.length < 6) {
-      question.readingQuestionOptions.push({ optionText: '', isCorrect: false });
+      question.readingQuestionOptions.push({ id: null, optionText: '', correct: false });
       setPassages(newPassages);
     }
   };
@@ -115,7 +190,7 @@ const ReadingQuestionForm = ({ onSubmit }) => {
   // Xóa option
   const removeOption = (passageIndex, questionIndex, optionIndex) => {
     const newPassages = [...passages];
-    const question = newPassages[passageIndex].questions[questionIndex];
+    const question = newPassages[passageIndex].readingQuestion[questionIndex];
     if (question.readingQuestionOptions.length > 2) {
       question.readingQuestionOptions.splice(optionIndex, 1);
       setPassages(newPassages);
@@ -125,14 +200,14 @@ const ReadingQuestionForm = ({ onSubmit }) => {
   // Cập nhật option
   const updateOption = (passageIndex, questionIndex, optionIndex, field, value) => {
     const newPassages = [...passages];
-    const options = newPassages[passageIndex].questions[questionIndex].readingQuestionOptions;
+    const options = newPassages[passageIndex].readingQuestion[questionIndex].readingQuestionOptions;
     options[optionIndex][field] = value;
     
     // Nếu đánh dấu đáp án đúng, bỏ đánh dấu các option khác
-    if (field === 'isCorrect' && value === true) {
+    if (field === 'correct' && value === true) {
       options.forEach((option, i) => {
         if (i !== optionIndex) {
-          option.isCorrect = false;
+          option.correct = false;
         }
       });
     }
@@ -157,8 +232,8 @@ const ReadingQuestionForm = ({ onSubmit }) => {
       }
 
       // Kiểm tra từng câu hỏi
-      for (let j = 0; j < passage.questions.length; j++) {
-        const question = passage.questions[j];
+      for (let j = 0; j < passage.readingQuestion.length; j++) {
+        const question = passage.readingQuestion[j];
         
         if (!question.question.trim()) {
           alert(`Đoạn văn ${i + 1}, Câu hỏi ${j + 1}: Vui lòng nhập nội dung câu hỏi!`);
@@ -173,7 +248,7 @@ const ReadingQuestionForm = ({ onSubmit }) => {
         }
 
         // Kiểm tra có đáp án đúng
-        const correctOptions = question.readingQuestionOptions.filter(opt => opt.isCorrect);
+        const correctOptions = question.readingQuestionOptions.filter(opt => opt.correct);
         if (correctOptions.length !== 1) {
           alert(`Đoạn văn ${i + 1}, Câu hỏi ${j + 1}: Cần có đúng 1 đáp án đúng!`);
           return false;
@@ -191,18 +266,22 @@ const ReadingQuestionForm = ({ onSubmit }) => {
       return;
     }
 
-    // Format dữ liệu
+    // Format dữ liệu theo API format
     const validData = passages.map(passage => ({
+      mcId: passage.mcId,
+      typeOfContent: "READING",
       title: passage.title.trim(),
       content: passage.content.trim(),
-      questions: passage.questions.map(q => ({
+      readingQuestion: passage.readingQuestion.map(q => ({
+        rqId: q.rqId, // Giữ rqId để update
         question: q.question.trim(),
-        feedBack: q.feedBack.trim(),
+        feedBack: q.feedBack.trim() || null,
         readingQuestionOptions: q.readingQuestionOptions
           .filter(opt => opt.optionText.trim() !== '')
           .map(opt => ({
+            id: opt.id, // Giữ id để update
             optionText: opt.optionText.trim(),
-            isCorrect: opt.isCorrect
+            correct: opt.correct
           }))
       }))
     }));
@@ -213,22 +292,26 @@ const ReadingQuestionForm = ({ onSubmit }) => {
       await onSubmit(validData);
       // Reset form
       setPassages([{
+        mcId: null,
         title: '',
         content: '',
-        questions: [{
+        readingQuestion: [{
+          rqId: null,
           question: '',
           feedBack: '',
           readingQuestionOptions: [
-            { optionText: '', isCorrect: false },
-            { optionText: '', isCorrect: false },
-            { optionText: '', isCorrect: false },
-            { optionText: '', isCorrect: false }
+            { id: null, optionText: '', correct: false },
+            { id: null, optionText: '', correct: false },
+            { id: null, optionText: '', correct: false },
+            { id: null, optionText: '', correct: false }
           ]
         }]
       }]);
+      hasLoadedInitialData.current = false;
+      alert('Upload câu hỏi đọc hiểu thành công!');
     } catch (error) {
       console.error('Error submitting reading questions:', error);
-      alert('Có lỗi xảy ra khi gửi câu hỏi đọc hiểu!');
+      alert(error.message || 'Có lỗi xảy ra khi gửi câu hỏi đọc hiểu!');
     } finally {
       setIsSubmitting(false);
     }
@@ -248,7 +331,7 @@ const ReadingQuestionForm = ({ onSubmit }) => {
         <div className="flex items-center gap-3 mb-2">
           <BookOpen className="w-8 h-8 text-blue-600" />
           <h2 className="text-2xl font-bold text-gray-800">
-            Thêm Câu Hỏi Đọc Hiểu
+            Quản lý Câu Hỏi Đọc Hiểu
           </h2>
         </div>
         <p className="text-gray-600">
@@ -261,7 +344,7 @@ const ReadingQuestionForm = ({ onSubmit }) => {
         <div className="flex items-start gap-3">
           <Lightbulb className="w-6 h-6 text-blue-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-semibold text-blue-800 mb-2">💡 Hướng dẫn tạo câu hỏi đọc hiểu:</h4>
+            <h4 className="font-semibold text-blue-800 mb-2">Hướng dẫn tạo câu hỏi đọc hiểu:</h4>
             <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
               <li>Nhập đoạn văn có nội dung phù hợp với trình độ học sinh</li>
               <li>Tạo câu hỏi kiểm tra khả năng hiểu nội dung, suy luận</li>
@@ -286,7 +369,7 @@ const ReadingQuestionForm = ({ onSubmit }) => {
                   Đoạn văn #{passageIndex + 1}
                 </h3>
                 <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                  {passage.questions.length} câu hỏi
+                  {passage.readingQuestion.length} câu hỏi
                 </span>
               </div>
               
@@ -385,7 +468,7 @@ const ReadingQuestionForm = ({ onSubmit }) => {
                   </button>
                 </div>
 
-                {passage.questions.map((question, questionIndex) => (
+                {passage.readingQuestion.map((question, questionIndex) => (
                   <div 
                     key={questionIndex}
                     className="bg-white border border-gray-200 rounded-lg p-5"
@@ -395,7 +478,7 @@ const ReadingQuestionForm = ({ onSubmit }) => {
                       <h5 className="text-md font-semibold text-gray-800">
                         Câu hỏi {questionIndex + 1}
                       </h5>
-                      {passage.questions.length > 1 && (
+                      {passage.readingQuestion.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeQuestion(passageIndex, questionIndex)}
@@ -447,14 +530,14 @@ const ReadingQuestionForm = ({ onSubmit }) => {
                           <div 
                             key={optionIndex}
                             className={`flex items-center gap-3 p-3 rounded-md border transition-colors ${
-                              option.isCorrect 
+                              option.correct 
                                 ? 'border-green-300 bg-green-50' 
                                 : 'border-gray-200 bg-gray-50'
                             }`}
                           >
                             {/* Label */}
                             <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                              option.isCorrect 
+                              option.correct 
                                 ? 'bg-green-500 text-white' 
                                 : 'bg-gray-300 text-gray-600'
                             }`}>
@@ -473,15 +556,15 @@ const ReadingQuestionForm = ({ onSubmit }) => {
                             {/* Correct answer button */}
                             <button
                               type="button"
-                              onClick={() => updateOption(passageIndex, questionIndex, optionIndex, 'isCorrect', !option.isCorrect)}
+                              onClick={() => updateOption(passageIndex, questionIndex, optionIndex, 'correct', !option.correct)}
                               className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
-                                option.isCorrect 
+                                option.correct 
                                   ? 'bg-green-500 text-white hover:bg-green-600' 
                                   : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
                               }`}
-                              title={option.isCorrect ? 'Đáp án đúng' : 'Đánh dấu đáp án đúng'}
+                              title={option.correct ? 'Đáp án đúng' : 'Đánh dấu đáp án đúng'}
                             >
-                              {option.isCorrect ? (
+                              {option.correct ? (
                                 <Check className="w-4 h-4" />
                               ) : (
                                 <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
@@ -542,20 +625,25 @@ const ReadingQuestionForm = ({ onSubmit }) => {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => setPassages([{
-                title: '',
-                content: '',
-                questions: [{
-                  question: '',
-                  feedBack: '',
-                  readingQuestionOptions: [
-                    { optionText: '', isCorrect: false },
-                    { optionText: '', isCorrect: false },
-                    { optionText: '', isCorrect: false },
-                    { optionText: '', isCorrect: false }
-                  ]
-                }]
-              }])}
+              onClick={() => {
+                setPassages([{
+                  mcId: null,
+                  title: '',
+                  content: '',
+                  readingQuestion: [{
+                    rqId: null,
+                    question: '',
+                    feedBack: '',
+                    readingQuestionOptions: [
+                      { id: null, optionText: '', correct: false },
+                      { id: null, optionText: '', correct: false },
+                      { id: null, optionText: '', correct: false },
+                      { id: null, optionText: '', correct: false }
+                    ]
+                  }]
+                }]);
+                hasLoadedInitialData.current = false;
+              }}
               className="px-6 py-3 text-gray-600 border-2 border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors font-medium"
             >
               Làm mới
@@ -572,7 +660,7 @@ const ReadingQuestionForm = ({ onSubmit }) => {
                   Đang gửi...
                 </span>
               ) : (
-                'Gửi Câu Hỏi Đọc Hiểu'
+                'Upload Câu Hỏi'
               )}
             </button>
           </div>
@@ -592,9 +680,9 @@ const ReadingQuestionForm = ({ onSubmit }) => {
             <div className="bg-white p-3 rounded border-l-4 border-blue-500">
               <div className="font-medium text-gray-700">Tổng câu hỏi</div>
               <div className="text-2xl font-bold text-blue-600">
-                {passages.reduce((total, passage) => total + passage.questions.length, 0)}
-              </div>
-            </div>
+                {passages.reduce((total, passage) => total + passage.readingQuestion.length, 0)}
+                 </div>
+                 </div>
             <div className="bg-white p-3 rounded border-l-4 border-green-500">
               <div className="font-medium text-gray-700">Tổng từ vựng</div>
               <div className="text-2xl font-bold text-green-600">

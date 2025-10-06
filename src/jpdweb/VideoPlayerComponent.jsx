@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, Settings, RotateCcw, ExternalLink, Share2, BookOpen } from 'lucide-react';
+import { Play,Settings, RotateCcw, ExternalLink, Share2, BookOpen } from 'lucide-react';
 
 const VideoPlayer = ({ 
   videoUrl, 

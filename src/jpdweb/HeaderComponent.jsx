@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import finallogo from "../images/finallogo.jpg";
+import { useAuth } from "./security/Authentication";
+import { logOutKeycloak } from "./api/KeycloakService";
 export default function HeaderComponent() {
- 
+ const auth=useAuth();
   
  
 
@@ -21,8 +23,8 @@ export default function HeaderComponent() {
               </Link>
             </li>
 
-           
-              <>
+          
+              <> {!auth.isAuthentication&&
                 <li>
                   <Link
                     to="/login"
@@ -31,10 +33,11 @@ export default function HeaderComponent() {
                     Login
                   </Link>
                 </li>
+           }
 
-           
+           {}
          
-                <li>
+              { auth.isAuthentication&& <li>
                   <Link
                     to="/myLearning"
                     className="inline-block text-black text-xl font-semibold hover:scale-110  transition duration-200 transform  no-underline"
@@ -42,6 +45,8 @@ export default function HeaderComponent() {
                     My Learning
                   </Link>
                 </li>
+}
+                  { auth.isAuthentication&& 
                 <li>
                   <Link
                     to="/account"
@@ -50,18 +55,20 @@ export default function HeaderComponent() {
                     My Account
                   </Link>
                 </li>
-                
-
+}
+     { auth.isAuthentication&& 
                 <li>
                   <button
                     onClick={() => {
-                   
+                   logOutKeycloak();
+                   auth.setAuthentication(false)
                     }}
                     className="text-red-600 text-xl font-semibold hover:text-red-800 transition"
                   >
                     Logout
                   </button>
                 </li>
+}
               </>
            
           </ul>

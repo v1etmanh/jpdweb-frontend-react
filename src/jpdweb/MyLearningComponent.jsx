@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Clock, BookOpen, Heart, Star, MoreHorizontal, Search } from 'lucide-react';
+import { Play, BookOpen, Heart, MoreHorizontal, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Mock Data - Simple Format

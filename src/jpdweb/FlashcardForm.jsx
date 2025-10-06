@@ -1,27 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { PlusCircleIcon, Trash2Icon, ImageIcon, XIcon, Loader2Icon } from 'lucide-react';
+import { saveImg } from './api/ApiConnect';
 
-import { PlusCircleIcon, Trash2Icon } from 'lucide-react';
-
-const FlashCardForm = ({ onSubmit }) => {
+const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
   const [flashCards, setFlashCards] = useState([
-    { word: '', meaning: '' }
+    { mcId: null, word: '', meaning: '', imageUrl: '', typeOfContent: "FLASHCARD" }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingIndex, setUploadingIndex] = useState(null);
+  
+  // ✅ SỬA: Map imgUrl từ backend → imageUrl trong state
+  useEffect(() => {
+    console.log('Initial Data:', initialData)
+    if (initialData && initialData.length > 0) {
+      setFlashCards(initialData.map(card => ({
+        mcId: card.mcId || null,
+        word: card.word || '',
+        meaning: card.meaning || '',
+        imageUrl: card.imgUrl|| '', // ← Lấy từ imgUrl
+        typeOfContent: "FLASHCARD"
+      })));
+    }
+  }, [initialData]);
 
-  // Thêm flashcard mới
+  // ✅ SỬA: Dùng imageUrl trong state
   const addFlashCard = () => {
-    setFlashCards([...flashCards, { word: '', meaning: '' }]);
+    setFlashCards([...flashCards, { 
+      mcId: null, 
+      word: '', 
+      meaning: '', 
+      imageUrl: '', // ← Dùng imageUrl
+      typeOfContent: "FLASHCARD" 
+    }]);
   };
 
-  // Xóa flashcard
-  const removeFlashCard = (index) => {
-    if (flashCards.length > 1) {
-      const newFlashCards = flashCards.filter((_, i) => i !== index);
-      setFlashCards(newFlashCards);
+  const removeFlashCard = async (index) => {
+    const card = flashCards[index];
+    if (!card) return;
+
+    const confirmed = window.confirm("Bạn có chắc muốn xóa flashcard này?");
+    if (!confirmed) return;
+
+    try {
+      if (card.mcId) {
+        await onDelete(card.mcId);
+      }
+      setFlashCards(prev => prev.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error("Lỗi khi xóa flashcard:", error);
+      alert("Xóa thất bại, vui lòng thử lại.");
     }
   };
 
-  // Cập nhật giá trị flashcard
   const updateFlashCard = (index, field, value) => {
     const newFlashCards = flashCards.map((card, i) => 
       i === index ? { ...card, [field]: value } : card
@@ -29,14 +59,65 @@ const FlashCardForm = ({ onSubmit }) => {
     setFlashCards(newFlashCards);
   };
 
-  // Xử lý submit form
+  const handleImageUpload = async (index, file) => {
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Kích thước ảnh không được vượt quá 5MB');
+      return;
+    }
+
+    setUploadingIndex(index);
+
+    try {
+      const formData = new FormData();
+      formData.append('img', file);
+      const response = await saveImg(formData);
+      const downloadUrl = response.data;
+
+      if (!downloadUrl) {
+        throw new Error('Không nhận được URL từ server');
+      }
+
+      // ✅ Cập nhật vào imageUrl trong state
+      updateFlashCard(index, 'imageUrl', downloadUrl);
+      console.log(`Ảnh đã upload thành công: ${downloadUrl}`);
+      
+    } catch (error) {
+      console.error('Lỗi khi upload ảnh:', error);
+      alert('Upload ảnh thất bại. Vui lòng thử lại.');
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
+  const removeImage = (index) => {
+    const confirmed = window.confirm("Bạn có muốn xóa ảnh này không?");
+    if (confirmed) {
+      updateFlashCard(index, 'imageUrl', '');
+    }
+  };
+
+  // ✅ SỬA: Map imageUrl trong state → imgUrl khi submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate
-    const validFlashCards = flashCards.filter(card => 
-      card.word.trim() !== '' && card.meaning.trim() !== ''
-    );
+    // Validate và map đúng field cho backend
+    const validFlashCards = flashCards
+      .filter(card => card.word.trim() !== '' && card.meaning.trim() !== '')
+      .map(card => ({
+        mcId: card.mcId,
+        word: card.word.trim(),
+        meaning: card.meaning.trim(),
+        typeOfContent: "FLASHCARD",
+        imgUrl: card.imageUrl // ← Map imageUrl → imgUrl để gửi backend
+      }));
     
     if (validFlashCards.length === 0) {
       alert('Vui lòng nhập ít nhất một flashcard với đầy đủ thông tin!');
@@ -47,8 +128,15 @@ const FlashCardForm = ({ onSubmit }) => {
     
     try {
       await onSubmit(validFlashCards);
-      // Reset form sau khi submit thành công
-      setFlashCards([{ word: '', meaning: '' }]);
+      
+      // Reset form
+      setFlashCards([{ 
+        mcId: null, 
+        word: '', 
+        meaning: '', 
+        imageUrl: '', 
+        typeOfContent: "FLASHCARD" 
+      }]);
     } catch (error) {
       console.error('Error submitting flashcards:', error);
       alert('Có lỗi xảy ra khi gửi flashcard!');
@@ -90,7 +178,7 @@ const FlashCardForm = ({ onSubmit }) => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label 
                   htmlFor={`word-${index}`}
@@ -125,6 +213,80 @@ const FlashCardForm = ({ onSubmit }) => {
                 />
               </div>
             </div>
+
+            {/* Image Upload Section */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Hình ảnh minh họa (tùy chọn)
+              </label>
+
+              {!card.imageUrl ? (
+                <div className="relative">
+                  <input
+                    type="file"
+                    id={`image-${index}`}
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        handleImageUpload(index, file);
+                      }
+                    }}
+                    disabled={uploadingIndex === index}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor={`image-${index}`}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors ${
+                      uploadingIndex === index ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {uploadingIndex === index ? (
+                      <>
+                        <Loader2Icon className="w-5 h-5 animate-spin text-blue-600" />
+                        <span className="text-sm text-blue-600">Đang upload...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="w-5 h-5 text-gray-400" />
+                        <span className="text-sm text-gray-600">
+                          Click để chọn ảnh (JPG, PNG, GIF, max 5MB)
+                        </span>
+                      </>
+                    )}
+                  </label>
+                </div>
+              ) : (
+               <div className="relative group">
+  <img
+    src={card.imageUrl}
+    alt={card.word}
+    className="w-full h-64 object-cover rounded-lg border-2 border-gray-200"
+    // Tăng h-48 → h-64 (256px)
+    // Đổi object-contain → object-cover
+    // Bỏ bg-white
+  />
+  
+  <button
+    type="button"
+    onClick={() => removeImage(index)}
+    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-lg"
+    title="Xóa ảnh"
+  >
+    <XIcon className="w-5 h-5" />
+  </button>
+
+  <a
+    href={card.imageUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-xs text-blue-500 underline truncate block hover:text-blue-600"
+  >
+   link
+  </a>
+</div>
+              )}
+            </div>
           </div>
         ))}
 
@@ -141,7 +303,13 @@ const FlashCardForm = ({ onSubmit }) => {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => setFlashCards([{ word: '', meaning: '' }])}
+              onClick={() => setFlashCards([{ 
+                mcId: null, 
+                word: '', 
+                meaning: '', 
+                imageUrl: '', 
+                typeOfContent: "FLASHCARD" 
+              }])}
               className="px-6 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
             >
               Làm mới
@@ -149,15 +317,12 @@ const FlashCardForm = ({ onSubmit }) => {
             
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || uploadingIndex !== null}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                  <Loader2Icon className="animate-spin h-4 w-4" />
                   Đang gửi...
                 </span>
               ) : (
@@ -168,11 +333,12 @@ const FlashCardForm = ({ onSubmit }) => {
         </div>
 
         <div className="text-sm text-gray-500 mt-4">
-          <p>💡 <strong>Gợi ý:</strong></p>
-          <ul className="list-disc list-inside mt-1 space-y-1">
+          <p className="font-semibold mb-1">Gợi ý:</p>
+          <ul className="list-disc list-inside space-y-1">
             <li>Chỉ những flashcard có đầy đủ thông tin mới được gửi</li>
+            <li>Ảnh sẽ được upload ngay lập tức khi bạn chọn file</li>
+            <li>Kích thước ảnh tối đa: 5MB, định dạng: JPG, PNG, GIF, WEBP</li>
             <li>Sử dụng nút + để thêm nhiều flashcard cùng lúc</li>
-            <li>Nhấn "Làm mới" để xóa tất cả dữ liệu đã nhập</li>
           </ul>
         </div>
       </form>

@@ -1,9 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { 
-  Upload, 
   Image, 
   DollarSign, 
-  Users, 
   Globe, 
   BookOpen,
   Target,
@@ -12,10 +10,21 @@ import {
   ArrowLeft,
   Save
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { createNewCourse } from './api/ApiConnect';
 
-// Component InputField được tách ra ngoài để tránh re-render
-const InputField = React.memo(({ label, name, value, onChange, error, type = "text", textarea = false, placeholder, required = false }) => (
+// Component InputField tách riêng để tối ưu performance
+const InputField = React.memo(({ 
+  label, 
+  name, 
+  value, 
+  onChange, 
+  error, 
+  type = "text", 
+  textarea = false, 
+  placeholder, 
+  required = false 
+}) => (
   <div className="mb-6">
     <label className="block text-sm font-medium text-gray-700 mb-2">
       {label} {required && <span className="text-red-500">*</span>}
@@ -51,24 +60,33 @@ const InputField = React.memo(({ label, name, value, onChange, error, type = "te
 ));
 
 const CreateCourseForm = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [currentStep, setCurrentStep] = useState(1);
-  const [courseData, setCourseData] = useState({
-    name: '',
-    description: '',
-    targetAudience: '',
-    requirement: '',
-    learningObject: '',
-    language: 'Vietnamese',
-    price: '',
-    urlImg: '',
-     courseType: '',
-    imageFile: null
+  const [courseData, setCourseData] = useState(() => {
+    // Khôi phục draft nếu có
+    const draft = localStorage.getItem('courseDraft');
+    return draft ? JSON.parse(draft) : {
+      name: '',
+      description: '',
+      targetAudience: '',
+      requirement: '',
+      learningObject: '',
+      language: 'Vietnamese',
+      price: '',
+      urlImg: '',
+      courseType: '',
+      imageFile: null
+    };
   });
-  const[courseType,setCourseType]=useState(null)
   
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const[isShowPrice,setIsShowPrice]=useState(false)
+  const [isUpdateCertificate, setIsUpdateCertificate] = useState(() => {
+    return localStorage.getItem('certificateUploaded') === 'true';
+  });
+  
   const languages = useMemo(() => [
     { value: 'Vietnamese', label: 'Tiếng Việt' },
     { value: 'English', label: 'English' },
@@ -76,74 +94,71 @@ const CreateCourseForm = () => {
     { value: 'Korean', label: '한국어' },
     { value: 'Chinese', label: '中文' }
   ], []);
-  const[isUpdateCertifate,setIsUpdateCertificate]=useState(false)
-  const nav=useNavigate()
-useEffect(()=>{
-if(courseType=="commercial")
 
-  {
-   setIsShowPrice(true)
-  }
-  else {
-    setIsShowPrice(false)
-  }
+  // Auto-save draft
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (courseData.name || courseData.description) {
+        localStorage.setItem('courseDraft', JSON.stringify(courseData));
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [courseData]);
 
-},[courseType])
   const handleInputChange = useCallback((field, value) => {
     setCourseData(prev => ({
       ...prev,
       [field]: value
     }));
     
-    // Clear error when user starts typing
-    setErrors(prev => {
-      if (prev[field]) {
+    // Xóa error khi user bắt đầu nhập
+    if (errors[field]) {
+      setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
-      }
-      return prev;
-    });
-  }, []);
+      });
+    }
+  }, [errors]);
 
   const handleImageUpload = useCallback((event) => {
     const file = event.target.files[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setErrors(prev => ({
-          ...prev,
-          image: 'Vui lòng chọn file hình ảnh'
-        }));
-        return;
-      }
-      
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({
-          ...prev,
-          image: 'Kích thước file không được vượt quá 5MB'
-        }));
-        return;
-      }
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setCourseData(prev => ({
-          ...prev,
-          urlImg: e.target.result,
-          imageFile: file
-        }));
-      };
-      reader.readAsDataURL(file);
-      
-      // Clear image error
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.image;
-        return newErrors;
-      });
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setErrors(prev => ({
+        ...prev,
+        image: 'Vui lòng chọn file hình ảnh'
+      }));
+      return;
     }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors(prev => ({
+        ...prev,
+        image: 'Kích thước file không được vượt quá 5MB'
+      }));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setCourseData(prev => ({
+        ...prev,
+        urlImg: e.target.result,
+        imageFile: file
+      }));
+    };
+    reader.readAsDataURL(file);
+    
+    // Xóa error image
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.image;
+      return newErrors;
+    });
   }, []);
 
   const validateStep = useCallback((step) => {
@@ -179,15 +194,25 @@ if(courseType=="commercial")
         break;
 
       case 3:
-        if (!courseData.price) {
-          newErrors.price = 'Giá khóa học là bắt buộc';
-        } else if (isNaN(courseData.price) || parseFloat(courseData.price) < 0) {
-          newErrors.price = 'Giá phải là số dương';
+        if (!courseData.courseType) {
+          newErrors.courseType = 'Loại khóa học là bắt buộc';
+        }
+        
+        // Chỉ validate price nếu là PAID
+        if (courseData.courseType === 'PAID') {
+          if (!courseData.price) {
+            newErrors.price = 'Giá khóa học là bắt buộc';
+          } else if (isNaN(courseData.price) || parseFloat(courseData.price) <= 0) {
+            newErrors.price = 'Giá phải lớn hơn 0';
+          }
         }
 
         if (!courseData.urlImg) {
           newErrors.image = 'Hình ảnh khóa học là bắt buộc';
         }
+        break;
+
+      default:
         break;
     }
 
@@ -201,43 +226,148 @@ if(courseType=="commercial")
     }
   }, [validateStep, currentStep]);
 
+  const handlePrevStep = useCallback(() => {
+    setCurrentStep(prev => prev - 1);
+  }, []);
+
   const handleSubmit = useCallback(async () => {
     if (!validateStep(3)) return;
-      
+    
     setIsSubmitting(true);
-   if(courseData.courseType == "commercial"){ // Sửa thành ===
-    if(isUpdateCertifate == false){ // Sửa thành isUpdateCertificate và ===
-      nav("/upload_profile")
-      return; // Thêm return để thoát function
+    
+    // Kiểm tra certificate cho PAID course
+    if (courseData.courseType === "PAID" && !isUpdateCertificate) {
+      localStorage.setItem('courseDraft', JSON.stringify(courseData));
+      navigate("/upload_profile", { 
+        state: { 
+          redirectTo: '/create-course',
+          message: 'Vui lòng cập nhật chứng chỉ và thông tin thanh toán để tạo khóa học có phí'
+        } 
+      });
+      setIsSubmitting(false);
+      return;
     }
-  }
+    
     try {
-      // Here you would make API call to create course
       const formData = new FormData();
-      Object.keys(courseData).forEach(key => {
-        if (key === 'imageFile' && courseData[key]) {
-          formData.append('image', courseData[key]);
-        } else if (key !== 'imageFile' && key !== 'urlImg') {
-          formData.append(key, courseData[key]);
-        }
-      }  );
+      
+      // Append image file
+      if (courseData.imageFile) {
+        formData.append('imgFile', courseData.imageFile);
+      }
+      
+      // Append course data
+      formData.append('name', courseData.name.trim());
+      formData.append('description', courseData.description.trim());
+      formData.append('targetAudience', courseData.targetAudience.trim());
+      formData.append('requirements', courseData.requirement.trim());
+      formData.append('learningObject', courseData.learningObject.trim());
+      formData.append('language', courseData.language);
+      formData.append('accessMode', courseData.courseType);
+      
+      // Append price (0 cho PUBLIC/PRIVATE, giá thực cho PAID)
+      const priceValue = courseData.courseType === "PAID" 
+        ? parseFloat(courseData.price) 
+        : 0;
+      formData.append('price', priceValue);
 
-      console.log('Course data:', courseData);
+      // Debug log (chỉ trong development)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Submitting course data:', {
+          name: courseData.name,
+          courseType: courseData.courseType,
+          price: priceValue,
+          hasImage: !!courseData.imageFile
+        });
+      }
+
+      const response = await createNewCourse(formData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      alert('Khóa học đã được tạo thành công!');
-      // Reset form or redirect
-      
+      if (response.status === 200 || response.status === 201) {
+        // Clear draft
+        localStorage.removeItem('courseDraft');
+        
+        alert('Khóa học đã được tạo thành công!');
+        
+        // Redirect tới trang quản lý khóa học
+        navigate('/my-courses');
+      }
     } catch (error) {
       console.error('Error creating course:', error);
-      alert('Có lỗi xảy ra khi tạo khóa học');
+      
+      let errorMessage = 'Có lỗi xảy ra khi tạo khóa học';
+      
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        switch(status) {
+          case 403:
+            errorMessage = 'Bạn cần cập nhật thông tin thanh toán và chứng chỉ trước khi tạo khóa học có phí';
+            setTimeout(() => navigate("/upload_profile"), 2000);
+            break;
+            
+          case 404:
+            errorMessage = 'Không tìm thấy tài khoản hoặc hồ sơ giảng viên. Vui lòng đăng nhập lại';
+            break;
+            
+          case 400:
+            errorMessage = data?.error || data?.message || 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin';
+            break;
+            
+          case 500:
+            errorMessage = 'Lỗi server. Vui lòng thử lại sau';
+            break;
+            
+          default:
+            errorMessage = data?.error || data?.message || errorMessage;
+        }
+      } else if (error.request) {
+        errorMessage = 'Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng';
+      }
+      
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
-  }, [validateStep, courseData]);
+  }, [validateStep, courseData, isUpdateCertificate, navigate]);
 
+  const removeImage = useCallback(() => {
+    setCourseData(prev => ({ 
+      ...prev, 
+      urlImg: '', 
+      imageFile: null 
+    }));
+  }, []);
+
+  const handleLanguageChange = useCallback((e) => {
+    handleInputChange('language', e.target.value);
+  }, [handleInputChange]);
+
+  const handleCourseTypeChange = useCallback((e) => {
+    const value = e.target.value;
+    handleInputChange('courseType', value);
+    
+    // Reset price nếu chuyển từ PAID sang PUBLIC/PRIVATE
+    if (value !== 'PAID' && courseData.price) {
+      handleInputChange('price', '');
+    }
+  }, [handleInputChange, courseData.price]);
+
+  // Tính toán doanh thu
+  const revenueInfo = useMemo(() => {
+    if (!courseData.price || courseData.courseType !== 'PAID') return null;
+    
+    const price = parseFloat(courseData.price);
+    if (isNaN(price) || price <= 0) return null;
+    
+    const platformFee = price * 0.2;
+    const userRevenue = price * 0.8;
+    
+    return { price, platformFee, userRevenue };
+  }, [courseData.price, courseData.courseType]);
+
+  // Step indicator component
   const StepIndicator = useMemo(() => (
     <div className="flex items-center justify-center mb-8">
       {[1, 2, 3].map((step) => (
@@ -259,26 +389,11 @@ if(courseType=="commercial")
     </div>
   ), [currentStep]);
 
-  const removeImage = useCallback(() => {
-    setCourseData(prev => ({ ...prev, urlImg: '', imageFile: null }));
-  }, []);
-
-  const handleLanguageChange = useCallback((e) => {
-    handleInputChange('language', e.target.value);
-  }, [handleInputChange]);
-
-  const handlePrevStep = useCallback(() => {
-    setCurrentStep(prev => prev - 1);
-  }, []);
-
-  // Tính toán doanh thu
-  const revenueInfo = useMemo(() => {
-    if (!courseData.price) return null;
-    const price = parseInt(courseData.price);
-    const platformFee = price * 0.2;
-    const userRevenue = price * 0.8;
-    return { price, platformFee, userRevenue };
-  }, [courseData.price]);
+  const handleBack = useCallback(() => {
+    if (window.confirm('Bạn có chắc muốn rời khỏi trang? Dữ liệu đã nhập sẽ được lưu tạm thời.')) {
+      navigate(-1);
+    }
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -287,7 +402,10 @@ if(courseType=="commercial")
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <button className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <button 
+                onClick={handleBack}
+                className="mr-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <div>
@@ -406,36 +524,66 @@ if(courseType=="commercial")
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-             <select
-    id="courseType"
-    name="courseType"
-    value={courseData.courseType}
-   onChange={(e) => {
-  const value = e.target.value;
-  setCourseType(value);
-  handleInputChange('courseType', value); // Cập nhật vào courseData
-}}
-    required
-    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-  >
-    <option value="">-- Select type --</option>
-    <option value="public">Public</option>
-    <option value="private">Private</option>
-    <option value="commercial">Commercial</option>
-  </select>
-{isShowPrice&& <InputField label="Giá khóa học (VNĐ)" 
-name="price" value={courseData.price} 
-onChange={handleInputChange} error={errors.price} 
-type="number" placeholder="499000" required />}
-                  {revenueInfo && (
-                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-2">Dự kiến thu nhập:</h4>
-                      <div className="text-sm text-blue-700 space-y-1">
-                        <p>• Giá gốc: {revenueInfo.price.toLocaleString('vi-VN')} VNĐ</p>
-                        <p>• Phí nền tảng (20%): {revenueInfo.platformFee.toLocaleString('vi-VN')} VNĐ</p>
-                        <p className="font-semibold">• Bạn nhận được: {revenueInfo.userRevenue.toLocaleString('vi-VN')} VNĐ</p>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Loại khóa học <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={courseData.courseType}
+                      onChange={handleCourseTypeChange}
+                      className={`w-full rounded-lg border bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 ${
+                        errors.courseType ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                    >
+                      <option value="">-- Chọn loại khóa học --</option>
+                      <option value="PUBLIC">Công khai (Miễn phí)</option>
+                      <option value="PRIVATE">Riêng tư</option>
+                      <option value="PAID">Có phí</option>
+                    </select>
+                    {errors.courseType && (
+                      <div className="flex items-center mt-1 text-red-600 text-sm">
+                        <AlertCircle className="w-4 h-4 mr-1" />
+                        {errors.courseType}
                       </div>
-                    </div>
+                    )}
+                  </div>
+
+                  {courseData.courseType === 'PAID' && (
+                    <>
+                      <InputField
+                        label="Giá khóa học (VNĐ)"
+                        name="price"
+                        value={courseData.price}
+                        onChange={handleInputChange}
+                        error={errors.price}
+                        type="number"
+                        placeholder="499000"
+                        required
+                      />
+
+                      {revenueInfo && (
+                        <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                          <h4 className="font-medium text-blue-900 mb-2">Dự kiến thu nhập:</h4>
+                          <div className="text-sm text-blue-700 space-y-1">
+                            <p>Giá gốc: {revenueInfo.price.toLocaleString('vi-VN')} VNĐ</p>
+                            <p>Phí nền tảng (20%): {revenueInfo.platformFee.toLocaleString('vi-VN')} VNĐ</p>
+                            <p className="font-semibold">Bạn nhận được: {revenueInfo.userRevenue.toLocaleString('vi-VN')} VNĐ</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {!isUpdateCertificate && (
+                        <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <div className="flex items-start">
+                            <AlertCircle className="w-5 h-5 text-yellow-600 mr-2 flex-shrink-0 mt-0.5" />
+                            <div className="text-sm text-yellow-800">
+                              <p className="font-medium mb-1">Cần cập nhật thông tin</p>
+                              <p>Để tạo khóa học có phí, bạn cần cập nhật chứng chỉ và thông tin thanh toán.</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -456,6 +604,7 @@ type="number" placeholder="499000" required />}
                           type="button"
                           onClick={removeImage}
                           className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 w-6 h-6 flex items-center justify-center text-sm"
+                          title="Xóa ảnh"
                         >
                           ×
                         </button>
@@ -536,12 +685,13 @@ type="number" placeholder="499000" required />}
 
         {/* Tips Section */}
         <div className="bg-blue-50 rounded-xl p-6 mt-8">
-          <h3 className="font-semibold text-blue-900 mb-3">💡 Mẹo tạo khóa học thành công:</h3>
+          <h3 className="font-semibold text-blue-900 mb-3">Mẹo tạo khóa học thành công:</h3>
           <ul className="text-sm text-blue-800 space-y-2">
-            <li>• Tên khóa học nên rõ ràng, cụ thể và hấp dẫn</li>
-            <li>• Mô tả chi tiết giúp học viên hiểu rõ giá trị nhận được</li>
-            <li>• Hình ảnh chất lượng cao sẽ thu hút nhiều học viên hơn</li>
-            <li>• Định giá hợp lý dựa trên giá trị nội dung cung cấp</li>
+            <li>Tên khóa học nên rõ ràng, cụ thể và hấp dẫn</li>
+            <li>Mô tả chi tiết giúp học viên hiểu rõ giá trị nhận được</li>
+            <li>Hình ảnh chất lượng cao sẽ thu hút nhiều học viên hơn</li>
+            <li>Định giá hợp lý dựa trên giá trị nội dung cung cấp</li>
+            <li>Khóa học có phí yêu cầu cập nhật chứng chỉ và thông tin thanh toán</li>
           </ul>
         </div>
       </div>

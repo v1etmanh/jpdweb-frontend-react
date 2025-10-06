@@ -304,89 +304,71 @@ export default function CoursesResultComponent(){
             {/* Danh sách thư mục khóa học */}
             <div className="max-w-7xl mx-auto px-4 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {targetCourses.map((course, index) => (
+                   {targetCourses.map((course, index) => (
   <div
     key={index}
-    className="group cursor-pointer transform hover:scale-105 transition-all duration-300"
+    className="group cursor-pointer"
+    onClick={()=>{nav(`/course/specific/${index}`)}}
   >
-    {/* Folder Shape */}
-    <div className="relative">
-      {/* Folder Tab */}
-      <div className="absolute -top-3 left-4 z-10">
-        <div className="bg-white border border-blue-200 px-6 py-2 rounded-t-xl shadow-md">
-          <span className="text-[#1e88e5] font-bold text-sm">
-            📚 {course.numberModuleType} bài
-          </span>
-        </div>
+    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+      
+      {/* Course Image */}
+      <div className="relative aspect-video overflow-hidden bg-gray-200">
+        <img 
+          src={course.img} 
+          alt={course.name}
+          className="w-full h-full object-cover"
+        />
       </div>
 
-      {/* Main Folder Body */}
-      <div className="bg-white p-6 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-500 min-h-[300px] relative overflow-hidden border border-blue-200">
+      {/* Course Content */}
+      <div className="p-4">
         
-        {/* Hover Shine */}
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        
-        {/* Price Tag */}
-        <div className="absolute top-4 right-4 bg-[#1e88e5] text-white px-4 py-2 rounded-full font-bold shadow-lg">
-          ${course.price}
-        </div>
-
-        {/* Course Image */}
-        <div className="w-16 h-16 mx-auto mb-4 rounded-xl overflow-hidden shadow-lg border-4 border-blue-100">
-          <img 
-            src={course.img} 
-            alt={course.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-
         {/* Course Title */}
-        <h3 className="text-[#243864] font-bold text-lg text-center mb-3 line-clamp-2 min-h-[56px]">
+        <h3 className="text-gray-900 font-bold text-base mb-2 line-clamp-2 min-h-[48px]">
           {course.name}
         </h3>
 
-        {/* Description */}
-        <p className="text-gray-600 text-sm text-center mb-4 line-clamp-3 min-h-[60px]">
-          {course.description}
+        {/* Creator */}
+        <p className="text-gray-600 text-sm mb-2">
+          {course.creator.name}
         </p>
 
-        {/* Stats */}
-        <div className="flex justify-center items-center space-x-4 mb-4">
-          <div className="flex items-center bg-blue-50 px-3 py-1 rounded-full">
-            <span className="text-yellow-500 mr-1">⭐</span>
-            <span className="text-[#243864] font-semibold text-sm">{course.rating}</span>
+        {/* Rating and Students */}
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-yellow-600 font-bold text-sm">{course.rating}</span>
+          <div className="flex items-center">
+            {[...Array(5)].map((_, i) => (
+              <span key={i} className="text-yellow-400 text-xs">★</span>
+            ))}
           </div>
-          <div className="flex items-center bg-blue-50 px-3 py-1 rounded-full">
-            <span className="text-[#243864] mr-1">👥</span>
-            <span className="text-[#243864] font-semibold text-sm">{course.numberstudent.toLocaleString()}</span>
-          </div>
+          <span className="text-gray-500 text-xs">({course.numberstudent.toLocaleString()} ratings)</span>
         </div>
 
-        {/* Creator */}
-        <div className="text-center mb-4">
-          <div className="w-8 h-8 bg-[#1e88e5] rounded-full flex items-center justify-center mx-auto mb-2">
-            <span className="text-white font-bold text-sm">
-              {course.creator.name.charAt(0)}
+        {/* Course Info */}
+        <div className="flex items-center gap-2 mb-3 text-xs text-gray-600">
+          <span>{course.numberModuleType} total hours</span>
+          <span>•</span>
+          <span>{course.numberModuleType} lectures</span>
+          <span>•</span>
+          <span>All Levels</span>
+        </div>
+
+        {/* Price */}
+        <div className="flex items-center gap-2">
+          <span className="text-gray-900 font-bold text-lg">₫{course.price.toLocaleString()}</span>
+          <span className="text-gray-400 line-through text-sm">₫{(course.price * 1.5).toLocaleString()}</span>
+        </div>
+
+        {/* Bestseller Badge */}
+        {course.rating >= 4.5 && (
+          <div className="mt-2">
+            <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded">
+              Bestseller
             </span>
           </div>
-          <p className="text-gray-700 text-sm font-medium">
-            {course.creator.name}
-          </p>
-        </div>
-
-        {/* Open Button */}
-        <button className="w-full bg-[#1e88e5] hover:bg-[#1565c0] text-white font-bold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
-        onClick={()=>{nav(`/course/specific/${index}`)}}
-        >
-          🔓 Mở thư mục
-        </button>
-
-        {/* Folder Bottom Edge */}
-        <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-100 to-blue-300 opacity-60"></div>
+        )}
       </div>
-
-      {/* Folder Shadow */}
-      <div className="absolute -bottom-2 left-2 right-2 h-4 bg-gray-300/30 rounded-b-xl blur-sm -z-10"></div>
     </div>
   </div>
 ))}

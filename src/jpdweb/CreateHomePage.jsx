@@ -5,8 +5,7 @@ import {
   BookOpen, 
   Star, 
   TrendingUp, 
-  Eye,
-  Calendar,
+  
   Award,
   MessageSquare,
   Download
