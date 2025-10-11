@@ -15,7 +15,7 @@ export default function CreatorProfileComponent() {
     const [currentStep, setCurrentStep] = useState(0);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+   
     // Phase 1: Required fields only
     const [formData, setFormData] = useState({
         fullName: '',
@@ -25,7 +25,7 @@ export default function CreatorProfileComponent() {
         agreedToTerms: false
     });
 
-    const { setIsCreator, user } = useAuth();
+    const { setCreator, user, setCreatorInfor} = useAuth();
     const navigate = useNavigate();
 
     // Validation per field
@@ -147,19 +147,19 @@ export default function CreatorProfileComponent() {
 
             const response = await uploadProfile(formData);
           
-           console.log(response.data)
-            if (response.status===200) {
+           console.log(response)
+            if (response.status==201) {
                 // Clear draft
                 sessionStorage.removeItem('creatorProfileDraft');
                 
                 // Update auth context
-                setIsCreator(true);
-                
+              setCreator(true)
+                setCreatorInfor(response.data)
                 // Show success and redirect
                 alert('Chúc mừng! Bạn đã trở thành Creator');
                 navigate('/creator/commercial/dashboard');
             } else {
-                const error = await response.data();
+                const error =  response.data
                 alert(error.message || 'Có lỗi xảy ra, vui lòng thử lại');
             }
         } catch (error) {

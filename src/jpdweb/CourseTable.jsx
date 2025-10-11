@@ -1,21 +1,38 @@
-// CoursesTable.jsx
-import React from 'react';
-import { coursesData } from './MockData';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { retrieveCCourse } from './api/ApiConnect';
 
-const CoursesTable = ({  }) => {
-    const nav=useNavigate()
+const CoursesTable = () => {
+  const nav = useNavigate();
+  const [coursesData, setCourseData] = useState(null);
+  
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND'
     }).format(amount);
   };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('vi-VN');
+  
+  const fetchData = async () => {
+    try {
+      const response = await retrieveCCourse();
+      if (response.status !== 200) {
+        alert("error to fetch data");
+      } else {
+        console.log(response.data);
+        setCourseData(response.data);
+      }
+    } catch (e) {
+      console.error("error to fetch", e);
+    }
   };
-
+  
+  useEffect(() => {
+    fetchData();
+  }, []);
+  
+  if (!coursesData) return <>loading</>;
+  
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -32,9 +49,6 @@ const CoursesTable = ({  }) => {
                     Khóa Học
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                    Giá Tiền
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                     Học Viên
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
@@ -43,41 +57,38 @@ const CoursesTable = ({  }) => {
                   <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                     Doanh Thu
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                    Ngày Tạo
+                   <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                    Giá
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {coursesData.map((course) => (
                   <tr 
-                    key={course.id}
-                    onClick={() =>{nav(`/creator/commercial/courseDetail/${course.id}`)}}//navigate qua trang khac vs id do
+                    key={course.courseId}
+                    onClick={() => {
+                      nav(`/creator/commercial/courseDetail/${course.courseId}`);
+                    }}
                     className="hover:bg-gray-50 cursor-pointer transition-colors duration-200"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-4">
                         <img
-                          src={course.image}
-                          alt={course.name}
+                          src={course.urlImg}
+                          alt={course.title}
                           className="w-16 h-16 rounded-lg object-cover"
                         />
                         <div>
                           <h3 className="text-lg font-semibold text-[#243864]">
-                            {course.name}
+                            {course.title}
                           </h3>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[#1e88e5] font-semibold text-lg">
-                        {formatCurrency(course.price)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
                         <span className="bg-[#1e88e5] text-white px-3 py-1 rounded-full text-sm font-medium">
-                          {course.studentCount.toLocaleString()}
+                          {course.students.toLocaleString()}
                         </span>
                         <span className="text-gray-600 text-sm">học viên</span>
                       </div>
@@ -95,17 +106,19 @@ const CoursesTable = ({  }) => {
                             </svg>
                           ))}
                         </div>
-                        <span className="text-gray-600 font-medium">{course.rating}</span>
+                        <span className="text-gray-600 font-medium">
+                          {course.rating > 0 ? course.rating.toFixed(1) : 'N/A'}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-[#e53935] font-bold text-lg">
-                        {course.revenue} VNĐ
+                        {formatCurrency(course.revenue)}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="text-gray-600">
-                        {formatDate(course.createdDate)}
+                     <td className="px-6 py-4">
+                      <span className="text-[#e53935] font-bold text-lg">
+                        {formatCurrency(course.price)}
                       </span>
                     </td>
                   </tr>

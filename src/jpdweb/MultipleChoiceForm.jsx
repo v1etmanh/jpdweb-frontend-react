@@ -393,7 +393,7 @@ const applySuggestion = () => {
           correct: opt.isCorrect
         }))
     }));
-
+    console.log(validQuestions)
     setIsSubmitting(true);
     
     try {

@@ -12,6 +12,7 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
 
   // Load dữ liệu đầu vào
   useEffect(() => {
+    console.log(initialData)
     if (initialData && Array.isArray(initialData) && initialData.length > 0 && !hasLoadedInitialData.current) {
       const loadedQuestions = initialData.map(item => ({
         mcId: item.mcId || null,
@@ -113,7 +114,7 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
       .map(q => ({
         mcId: q.mcId,
         question: q.question.trim(),
-        imgUrl: q.imageUrl || null,
+        imageUrl: q.imageUrl || null,
         requirements: q.requirements.trim() || null,
         typeOfContent: "WRITING"
       }));

@@ -28,6 +28,7 @@ import LoginComponent from "./LoginComponent";
 import './api/AuthInterceptor'
 import ProtectedRoute from "./ProtectedRoute";
 import CreatorProtectedRoute from "./CreatorProtectedRoute";
+import WithdrawHistory from "./CreatorHistoryTransacction";
 export default function JpdWebComponent(){
   const [isCreator, setCreator] = useState(false);
   const [showDirect, setShowDirect] = useState(false);
@@ -222,6 +223,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
               </ProtectedRoute>
             }
           />
+         
           
           {/* Upload Profile - Chỉ cần authentication */}
           <Route 
@@ -232,7 +234,14 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
               </ProtectedRoute>
             } 
           />
-          
+           <Route 
+            path="/creator/commercial/history_transaction" 
+            element={
+              <ProtectedRoute>
+                <WithdrawHistory />
+              </ProtectedRoute>
+            } 
+          />
           {/* Creator Routes - Cần authentication + isCreator = true */}
           <Route 
             path="/creator/commercial/dashboard" 

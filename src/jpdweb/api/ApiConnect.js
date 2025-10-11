@@ -5,7 +5,7 @@ export const getAccount=()=>{
     return apiclient.get("/api/customer/account_infor")
 }
 export const uploadProfile=(data)=>{
-    return apiclient.post("/api/creator/upload_profile",data,  {headers: {
+    return apiclient.post("/api/customer/upload_profile",data,  {headers: {
                 'Content-Type': 'multipart/form-data'
             }})
 }
@@ -17,69 +17,111 @@ export const uploadPaypalEmail = (data) => {
     params: { pEmail: data }
   });
 };
+export const uploadCertificate = (files) => {
+  // Tạo FormData BÊN TRONG hàm này
+  const formData = new FormData();
+  
+  // Thêm tất cả files - phải khớp tên với @RequestParam
+  files.forEach((file) => {
+    formData.append('certificateFile', file); 
+  });
+  
+  // Gọi API với FormData
+  return apiclient.post("/api/creator/upade_certificate", formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};
 export const createNewCourse=(data)=>{
-  return apiclient.post("/api/course/create",data,{headers: {
+  return apiclient.post("/api/creator/course/create",data,{headers: {
                 'Content-Type': 'multipart/form-data'
             }})
 }
+export const retriveCreatorStatistic=()=>{
+  return apiclient.get("/api/creator/getStatisticInfor");
+}
 export const retriveCourseOfCreator=()=>{
-  return apiclient.get("/api/course/retrieveByEmail");
+  return apiclient.get("/api/creator/course");
 }
 export const getCourseById=(id)=>{
-return apiclient.get("/api/course/getCourseContent",{params:{
-  id:id
-}})
+return apiclient.get(`/api/creator/course/${id}`,)
 }
 export const generateFeedBack=(data)=>{
-  return apiclient.post("/api/course/generateFeeback",data)
+  return apiclient.post("/api/creator/AI/generateFeeback",data)
 }
 export const updateCourse=(data)=>{
 
 }
 export const saveImg = (formData) => {
-  return apiclient.post("/api/course/saveImg", formData, {
+  return apiclient.post("/api/creator/uploadFile/saveImg", formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};
+export const savePdf = (formData) => {
+  return apiclient.post("api/creator/uploadFile/saveImg", formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
   });
 };
 export const createNewChapter = ({ name, courseId }) => {
-  return apiclient.post("/api/course/createChapter", null, {
+  return apiclient.post(`/api/creator/${courseId}/chapter`, null, {
     params: {
       chapterName: name,
-      courseId: courseId
+      
     }
   });
 };
-export const deleteChapter = (id) => {
-  return apiclient.delete(`/api/course/deleteChapter/${id}`);
+export const deleteChapter = (courseId,id) => {
+  return apiclient.delete(`/api/creator/${courseId}/chapter/${id}`);
 }
 
-export const createNewModule=(data)=>{
-  return apiclient.post("/api/course/createModule",data)
+export const createNewModule=(courseId,chapterId,name)=>{
+  return apiclient.post(`/api/creator/${courseId}/${chapterId}/module`,null,
+    {params:{
+      moduleName:name
+    }}
+  )
 }
-export const deleteModule = (id) => {
-  return apiclient.delete(`/api/course/deleteModule/${id}`);
+export const deleteModule = (courseId,chapterId,id) => {
+  return apiclient.delete(`/api/creator/${courseId}/${chapterId}/module/${id}`);
 }
 
-export const savePdf = (formData) => {
-  return apiclient.post("/api/course/savePdf", formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  });
-};
-export const updateCourseMaterial=(data)=>{
-  return apiclient.post("/api/course/update_course",data)
+
+export const updateCourseMaterial=(courseId,chapterId,moduleId,data)=>{
+  return apiclient.post(`/api/creator/${courseId}/${chapterId}/${moduleId}`,data)
 }
-export const deleteModuleContent=(moduleContentId)=>{
-  return apiclient.delete(`/api/course/deleteModuleContent/${moduleContentId}`)
+export const deleteModuleContent=(courseId,chapterId,moduleId,moduleContentId)=>{
+  return apiclient.delete(`/api/creator/${courseId}/${chapterId}/${moduleId}/${moduleContentId}`)
 }
 export const deleteModuleContentByType=(type,moduleId,chapterId,courseId)=>{
-  return apiclient.delete("/api/course/deleteModuleContentByType",{params:{
-    moduleId:moduleId,
+  return apiclient.delete(`/api/creator/${courseId}/${chapterId}/${moduleId}/deleteModuleContentByType`,{params:{
+   
     type:type,
-    chapterId:chapterId,
-    courseId:courseId
+
   }})
+}
+export const getContentByTypeAndModule=(type,moduleId,chapterId,courseId)=>{
+   return apiclient.get(`/api/creator/${courseId}/${chapterId}/${moduleId}`,{params:{
+   
+    type:type,
+
+  }})
+}
+export const retrieveCCourse=()=>{
+  return apiclient.get("/api/creator/course/retrieve_CommercialCourese");
+}
+export const getEnrollementByCourseId=(courseId)=>{
+   return apiclient.get(`/api/enrollment/${courseId}`);
+}
+export const createWithdraw=(amount)=>{
+  return apiclient.post("/api/creator/createWithdraw",null,{params:{
+    amount:amount
+  }})
+}
+export const retrieveTransactionHistory=()=>{
+  return apiclient.get("/api/creator/history_transaction");
 }

@@ -3,10 +3,11 @@ import { CheckCircle, AlertCircle, User, Camera, FileText, Award, CreditCard, X 
 import { useAuth } from './security/Authentication';
 import { PayPalVerificationForm } from './PayPalVerificationForm';
 import { CertificateUploadForm } from './CertificateUploadForm';
+import { getCreatorAccount } from './api/ApiConnect';
 
 
 const CreatorAccountInfo = () => {
-  const { creatorInfor } = useAuth();
+  const {setCreatorInfor, creatorInfor } = useAuth();
   const [selectedItem, setSelectedItem] = useState(null);
 
   // Map creatorInfo data to states
@@ -79,7 +80,18 @@ const handleCertificateSubmit = (files) => {
   // Call API to upload certificates
   setShowCertificateForm(false);
 };
-
+const reload=async()=>{
+  try{
+  const response=await getCreatorAccount();
+  if(response.status==200)
+    setCreatorInfor(response.data)
+  else {
+    console.error("error to fetch data")
+  }
+  }catch(e){
+    console.error("daaaa",e)
+  }
+}
   const getIcon = (key) => {
     const iconProps = { size: 24, className: "text-white" };
     switch (key) {
@@ -356,6 +368,12 @@ const handleCertificateSubmit = (files) => {
           >
             {progressPercentage === 100 ? 'Hoàn thành hồ sơ' : 'Cần hoàn thành các mục bắt buộc'}
           </button>
+           <button
+      onClick={() => reload()}
+      className="px-4 py-2 rounded-lg font-medium transition-colors bg-blue-500 text-white hover:bg-blue-600"
+    >
+      reload
+    </button>
         </div>
       </div>
 
@@ -407,6 +425,9 @@ const handleCertificateSubmit = (files) => {
               >
                 Chỉnh sửa
               </button>
+              
+
+ 
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   Plus, 
   ChevronDown, 
@@ -52,7 +52,7 @@ const CONTENT_TYPES = {
 const CourseManagementInterface = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  let tempIdCounter=-1;
+  const tempIdCounter=useRef(-1);
   // State management
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -125,7 +125,7 @@ useEffect(() => {
     setLoading(true);
     const response = await getCourseById(courseId);
     const data = response.data;
-    
+    console.log(response.data)
     // ✅ Normalize data từ API
     if (!data.chapters) {
       data.chapters = [];
@@ -176,7 +176,7 @@ const saveModuleContent = async (chapterId, moduleId, updateData) => {
   };
   
   try {
-    const response = await updateCourseMaterial(data);
+    const response = await updateCourseMaterial(courseId,chapterId,moduleId,data);
     console.log(response.data)
     updateCourseDataAfterSave(chapterId,moduleId,response.data)
    
@@ -250,7 +250,7 @@ const saveModuleContent = async (chapterId, moduleId, updateData) => {
 
   try {
     // Gọi API xóa chapter
-    await deleteChapter(chapterId);
+    await deleteChapter(courseId,chapterId);
 
     // Cập nhật state sau khi xóa thành công
     setCourseData({
@@ -267,13 +267,9 @@ const saveModuleContent = async (chapterId, moduleId, updateData) => {
   // CRUD Operations for Module
 const handleAddModule = async (chapterId, moduleTitle) => {
   try {
-    const moduleDto = {
-      courseId: courseId,
-      chapterId: chapterId,
-      title: moduleTitle
-    };
+    console.log(courseData)
 
-    const response = await createNewModule(moduleDto);
+    const response = await createNewModule(courseId,chapterId,moduleTitle);
     const createdModule = {
       ...response.data,
       moduleContent: response.data.moduleContent || [] // ✅ Đảm bảo có moduleContent
@@ -317,6 +313,7 @@ const handleAddModule = async (chapterId, moduleTitle) => {
       )
     });
     setEditingModule(null);
+    
   };
 
   const handleDeleteModule = async (chapterId, moduleId) => {
@@ -324,7 +321,7 @@ const handleAddModule = async (chapterId, moduleTitle) => {
 
   try {
     // Gọi API xóa module
-    await deleteModule(moduleId);
+    await deleteModule(courseId,chapterId,moduleId);
 
     // Cập nhật state sau khi xóa thành công
     setCourseData({
@@ -426,7 +423,7 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
   
   const toAdd = updatedData
     .filter(u => !u.mcId || !moduleContent.some(content => content.mcId === u.mcId))
-    .map(u => ({ ...u, mcId: u.mcId ?? tempIdCounter-- }));
+    .map(u => ({ ...u, mcId: u.mcId ?? tempIdCounter.current-- }));
 
   const updatedCourseData = {
     ...courseData,
@@ -460,9 +457,9 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
   const handleDeleteContent = async(chapterId, moduleId, mcId) => {
     if (window.confirm('Are you sure you want to delete this content?')) {
       try{
-       const response= await deleteModuleContent(mcId)
-       console.log(response.status)
-       if(response.status==200){
+       const response= await deleteModuleContent(courseId,chapterId,moduleId,mcId)
+      
+       
       setCourseData({
         ...courseData,
         chapters: courseData.chapters.map(chapter =>
@@ -480,11 +477,8 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
               }
             : chapter
         )
-      });}
-      else{
-        alert("error to delete")
-      }
-    }catch(e){
+      });
+         }catch(e){
       alert("error to delete",e)
     }
     }
@@ -495,7 +489,7 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
   if (window.confirm(`Are you sure you want to delete all ${typeOfContent} contents in this module?`)) {
     try{
       const response=await deleteModuleContentByType(typeOfContent,moduleId,chapterId,courseId)
-      if(response.status==200){
+  
     setCourseData({
       ...courseData,
       chapters: courseData.chapters.map(chapter =>
@@ -516,10 +510,7 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
           : chapter
       )
     });
-  }
-  else{
-    alert("error to delete ")
-  }
+ 
   }catch(e){
  alert("error to delete ",e)
   }
@@ -1158,8 +1149,12 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
     if (selectedItem.type === 'content') {
       const content = selectedItem.data;
       let arr = Object.keys(content)
+      
     .filter(key => !isNaN(key)) // chỉ lấy key là số
     .map(key => content[key]);
+    //bay h mik can lay dc th  nay tu server dua vao? moduleId,+ typeOfContent +
+    //lay dc
+    //
       const ContentIcon = CONTENT_TYPES[content.typeOfContent]?.icon || FileText;
       const iconColor = CONTENT_TYPES[content.typeOfContent]?.color || "text-gray-600";
       const label = CONTENT_TYPES[content.typeOfContent]?.label || content.typeOfContent;

@@ -1,5 +1,6 @@
 import { AlertCircle, Upload, X } from "lucide-react";
 import { useState } from "react";
+import { uploadCertificate } from "./api/ApiConnect";
 
 export const CertificateUploadForm = ({ onSubmit, onCancel }) => {
   const [files, setFiles] = useState([]);
@@ -59,32 +60,38 @@ export const CertificateUploadForm = ({ onSubmit, onCancel }) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (files.length === 0) {
-      setError('Vui lòng chọn ít nhất một file');
-      return;
-    }
+ const handleSubmit = async (e) => {
+  e.preventDefault(); // THIẾU dòng này!
+  
+  if (files.length === 0) {
+    setError('Vui lòng chọn ít nhất một file');
+    return;
+  }
 
-    setUploading(true);
-    setError('');
+  setUploading(true);
+  setError('');
 
-    try {
-      // Upload files to server
-      // const uploadedUrls = await uploadCertificates(files);
+  try {
+    const response = await uploadCertificate(files); // ✅ Đúng - truyền files vào
+    
+    if (response.status === 201) { // Backend trả về 201 CREATED
+      alert("Bạn đã gửi thành công! Vui lòng chờ 2-3 ngày để admin xác nhận chứng chỉ của bạn. Cảm ơn!");
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Reset form
+      setFiles([]);
       
-      if (onSubmit) {
-        onSubmit(files);
-      }
-    } catch (err) {
-      setError('Có lỗi xảy ra khi tải lên. Vui lòng thử lại.');
-    } finally {
-      setUploading(false);
+      // Close modal
+      if (onSubmit) onSubmit();
+      onCancel();
     }
-  };
+    
+  } catch (error) {
+    console.error('Upload error:', error);
+    setError(error.response?.data?.error || 'Có lỗi xảy ra khi tải lên. Vui lòng thử lại.');
+  } finally {
+    setUploading(false);
+  }
+};
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';

@@ -11,8 +11,10 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
   
   // ✅ SỬA: Map imgUrl từ backend → imageUrl trong state
   useEffect(() => {
-    console.log('Initial Data:', initialData)
-    if (initialData && initialData.length > 0) {
+   console.log(initialData)
+     
+    if (initialData && Array.isArray(initialData) && initialData.length > 0) {
+   
       setFlashCards(initialData.map(card => ({
         mcId: card.mcId || null,
         word: card.word || '',
