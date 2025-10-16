@@ -1,56 +1,11 @@
 import { useEffect, useState } from "react";
 
 
-export default function PdfComponent({ course_id, pdf_id }) {
-    const [pdfUrl, setPdfUrl] = useState("");
+export default function PdfComponent({ course_id, pdfUrl }) {
+    
     const [error, setError] = useState(null);
 
-    //   useEffect(() => {
-    //     async function fetchdata() {
-    //       try {
-
-    //         //
-    //         // Nếu không dùng mock thì gọi API thật
-    //         const response = await retrievePdfOfModule(course_id, pdf_id, { 
-    //           responseType: 'blob' 
-    //         });
-
-    //         const url = URL.createObjectURL(response.data);
-    //         setPdfUrl(url);
-
-    //       } catch (error) {
-    //         console.log(error);
-    //         setError("Không thể tải file PDF");
-    //       }
-    //     }
-
-    //     fetchdata();
-
-    //     return () => {
-    //       if (pdfUrl ) {
-    //         URL.revokeObjectURL(pdfUrl);
-    //       }
-    //     };
-    //   }, [course_id, pdf_id]);
-
-
-  
-
-
-
-
-
-
-
-    // if (error) {
-    //     return <div>{error}</div>;
-    // }
-
-
-
-
-
-
+   
 
 
     return (

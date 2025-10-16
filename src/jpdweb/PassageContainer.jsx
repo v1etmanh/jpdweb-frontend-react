@@ -65,8 +65,8 @@ export default function PassageContainer({ passageContent, isSave, postP }) {
       {/* Nội dung câu hỏi */}
       <div className="mt-12">
         <PassageWithQuestions
-          text={passageContent[currentIndex].text}
-          questionAndOption={passageContent[currentIndex].questions}
+          text={passageContent[currentIndex].content}
+          questionAndOption={passageContent[currentIndex].readingQuestion}
           increNum={increNum}
         />
 

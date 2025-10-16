@@ -1,19 +1,26 @@
 
 import { useState } from "react";
 import ReactCardFlip from "react-card-flip";
+import { useSearchParams } from "react-router-dom";
 
-export default function FlashCardComponent({ frontText, backText, currentIndex, totalCards }) {
+export default function FlashCardComponent({ frontText, backText, currentIndex, totalCards,img }) {
   const [isFlipped, setIsFlipped] = useState(false);
   // chinh lai ham ni de nhan dau vao la ngon ngu
+  console.log(img)
+  const [searchParams] = useSearchParams();
+  const language = searchParams.get('language') || 'en-US';
   const handleClick = () => {
     setIsFlipped(!isFlipped);
   };
   
   const speak = (text) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "ja-JP";
-    window.speechSynthesis.speak(utterance);
-  };
+ 
+  
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang =language || 'en-US';
+  window.speechSynthesis.speak(utterance);
+};
 return (<div className="flex flex-col items-center my-8">
       <ReactCardFlip 
         isFlipped={isFlipped} 
@@ -21,11 +28,20 @@ return (<div className="flex flex-col items-center my-8">
         flipSpeedBackToFront={1}
         flipSpeedFrontToBack={1}
       >
-  
-        <div 
-          className="w-80 h-52 rounded-xl bg-white border-4 border-blue-700 overflow-hidden shadow-md cursor-pointer transition transform hover:-translate-y-1 duration-300 relative"
-          onClick={handleClick}
-        >
+  <div 
+  className="w-[28rem] h-80 rounded-xl bg-white border-4 border-blue-700 overflow-hidden shadow-md cursor-pointer transition transform hover:-translate-y-1 duration-300 relative"
+  onClick={handleClick}
+>
+         {/* Ảnh ở góc trên bên trái */}
+  {img && (
+    <div className="absolute top-2 left-2 w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
+      <img
+        src={img}
+        alt="Flashcard illustration"
+        className="w-full h-full object-cover"
+      />
+    </div>
+  )}
           <div className="text-center flex justify-center items-center  text-3xl font-bold  h-[100%]">
             {frontText}
           </div>
@@ -44,7 +60,7 @@ return (<div className="flex flex-col items-center my-8">
 
     
         <div 
-          className="w-80 h-52 rounded-xl bg-white border-4 border-blue-700 overflow-hidden shadow-md cursor-pointer transition transform hover:-translate-y-1 duration-300 relative"
+          className="w-[28rem] h-80 rounded-xl bg-white border-4 border-blue-700 overflow-hidden shadow-md cursor-pointer transition transform hover:-translate-y-1 duration-300 relative"
           onClick={handleClick}
         >
           <div className="text-center flex justify-center items-center  text-3xl font-bold  h-[100%]">

@@ -61,7 +61,7 @@ export const saveImg = (formData) => {
   });
 };
 export const savePdf = (formData) => {
-  return apiclient.post("api/creator/uploadFile/saveImg", formData, {
+  return apiclient.post("api/creator/uploadFile/savePdf", formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
@@ -115,7 +115,7 @@ export const retrieveCCourse=()=>{
   return apiclient.get("/api/creator/course/retrieve_CommercialCourese");
 }
 export const getEnrollementByCourseId=(courseId)=>{
-   return apiclient.get(`/api/enrollment/${courseId}`);
+   return apiclient.get(`api/creator/enrollment/${courseId}`);
 }
 export const createWithdraw=(amount)=>{
   return apiclient.post("/api/creator/createWithdraw",null,{params:{
@@ -124,4 +124,41 @@ export const createWithdraw=(amount)=>{
 }
 export const retrieveTransactionHistory=()=>{
   return apiclient.get("/api/creator/history_transaction");
+}
+export const retrieveRecommendCourses=()=>{
+  return apiclient.get("/api/course/recommend_courses");
+}
+export const findCourseByKey=(name)=>{
+  return apiclient.get("/api/course/search",{params:{name:name}});
+}
+export const changeCourseStatus=(id)=>{
+  return apiclient.get(`/api/creator/course/${id}/setCourseStatus`)
+}
+export const getCourseDetail=(id)=>{
+  return apiclient.get(`/api/course/${id}`)
+
+  } 
+   export const createTransaction=(amount,courseId)=>{
+      return  apiclient.post(`/api/paypal/create-order/${courseId}`,null,{params:{
+          amount:amount
+        }})
+   }
+   export const enrollCourse=(joinkey,courseId)=>{
+    return apiclient.post(`/api/enroll/${courseId}`,null,{params:{
+      joinKey:joinkey
+    }})
+   }
+   export const addToWishlist=(courseId)=>{
+    return apiclient.post(`/api/wishlist/${courseId}`,null)
+   }
+   export const loadLearningList=()=>{
+    return apiclient.get("/api/customer/learning_course_list")
+   }
+export const loadContentOverview=(courseId)=>{
+  return apiclient.get(`/api/customer/learning/${courseId}/courseOverview`)
+}
+export const loadModuleContent=(courseId,chapterId,moduleId,typeOfContent)=>{
+  return apiclient.get(`/api/customer/learning/${courseId}/${chapterId}/${moduleId}/moduleContent`,{params:{
+    typeOfContent:typeOfContent
+  }})
 }

@@ -141,7 +141,7 @@ export default function SpeakingPage({ paragraphs, pictureAndQuestions, isSave, 
               </div>
             ) : (
               <ReadPractice 
-                paragraph={paragraphs[selectedPara].passageText} 
+                paragraph={paragraphs[selectedPara].passage} 
                 increNum={completeReadPractice} 
                 evaluateAnswerSpeaking={()=>{}}
               />

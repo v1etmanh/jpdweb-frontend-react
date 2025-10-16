@@ -1,14 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, FileText, ImageIcon, XIcon, Loader2Icon } from 'lucide-react';
+import { Plus, Trash2, FileText, ImageIcon, XIcon, Loader2Icon, ListChecks } from 'lucide-react';
 import { saveImg } from './api/ApiConnect';
 
 const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
   const [questions, setQuestions] = useState([
-    { mcId: null, question: '', imageUrl: '', requirements: '' }
+    { 
+      mcId: null, 
+      question: '', 
+      imageUrl: '', 
+      requirements: '',
+      taskTypeCategory: 'REPORT',
+      criterias: [] 
+    }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const hasLoadedInitialData = useRef(false);
+
+  // Danh sách TaskTypeCategory
+  const taskTypes = [
+    { value: 'REPORT', label: 'Report (Academic Description)' },
+    { value: 'LETTER', label: 'Letter (General)' },
+    { value: 'ESSAY', label: 'Essay (Argumentative)' },
+    { value: 'INTEGRATED_WRITING', label: 'Integrated Writing' },
+    { value: 'EMAIL', label: 'Email' },
+    { value: 'SHORT_WRITING', label: 'Short Writing' },
+    { value: 'FREE_WRITING', label: 'Free Writing' },
+    { value: 'STORY', label: 'Story' },
+    { value: 'FORM_FILLING', label: 'Form Filling' }
+  ];
 
   // Load dữ liệu đầu vào
   useEffect(() => {
@@ -18,7 +38,9 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
         mcId: item.mcId || null,
         question: item.question || '',
         imageUrl: item.imageUrl || item.imgUrl || '',
-        requirements: item.requirements || ''
+        requirements: item.requirements || '',
+        taskTypeCategory: item.taskTypeCategory || 'REPORT',
+        criterias: item.criterias || []
       }));
       setQuestions(loadedQuestions);
       hasLoadedInitialData.current = true;
@@ -27,7 +49,14 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
 
   // Thêm câu hỏi mới
   const addQuestion = () => {
-    setQuestions([...questions, { mcId: null, question: '', imageUrl: '', requirements: '' }]);
+    setQuestions([...questions, { 
+      mcId: null, 
+      question: '', 
+      imageUrl: '', 
+      requirements: '',
+      taskTypeCategory: 'REPORT',
+      criterias: [] 
+    }]);
   };
 
   // Xóa câu hỏi
@@ -54,6 +83,29 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
     const newQuestions = questions.map((question, i) =>
       i === index ? { ...question, [field]: value } : question
     );
+    setQuestions(newQuestions);
+  };
+
+  // Thêm criteria mới
+  const addCriteria = (index) => {
+    const newQuestions = [...questions];
+    newQuestions[index].criterias.push('');
+    setQuestions(newQuestions);
+  };
+
+  // Xóa criteria
+  const removeCriteria = (questionIndex, criteriaIndex) => {
+    const newQuestions = [...questions];
+    newQuestions[questionIndex].criterias = newQuestions[questionIndex].criterias.filter(
+      (_, i) => i !== criteriaIndex
+    );
+    setQuestions(newQuestions);
+  };
+
+  // Cập nhật criteria
+  const updateCriteria = (questionIndex, criteriaIndex, value) => {
+    const newQuestions = [...questions];
+    newQuestions[questionIndex].criterias[criteriaIndex] = value;
     setQuestions(newQuestions);
   };
 
@@ -116,6 +168,8 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
         question: q.question.trim(),
         imageUrl: q.imageUrl || null,
         requirements: q.requirements.trim() || null,
+        taskTypeCategory: q.taskTypeCategory,
+        criterias: q.criterias.filter(c => c.trim()).map(c => c.trim()),
         typeOfContent: "WRITING"
       }));
 
@@ -127,7 +181,14 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
     setIsSubmitting(true);
     try {
       await onSubmit(validQuestions);
-      setQuestions([{ mcId: null, question: '', imageUrl: '', requirements: '' }]);
+      setQuestions([{ 
+        mcId: null, 
+        question: '', 
+        imageUrl: '', 
+        requirements: '',
+        taskTypeCategory: 'REPORT',
+        criterias: [] 
+      }]);
       hasLoadedInitialData.current = false;
       alert('Upload câu hỏi thành công!');
     } catch (error) {
@@ -173,6 +234,25 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
             </div>
 
             <div className="space-y-4">
+              {/* Task Type Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Loại bài viết <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={question.taskTypeCategory}
+                  onChange={(e) => updateQuestion(index, 'taskTypeCategory', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  {taskTypes.map(type => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Question Content */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nội dung câu hỏi <span className="text-red-500">*</span>
@@ -257,6 +337,7 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
                 )}
               </div>
 
+              {/* Requirements */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Yêu cầu bài viết (tùy chọn)
@@ -268,6 +349,45 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
                   rows="3"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
                 />
+              </div>
+
+              {/* Criterias Section */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <ListChecks className="w-4 h-4" />
+                  Tiêu chí chấm điểm (tùy chọn)
+                </label>
+                
+                <div className="space-y-2">
+                  {question.criterias.map((criteria, criteriaIndex) => (
+                    <div key={criteriaIndex} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={criteria}
+                        onChange={(e) => updateCriteria(index, criteriaIndex, e.target.value)}
+                        placeholder={`Tiêu chí ${criteriaIndex + 1}...`}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeCriteria(index, criteriaIndex)}
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-md transition-colors"
+                        title="Xóa tiêu chí"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  
+                  <button
+                    type="button"
+                    onClick={() => addCriteria(index)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-green-600 border border-green-600 rounded-md hover:bg-green-50 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Thêm tiêu chí
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -287,7 +407,14 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
             <button
               type="button"
               onClick={() => {
-                setQuestions([{ mcId: null, question: '', imageUrl: '', requirements: '' }]);
+                setQuestions([{ 
+                  mcId: null, 
+                  question: '', 
+                  imageUrl: '', 
+                  requirements: '',
+                  taskTypeCategory: 'REPORT',
+                  criterias: [] 
+                }]);
                 hasLoadedInitialData.current = false;
               }}
               className="px-6 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
@@ -319,6 +446,7 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
             <li>Chỉ những câu hỏi có đầy đủ thông tin mới được gửi</li>
             <li>Ảnh sẽ được upload ngay lập tức khi bạn chọn file</li>
             <li>Kích thước ảnh tối đa: 5MB, định dạng: JPG, PNG, GIF, WEBP</li>
+            <li>Có thể thêm nhiều tiêu chí chấm điểm cho mỗi câu hỏi</li>
           </ul>
         </div>
       </div>

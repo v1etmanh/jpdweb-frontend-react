@@ -1,81 +1,77 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { loadContentOverview, loadModuleContent } from "./api/ApiConnect";
 
 export default function CourseContentOverviewComponent(){
-
-  const contentOverview = {
-    "courseName": "Tiếng Anh Giao Tiếp Cơ Bản",
-    "moduleType": [
-      {
-        "moduleName": "Chào hỏi và giới thiệu bản thân",
-        "content": [
-          { "id":9,
-            "type": "video",
-            "title": "Video: Các mẫu câu chào hỏi"
-          },
-          { "id":7,
-            "type": "listening",
-            "title": "Luyện nghe: Đoạn hội thoại 1"
-          },
-          { "id":5,
-            "type": "speakingPassage",
-            "title": "Luyện nói: Đọc theo mẫu câu"
-          },
-          {  "id":3,
-            "type": "multipleChoice",
-            "title": "Bài tập trắc nghiệm: Chọn câu trả lời đúng"
-          },
-          {  "id":1,
-            "type": "flashcard",
-            "title": "Ôn tập: Từ vựng về gia đình và bạn bè"
-          }
-        ]
-      },
-      {
-        "moduleName": "Hỏi đường và chỉ đường",
-        "content": [
-          { "id":9,
-            "type": "video",
-            "title": "Video: Các cụm từ chỉ phương hướng"
-          },
-          {"id":4,
-            "type": "writing",
-            "title": "Viết đoạn văn mô tả đường đi từ A đến B"
-          },
-          { "id":2,
-            "type": "gapfill",
-            "title": "Điền từ vào chỗ trống: Đoạn văn chỉ đường"
-          },
-          {"id":6,
-            "type": "speakingPicture",
-            "title": "Luyện nói: Mô tả bức tranh về một địa điểm"
-          },
-          { "id":3,
-            "type": "multipleChoice",
-            "title": "Bài tập trắc nghiệm: Tình huống chỉ đường"
-          }
-        ]
-      }
-    ]
-  }
-
+  const { id } = useParams();
+  const nav = useNavigate();
+  
   const [courseData, setCourseData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [expandedModules, setExpandedModules] = useState(new Set([0])); // Module đầu tiên mở sẵn
-  const nav=useNavigate()
-  // Icon mapping cho từng loại content - Size lớn hơn
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingContent, setLoadingContent] = useState(null);
+  const [error, setError] = useState(null);
+  const [expandedChapters, setExpandedChapters] = useState(new Set([0]));
+  const [expandedModules, setExpandedModules] = useState(new Set());
+
+  useEffect(() => {
+    const fetchCourseOverview = async () => {
+      setIsLoading(true);
+      try {
+        const response = await loadContentOverview(id);
+        
+        if (response.status !== 200) {
+          throw new Error('Failed to load course');
+        }
+
+        const data = response.data;
+        setCourseData(data);
+      } catch (err) {
+        setError(err.message || 'An error occurred');
+        console.error('Error fetching course:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchCourseOverview();
+    }
+  }, [id]);
+
+  const mapContentType = (type) => {
+    const typeMap = {
+      'VIDEO': 'video',
+      'LISTEN_CHOICE': 'listening',
+      'SPEAKING_PASSAGE': 'speakingPassage',
+      'SPEAKING_PICTURE': 'speakingPicture',
+      'MULTIPLE_CHOICE': 'multipleChoice',
+      'FLASHCARD': 'flashcard',
+      'WRITING': 'writing',
+      'GAPFILL': 'gapfill',
+      'READING': 'reading',
+      'PDF': 'pdf'
+    };
+    return typeMap[type] || 'video';
+  };
+
+  const formatContentType = (type) => {
+    return type
+      .split('_')
+      .map(word => word.charAt(0) + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   const getContentIcon = (type) => {
     const icons = {
       video: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1"/>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
       ),
       listening: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728"/>
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 8c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z"/>
         </svg>
       ),
       speakingPassage: (
@@ -107,63 +103,76 @@ export default function CourseContentOverviewComponent(){
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
+      ),
+      reading: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17s4.5 10.747 10 10.747c5.5 0 10-4.998 10-10.747S17.5 6.253 12 6.253z"/>
+        </svg>
+      ),
+      pdf: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+        </svg>
       )
     };
     return icons[type] || icons.video;
   };
 
-  // Tính toán progress cho module
-  const getModuleProgress = (moduleIndex) => {
-    const progresses = [100, 60, 0];
-    return progresses[moduleIndex] || 0;
+  const toggleChapter = (chapterIndex) => {
+    const newExpanded = new Set(expandedChapters);
+    if (newExpanded.has(chapterIndex)) {
+      newExpanded.delete(chapterIndex);
+    } else {
+      newExpanded.add(chapterIndex);
+    }
+    setExpandedChapters(newExpanded);
   };
 
-  // Toggle module expansion
-  const toggleModule = (moduleIndex) => {
+  const toggleModule = (moduleKey) => {
     const newExpanded = new Set(expandedModules);
-    if (newExpanded.has(moduleIndex)) {
-      newExpanded.delete(moduleIndex);
+    if (newExpanded.has(moduleKey)) {
+      newExpanded.delete(moduleKey);
     } else {
-      newExpanded.add(moduleIndex);
+      newExpanded.add(moduleKey);
     }
     setExpandedModules(newExpanded);
   };
 
-  // Get folder icon based on module status - Size lớn hơn
-  const getFolderIcon = (moduleIndex, isExpanded) => {
-    const progress = getModuleProgress(moduleIndex);
-    const isCompleted = progress === 100;
-    const isAvailable = moduleIndex === 0 || getModuleProgress(moduleIndex - 1) === 100;
-    
-    if (isExpanded) {
-      return (
-        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd"/>
-        </svg>
-      );
-    }
-    
-    return (
-      <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
-      </svg>
-    );
-  };
+  const handleContentClick = async (chapter, module, contentType) => {
+    try {
+      const contentKey = `${module.moduleId}-${contentType}`;
+      setLoadingContent(contentKey);
+      
+      const response = await loadModuleContent(id, chapter.chapterId, module.moduleId, contentType);
 
-  useEffect(() => {
-    async function fetchdata() {
-      setIsLoading(true);
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setCourseData(contentOverview);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
+      if (response.status !== 200) {
+        throw new Error(`Failed to load content: ${response.statusText}`);
       }
+
+      const contents = response.data;
+        const languageMap = {
+    'ENGLISH': 'en-US',
+    'VIETNAMESE': 'vi-VN',
+    'CHINESE': 'zh-CN',
+    'JAPANESE': 'ja-JP',
+    'KOREAN': 'ko-KR',
+    'FRENCH': 'fr-FR',
+    'GERMAN': 'de-DE',
+    'SPANISH': 'es-ES',
+    'ITALIAN': 'it-IT',
+    'RUSSIAN': 'ru-RU',
+  };
+      // ✅ Fixed: Navigate with contentType in URL, pass contents in state
+      nav(`/course/content/${module.moduleId}/${contentType}?language=${languageMap[courseData.language]}&teachingLanguage=${languageMap[courseData.teachingLanguage]}`, {
+        state: { contents }
+      });
+    } catch (err) {
+      console.error('Error fetching content:', err);
+      alert('Failed to load content. Please try again.');
+    } finally {
+      setLoadingContent(null);
     }
-    fetchdata();
-  }, []);
+  };
 
   if (isLoading) {
     return (
@@ -173,7 +182,23 @@ export default function CourseContentOverviewComponent(){
     );
   }
 
-  if (!courseData || !courseData.moduleType) {
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded">
+          <p>Error: {error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!courseData || !courseData.chapters) {
     return (
       <div className="p-8 text-center text-gray-500">
         <p>No course data found.</p>
@@ -181,61 +206,56 @@ export default function CourseContentOverviewComponent(){
     );
   }
 
-  const modules = courseData.moduleType;
-  const completedModules = modules.filter((_, index) => getModuleProgress(index) === 100).length;
-  const overallProgress = modules.length > 0 ? Math.round((completedModules / modules.length) * 100) : 0;
+  const chapters = courseData.chapters;
+  const totalModules = chapters.reduce((sum, ch) => sum + (ch.modules?.length || 0), 0);
+  const completedModules = Math.floor(totalModules * 0.3);
+  const overallProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900">
-            {courseData.courseName}
+            {courseData.name}
           </h1>
           <div className="flex items-center mt-3 space-x-4 text-base text-gray-600">
-            <span className="font-medium">{modules.length} modules</span>
+            <span className="font-medium">{totalModules} modules</span>
+            <span>•</span>
+            <span className="font-medium">{chapters.length} chapters</span>
             <span>•</span>
             <span className="font-medium">{overallProgress}% completed</span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto p-6">
-        {/* Course Structure - File Explorer Style */}
+      <div className="max-w-6xl mx-auto p-6">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          {/* Toolbar */}
           <div className="border-b border-gray-200 px-6 py-4 bg-gray-50 rounded-t-lg">
             <div className="flex items-center space-x-3 text-base text-gray-700 font-medium">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
               </svg>
-              <span>Course Content</span>
+              <span>Course Structure</span>
             </div>
           </div>
 
-          {/* File Tree */}
           <div className="p-4">
-            {modules.map((module, moduleIndex) => {
-              const progress = getModuleProgress(moduleIndex);
-              const isCompleted = progress === 100;
-              const isAvailable = moduleIndex === 0 || getModuleProgress(moduleIndex - 1) === 100;
-              const isExpanded = expandedModules.has(moduleIndex);
+            {chapters.map((chapter, chapterIndex) => {
+              const isChapterExpanded = expandedChapters.has(chapterIndex);
+              const chapterModules = chapter.modules || [];
 
               return (
-                <div key={moduleIndex} className="mb-2">
-                  {/* Module Folder */}
+                <div key={chapterIndex} className="mb-4">
                   <div
                     className={`flex items-center space-x-4 px-4 py-4 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-150 ${
-                      isExpanded ? 'bg-blue-50 border border-blue-200' : 'border border-transparent'
+                      isChapterExpanded ? 'bg-blue-50 border border-blue-200' : 'border border-transparent'
                     }`}
-                    onClick={() => toggleModule(moduleIndex)}
+                    onClick={() => toggleChapter(chapterIndex)}
                   >
-                    {/* Expand/Collapse Arrow */}
                     <div className="w-6 h-6 flex items-center justify-center">
                       <svg
                         className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-                          isExpanded ? 'rotate-90' : ''
+                          isChapterExpanded ? 'rotate-90' : ''
                         }`}
                         fill="currentColor"
                         viewBox="0 0 20 20"
@@ -244,85 +264,114 @@ export default function CourseContentOverviewComponent(){
                       </svg>
                     </div>
 
-                    {/* Folder Icon */}
-                    <div className={`${
-                      isCompleted 
-                        ? 'text-green-500' 
-                        : isAvailable 
-                          ? 'text-blue-500' 
-                          : 'text-gray-400'
-                    }`}>
-                      {getFolderIcon(moduleIndex, isExpanded)}
+                    <div className="text-blue-500">
+                      <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+                      </svg>
                     </div>
 
-                    {/* Module Name */}
-                    <div className="flex-1 flex items-center justify-between">
-                      <span className={`text-lg font-semibold ${
-                        isAvailable ? 'text-gray-900' : 'text-gray-400'
-                      }`}>
-                        Module {moduleIndex + 1}: {module.moduleName}
+                    <div className="flex-1">
+                      <span className="text-lg font-semibold text-gray-900">
+                        Chapter {chapterIndex + 1}: {chapter.chapterName}
                       </span>
-                      
-                      {/* Status Indicators */}
-                      <div className="flex items-center space-x-3">
-                        {isCompleted && (
-                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        )}
-                        {!isCompleted && isAvailable && progress > 0 && (
-                          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        )}
-                        {!isAvailable && (
-                          <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/>
-                          </svg>
-                        )}
-                        <span className={`text-base font-bold px-3 py-1 rounded-full ${
-                          isCompleted 
-                            ? 'text-green-700 bg-green-100'
-                            : isAvailable && progress > 0
-                              ? 'text-blue-700 bg-blue-100'
-                              : 'text-gray-500 bg-gray-100'
-                        }`}>
-                          {progress}%
-                        </span>
-                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {chapterModules.length} module(s)
+                      </p>
                     </div>
                   </div>
 
-                  {/* Module Content (Files) */}
-                  {isExpanded && (
-                    <div className="ml-10 mt-3 border-l-2 border-gray-200 pl-6 py-2">
-                      {module.content.map((item, contentIndex) => (
-                        <div
-                          key={contentIndex}
-                          className="flex items-center space-x-4 px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-150 group"
-                          onClick={() => {
-                            if (isAvailable) {
-                              nav(`/course/content/${1}/${item.id}`)
-                            }
-                          }}
-                        >
-                          
-                          {/* Content Icon */}
-                          <div className={`${isAvailable ? 'text-gray-600' : 'text-gray-300'}`}>
-                            {getContentIcon(item.type)}
+                  {isChapterExpanded && (
+                    <div className="ml-4 mt-3 border-l-2 border-blue-200 pl-4 space-y-2">
+                      {chapterModules.map((module) => {
+                        const moduleKey = `ch${chapterIndex}-mod${module.moduleId}`;
+                        const isModuleExpanded = expandedModules.has(moduleKey);
+                        const contentTypes = module.contentTypes || [];
+
+                        return (
+                          <div key={module.moduleId}>
+                            <div
+                              className={`flex items-center space-x-4 px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${
+                                isModuleExpanded ? 'bg-purple-50 border border-purple-200' : 'border border-transparent'
+                              }`}
+                              onClick={() => toggleModule(moduleKey)}
+                            >
+                              <div className="w-6 h-6 flex items-center justify-center">
+                                <svg
+                                  className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                                    isModuleExpanded ? 'rotate-90' : ''
+                                  }`}
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"/>
+                                </svg>
+                              </div>
+
+                              <div className="text-purple-500">
+                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+                                </svg>
+                              </div>
+
+                              <div className="flex-1">
+                                <span className="font-semibold text-gray-900">
+                                  {module.titleOfModule}
+                                </span>
+                                <p className="text-sm text-gray-500">
+                                  {contentTypes.length} content(s)
+                                </p>
+                              </div>
+                            </div>
+
+                            {isModuleExpanded && (
+                              <div className="ml-8 mt-2 border-l-2 border-purple-200 pl-4 space-y-1">
+                                {contentTypes.map((contentType, contentIndex) => {
+                                  const isLoadingThis = loadingContent === `${module.moduleId}-${contentType}`;
+
+                                  return (
+                                    <div
+                                      key={contentIndex}
+                                      className={`flex items-center space-x-4 px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors group ${
+                                        isLoadingThis ? 'opacity-60 cursor-wait' : ''
+                                      }`}
+                                      onClick={() => {
+                                        if (!loadingContent) {
+                                          handleContentClick(chapter, module, contentType);
+                                        }
+                                      }}
+                                    >
+                                      <div className="text-gray-600">
+                                        {isLoadingThis ? (
+                                          <div className="animate-spin">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m1.364 6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1M3.636 5.636l.707.707"/>
+                                            </svg>
+                                          </div>
+                                        ) : (
+                                          getContentIcon(mapContentType(contentType))
+                                        )}
+                                      </div>
+
+                                      <span className="text-sm font-medium text-gray-700 flex-1">
+                                        {formatContentType(contentType)}
+                                      </span>
+
+                                      {!loadingContent && (
+                                        <button className="opacity-0 group-hover:opacity-100 text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-all duration-150">
+                                          Start
+                                        </button>
+                                      )}
+                                      {isLoadingThis && (
+                                        <span className="text-xs text-blue-600 font-medium">Loading...</span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
-
-                          {/* Content Title */}
-                          <span className={`text-base flex-1 ${
-                            isAvailable ? 'text-gray-700 font-medium' : 'text-gray-400'
-                          }`}>
-                            {item.title}
-                          </span>
-
-                          {/* File Actions */}
-                          {isAvailable && (
-                            <button className="opacity-0 group-hover:opacity-100 text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-all duration-150">
-                              Start
-                            </button>
-                          )}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -331,7 +380,6 @@ export default function CourseContentOverviewComponent(){
           </div>
         </div>
 
-        {/* Progress Summary */}
         <div className="mt-8 bg-white rounded-lg border border-gray-200 shadow-sm p-8">
           <h3 className="text-2xl font-bold text-gray-900 mb-6">Learning Progress</h3>
           
@@ -342,21 +390,16 @@ export default function CourseContentOverviewComponent(){
             </div>
             
             <div className="text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="text-4xl font-bold text-blue-600 mb-2">
-                {modules.filter((_, i) => getModuleProgress(i) > 0 && getModuleProgress(i) < 100).length}
-              </div>
-              <div className="text-base font-medium text-blue-700">In Progress</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{totalModules - completedModules}</div>
+              <div className="text-base font-medium text-blue-700">Remaining</div>
             </div>
             
             <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="text-4xl font-bold text-gray-500 mb-2">
-                {modules.filter((_, i) => i > 0 && getModuleProgress(i - 1) < 100).length}
-              </div>
-              <div className="text-base font-medium text-gray-600">Locked</div>
+              <div className="text-4xl font-bold text-gray-600 mb-2">{chapters.length}</div>
+              <div className="text-base font-medium text-gray-700">Chapters</div>
             </div>
           </div>
 
-          {/* Overall Progress Bar */}
           <div className="mt-8">
             <div className="flex justify-between text-lg font-medium text-gray-700 mb-3">
               <span>Overall Progress</span>

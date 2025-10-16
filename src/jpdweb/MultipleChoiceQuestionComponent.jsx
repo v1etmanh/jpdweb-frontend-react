@@ -15,22 +15,22 @@ export default function QuestionCard({ mulptipleQuizz, isFeedBack,increNum }) {
 
   const handleSubmit = () => {
     if (selected !== null) {setSubmitted(true);
-     const isCorrect = mulptipleQuizz.mutipleChoiceOption[selected]?.correct;
+     const isCorrect = mulptipleQuizz.options[selected]?.correct;
      if(isCorrect)increNum()
     }
   };
 
   const isCorrect =
-    submitted && mulptipleQuizz.mutipleChoiceOption[selected]?.correct;
+    submitted && mulptipleQuizz.options[selected]?.correct;
 
   return (
     <div className="max-w-md w-full mx-auto mt-6 bg-white shadow-lg rounded-xl p-6">
       <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        {mulptipleQuizz.question}
+        {mulptipleQuizz.questionText}
       </h2>
       <form>
         <div className="space-y-3">
-          {mulptipleQuizz.mutipleChoiceOption.map((option, i) => {
+          {mulptipleQuizz.options.map((option, i) => {
             const isOptionSelected = selected === i;
             const isOptionCorrect = submitted && option.correct;
             const isOptionWrong = submitted && isOptionSelected && !option.correct;
@@ -51,17 +51,17 @@ export default function QuestionCard({ mulptipleQuizz, isFeedBack,increNum }) {
             return (
               <label
                 key={i}
-                htmlFor={`option-${mulptipleQuizz.mcqId}-${option.optionId}`}
+                htmlFor={`option-${mulptipleQuizz.mcId}-${option.mcoId}`}
                 className={`${baseClasses} ${selectedBorder} ${bgColor} block`}
               >
                 <input
                   type="radio"
-                  name={`quiz-${mulptipleQuizz.mcqId}`}
-                  id={`option-${mulptipleQuizz.mcqId}-${option.optionId}`}
+                  name={`quiz-${mulptipleQuizz.mcId}`}
+                  id={`option-${mulptipleQuizz.mcId}-${option.mcoId}`}
                   value={i}
                   checked={isOptionSelected}
                   onChange={handleSelect}
-                  disabled={submitted}
+                  disabled={false}
                   className="hidden"
                 />
                 {option.optionText}

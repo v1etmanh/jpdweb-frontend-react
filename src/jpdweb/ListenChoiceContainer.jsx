@@ -97,9 +97,10 @@ console.log(questions)
       </div>
       
       <ListeningQuiz
-        question={questions[currentIndex].answer}
-        options={questions[currentIndex].listionChoiceOptions}
+        question={questions[currentIndex].question}
+        options={questions[currentIndex].options}
         inCreNum={increNum}
+        img={questions[currentIndex].imgUrl}
       />
 
       <Row className="justify-content-center mt-4">

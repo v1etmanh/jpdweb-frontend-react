@@ -6,106 +6,16 @@ import flashcard from '../images/flashcard.png';
 import AIvoice from '../images/AIvoice.png'
 import qiuz from '../images/qiuz.png'
 import { Search } from "lucide-react";
+import { retrieveRecommendCourses } from "./api/ApiConnect";
 
-// Mock data cho các khóa học
-const lCourses = [
-    {
-        id: 1,
-        name: 'Japanese for Beginners',
-        img: 'https://th.bing.com/th/id/OIP.FymLBD9dBOSq9f1EkTi-dgHaFF?w=251&h=180&c=7&r=0&o=7&dpr=1.5&pid=1.7&rm=3',
-        numberStudent: 15000,
-        rating: 4.8,
-        instructor: 'Takeshi Yamamoto',
-        price: 299000
-    },
-    {
-        id: 2,
-        name: 'JLPT N5 Preparation',
-        img: 'https://hvcgroup.edu.vn/uploads/details/2021/04/images/hoc-tieng-nhat-co-ban.jpg',
-        numberStudent: 12500,
-        rating: 4.7,
-        instructor: 'Yuki Tanaka',
-        price: 399000
-    },
-    {
-        id: 3,
-        name: 'Business Japanese Communication',
-        img: 'https://tiengnhatvui.com/wp-content/uploads/2023/12/30-ngay-hoc-tieng-nhat-giao-tiep-22.jpg',
-        numberStudent: 8900,
-        rating: 4.9,
-        instructor: 'Hiroshi Sato',
-        price: 599000
-    }
-];
 
-const rCourses = [
-    {
-        id: 4,
-        name: 'Advanced Japanese Grammar',
-        img: 'https://hvcgroup.edu.vn/uploads/details/2021/04/images/hoc-tieng-nhat-co-kho-khong.jpg',
-        numberStudent: 3200,
-        rating: 4.9,
-        instructor: 'Kenji Nakamura',
-        price: 799000
-    },
-    {
-        id: 5,
-        name: 'Japanese Conversation Mastery',
-        img: 'https://dichthuattiengnhatban.com/wp-content/uploads/2024/04/App-hc-tieng-nhat-N3-1-300x300.jpg',
-        numberStudent: 4500,
-        rating: 4.8,
-        instructor: 'Akiko Suzuki',
-        price: 699000
-    },
-    {
-        id: 6,
-        name: 'Kanji Mastery Course',
-        img: 'https://thuthuat.taimienphi.vn/cf/Images/dvv/2020/2/6/ung-dung-hoc-tieng-nhat-tot-nhat.jpg',
-        numberStudent: 6200,
-        rating: 4.8,
-        instructor: 'Ryuji Watanabe',
-        price: 549000
-    }
-];
-
-const nCourses = [
-    {
-        id: 7,
-        name: 'Japanese Culture & Language',
-        img: 'https://ngoainguhanoi.com/wp-content/uploads/2018/05/hinh-anh-hoc-tieng-nhat-online2.jpg',
-        numberStudent: 1200,
-        rating: 4.6,
-        instructor: 'Miyuki Ito',
-        price: 449000,
-        isNew: true
-    },
-    {
-        id: 8,
-        name: 'Anime Japanese Learning',
-        img: 'https://cdt.caothang.edu.vn/images/images/H%C3%ACnh%20Nh%E1%BA%ADt%20Huy%20Khang/h%E1%BB%8Dc%20ti%C3%AAng%20Nh%E1%BA%ADt.jpg',
-        numberStudent: 890,
-        rating: 4.5,
-        instructor: 'Daiki Yamada',
-        price: 349000,
-        isNew: true
-    },
-    {
-        id: 9,
-        name: 'Japanese Writing Skills',
-        img: 'https://tse1.mm.bing.net/th/id/OIP.F-Jer9k_Wq5QF8Pv5Txk4QHaE8?rs=1&pid=ImgDetMain&o=7&rm=3',
-        numberStudent: 650,
-        rating: 4.4,
-        instructor: 'Nanami Kato',
-        price: 399000,
-        isNew: true
-    }
-];
 
 // Component để hiển thị course card
 const CourseCard = ({ course, type }) => {
     const formatNumber = (num) => {
         return num.toLocaleString('vi-VN');
     };
+    const nav=useNavigate()
 
     const renderStars = (rating) => {
         const stars = [];
@@ -149,7 +59,9 @@ const CourseCard = ({ course, type }) => {
                     </span>
                 </div>
 
-                <button className="w-full bg-[#243864] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#1e88e5] transition duration-300">
+                <button
+                onClick={()=>{nav(`/course/specific/${course.id}`)}}
+                className="w-full bg-[#243864] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#1e88e5] transition duration-300">
                     Xem chi tiết
                 </button>
             </div>
@@ -180,17 +92,29 @@ const CourseSection = ({ title, courses, type, icon }) => {
 };
 
 export default function HomepageComponent() {
-    const [largesCourses, setLargesCourses] = useState([])
-    const [ratingCourses, setRatingCourses] = useState([])
-    const [newCourses, setNewCourses] = useState([])
+    const [courseData, setCourseData] = useState([])
+    const[courseInL,setCourseInL]=useState([])
     const [name,setName]=useState("")
    const nav=useNavigate()
     useEffect(() => {
-        setLargesCourses(lCourses)
-        setNewCourses(nCourses)
-        setRatingCourses(rCourses)
+        fetchdata()
     }, [])
+const fetchdata=async()=>{
+   const response = await retrieveRecommendCourses();
+  const data = response.data;
 
+  // Nhóm dữ liệu theo 'language'
+  const grouped = data.reduce((acc, obj) => {
+    const key = obj.language || 'Unknown';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(obj);
+    return acc;
+  }, {});
+
+  // Cập nhật state
+  setCourseData(data);
+  setCourseInL(grouped);
+}
     return (
         <div className='bg-white'>
             {/* Hero Section */}
@@ -272,28 +196,19 @@ export default function HomepageComponent() {
             {/* Courses Sections */}
             <div className="py-16 px-6 md:px-20 container mx-auto">
                 {/* Khóa học có nhiều học viên */}
-                <CourseSection 
-                    title="Khóa học được yêu thích nhất" 
-                    courses={largesCourses} 
-                    type="popular"
-                    icon="🔥"
-                />
+                {Object.entries(courseInL).map(([lang, courses]) => (
+    <div key={lang}>
+      <h2 className="text-2xl font-bold mb-4">{lang}</h2>
+      <CourseSection
+        title={`Khóa học ${lang}`}
+        courses={courses}
+        type="popular"
+        icon="🔥"
+      />
+    </div>
+  ))}
 
-                {/* Khóa học đánh giá cao */}
-                <CourseSection 
-                    title="Khóa học đánh giá cao nhất" 
-                    courses={ratingCourses} 
-                    type="rating"
-                    icon="⭐"
-                />
-
-                {/* Khóa học mới */}
-                <CourseSection 
-                    title="Khóa học mới nhất" 
-                    courses={newCourses} 
-                    type="new"
-                    icon="🆕"
-                />
+               
             </div>
 
             {/* Features Section */}

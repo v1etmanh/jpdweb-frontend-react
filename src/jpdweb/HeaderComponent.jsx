@@ -46,16 +46,6 @@ export default function HeaderComponent() {
                   </Link>
                 </li>
 }
-                  { auth.isAuthentication&& 
-                <li>
-                  <Link
-                    to="/account"
-                    className="inline-block text-black text-xl font-semibold hover:scale-110  transition duration-200 transform  no-underline"
-                  >
-                    My Account
-                  </Link>
-                </li>
-}
      { auth.isAuthentication&& 
                 <li>
                   <button

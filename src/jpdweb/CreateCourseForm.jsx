@@ -74,6 +74,7 @@ const CreateCourseForm = () => {
       requirement: '',
       learningObject: '',
       language: 'Vietnamese',
+      teachingLanguage:'',
       price: '',
       urlImg: '',
       courseType: '',
@@ -86,14 +87,43 @@ const CreateCourseForm = () => {
   const [isUpdateCertificate, setIsUpdateCertificate] = useState(() => {
     return localStorage.getItem('certificateUploaded') === 'true';
   });
-  
-  const languages = useMemo(() => [
-    { value: 'Vietnamese', label: 'Tiếng Việt' },
-    { value: 'English', label: 'English' },
-    { value: 'Japanese', label: '日本語' },
-    { value: 'Korean', label: '한국어' },
-    { value: 'Chinese', label: '中文' }
-  ], []);
+ /*
+ ENGLISH,
+    VIETNAMESE,
+    CHINESE,
+    JAPANESE,
+    KOREAN,
+    FRENCH,
+    GERMAN,
+    SPANISH,
+    ITALIAN,
+    RUSSIAN,
+*/ 
+const languages = useMemo(() => [
+  { value: 'ENGLISH', label: 'English' },
+  { value: 'VIETNAMESE', label: 'Tiếng Việt' },
+  { value: 'CHINESE', label: '中文' },
+  { value: 'JAPANESE', label: '日本語' },
+  { value: 'KOREAN', label: '한국어' },
+  { value: 'FRENCH', label: 'Français' },
+  { value: 'GERMAN', label: 'Deutsch' },
+  { value: 'SPANISH', label: 'Español' },
+  { value: 'ITALIAN', label: 'Italiano' },
+  { value: 'RUSSIAN', label: 'Русский' }
+], []);
+
+const teachingLanguages = useMemo(() => [
+  { value: 'ENGLISH', label: 'English' },
+  { value: 'VIETNAMESE', label: 'Tiếng Việt' },
+  { value: 'CHINESE', label: '中文' },
+  { value: 'JAPANESE', label: '日本語' },
+  { value: 'KOREAN', label: '한국어' },
+  { value: 'FRENCH', label: 'Français' },
+  { value: 'GERMAN', label: 'Deutsch' },
+  { value: 'SPANISH', label: 'Español' },
+  { value: 'ITALIAN', label: 'Italiano' },
+  { value: 'RUSSIAN', label: 'Русский' }
+], []);
 
   // Auto-save draft
   useEffect(() => {
@@ -263,6 +293,7 @@ const CreateCourseForm = () => {
       formData.append('requirements', courseData.requirement.trim());
       formData.append('learningObject', courseData.learningObject.trim());
       formData.append('language', courseData.language);
+      formData.append('teachingLanguage', courseData.teachingLanguage);
       formData.append('accessMode', courseData.courseType);
       
       // Append price (0 cho PUBLIC/PRIVATE, giá thực cho PAID)
@@ -342,6 +373,9 @@ const CreateCourseForm = () => {
 
   const handleLanguageChange = useCallback((e) => {
     handleInputChange('language', e.target.value);
+  }, [handleInputChange]);
+const handleTeachingLanguageChange = useCallback((e) => {
+    handleInputChange('teachingLanguage', e.target.value);
   }, [handleInputChange]);
 
   const handleCourseTypeChange = useCallback((e) => {
@@ -453,7 +487,7 @@ const CreateCourseForm = () => {
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ngôn ngữ giảng dạy <span className="text-red-500">*</span>
+                  Ngôn ngữ  <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -463,6 +497,21 @@ const CreateCourseForm = () => {
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {languages.map(lang => (
+                      <option key={lang.value} value={lang.value}>{lang.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ngôn ngữ giảng dạy <span className="text-red-500">*</span>
+                </label>
+                  <div className="relative">
+                  <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <select
+                    value={courseData.teachingLanguage}
+                    onChange={handleTeachingLanguageChange}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {teachingLanguages.map(lang => (
                       <option key={lang.value} value={lang.value}>{lang.label}</option>
                     ))}
                   </select>

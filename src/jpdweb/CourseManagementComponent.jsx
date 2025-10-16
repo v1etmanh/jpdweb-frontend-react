@@ -13,13 +13,11 @@ import {
   Edit,
   Mic,
   PenTool,
-  FileImage,
   MicIcon,
   Trash2,
   Save,
   X,
-  
-  
+  Loader2
 } from 'lucide-react';
 import VideoUploadForm from './VideoPlayerForm';
 import PdfUploadForm from './PdfFormComponent';
@@ -31,9 +29,19 @@ import ReadingQuestionForm from './ReadingQuestionForm';
 import SpeakingPassageForm from './SpeakingPassageForm';
 import WritingQuestionForm from './WritingQuestionForm';
 import SpeakingPictureForm from './SpeakingPictureForm';
-import { data, useNavigate, useParams } from 'react-router-dom';
-import { createNewChapter, createNewModule, deleteChapter, deleteModule, deleteModuleContent, deleteModuleContentByType, getCourseById, updateCourse, updateCourseMaterial } from './api/ApiConnect';
-import { apiclient } from './api/BaseApi';
+import { useNavigate, useParams } from 'react-router-dom';
+import { 
+  createNewChapter, 
+  createNewModule, 
+  deleteChapter, 
+  deleteModule, 
+  deleteModuleContent, 
+  deleteModuleContentByType, 
+  getCourseById, 
+  updateCourse, 
+  updateCourseMaterial,
+  getContentByTypeAndModule 
+} from './api/ApiConnect';
 
 // Content type mapping
 const CONTENT_TYPES = {
@@ -46,16 +54,19 @@ const CONTENT_TYPES = {
   SPEAKING_PASSAGE: { icon: Mic, label: "Speaking Passage", color: "text-pink-600" },
   SPEAKING_PICTURE: { icon: MicIcon, label: "Speaking Picture", color: "text-rose-600" },
   WRITING: { icon: PenTool, label: "Writing Question", color: "text-amber-600" },
-  PDF:{icon:FileText,label:"PDF Document",color:"text-amber-600"}
+  PDF: { icon: FileText, label: "PDF Document", color: "text-amber-600" }
 };
 
 const CourseManagementInterface = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const tempIdCounter=useRef(-1);
+  const tempIdCounter = useRef(-1);
+  
   // State management
-  const [courseData, setCourseData] = useState(null);
+  const [courseMetadata, setCourseMetadata] = useState(null);
+  const [loadedContents, setLoadedContents] = useState({}); // Cache for loaded contents
   const [loading, setLoading] = useState(true);
+  const [contentLoading, setContentLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [expandedChapters, setExpandedChapters] = useState(new Set());
   const [expandedModules, setExpandedModules] = useState(new Set());
@@ -68,124 +79,147 @@ const CourseManagementInterface = () => {
   const [editingModule, setEditingModule] = useState(null);
   const [selectedChapterForModule, setSelectedChapterForModule] = useState(null);
   const [selectedModuleForContent, setSelectedModuleForContent] = useState(null);
-  const [type_flashcardData, setTypeFlashcardData] = useState(null);
-const [groupData, setGroupData] = useState([]);
 
-  // Load course data
+  // Load course metadata only
   useEffect(() => {
-    fetchCourseData();
+    fetchCourseMetadata();
   }, [courseId]);
-  //auto save when have any change // 🔄 Tự động đồng bộ courseData vào localStorage mỗi khi thay đổi
-useEffect(() => {
-  if (courseData && courseId) {
-    localStorage.setItem(`course_data_${courseId}`, JSON.stringify(courseData));
-  }
-}, [courseData, courseId]);
 
+  // Auto save metadata when changes
+  useEffect(() => {
+    if (courseMetadata && courseId) {
+      localStorage.setItem(`course_metadata_${courseId}`, JSON.stringify(courseMetadata));
+    }
+  }, [courseMetadata, courseId]);
 
-
-  const fetchCourseData = async () => {
-  try {
-    const cached = localStorage.getItem(`course_data_${courseId}`);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      
-      // ✅ Đảm bảo chapters luôn là mảng
-      if (!parsed.chapters) {
-        parsed.chapters = [];
+  // 📥 Fetch course metadata (without full moduleContent)
+  const fetchCourseMetadata = async () => {
+    try {
+      const cached = localStorage.getItem(`course_metadata_${courseId}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setCourseMetadata(normalizeMetadata(parsed));
+        // neu chapter do dai lon .0
+        if (parsed.chapters?.length > 0) {
+          setExpandedChapters(new Set([parsed.chapters[0].chapterId]));
+          if (parsed.chapters[0].modules?.length > 0) {
+            setExpandedModules(new Set([parsed.chapters[0].modules[0].moduleId]));
+          }
+        }
+        setLoading(false);
+        return;
       }
-      
-      // ✅ Đảm bảo mỗi chapter có modules
-      parsed.chapters = parsed.chapters.map(chapter => ({
-        ...chapter,
-        modules: chapter.modules || []
-      }));
-      
-      // ✅ Đảm bảo mỗi module có moduleContent
-      parsed.chapters.forEach(chapter => {
-        chapter.modules = chapter.modules.map(module => ({
-          ...module,
-          moduleContent: module.moduleContent || []
-        }));
-      });
-      
-      setCourseData(parsed);
+      // setup expand chapter and expand module
+      // chức năng về UI nó cho phép khi render ta sẽ mặc định ban đầu list các content từ chapter tới module ở chapter 1
+      // sau này mỗi khi người dùng click 1 chapter khác ta sẽ thêm nó vào dựa vào nó ta sẽ có cách để render riêng 
 
-      // Auto expand
-      if (parsed.chapters?.length > 0) {
-        setExpandedChapters(new Set([parsed.chapters[0].chapterId]));
-        if (parsed.chapters[0].modules?.length > 0) {
-          setExpandedModules(new Set([parsed.chapters[0].modules[0].moduleId]));
+      setLoading(true);
+      //loading sẽ hiển thị trạng thái  tải để tránh lỗi
+      const response = await getCourseById(courseId);
+      const data = response.data;
+      
+      const normalized = normalizeMetadata(data);
+      setCourseMetadata(normalized);
+      localStorage.setItem(`course_metadata_${courseId}`, JSON.stringify(normalized));
+
+      if (normalized.chapters?.length > 0) {
+        setExpandedChapters(new Set([normalized.chapters[0].chapterId]));
+        if (normalized.chapters[0].modules?.length > 0) {
+          setExpandedModules(new Set([normalized.chapters[0].modules[0].moduleId]));
         }
       }
-      return;
-    }
 
-    // Gọi API
-    setLoading(true);
-    const response = await getCourseById(courseId);
-    const data = response.data;
-    console.log(response.data)
-    // ✅ Normalize data từ API
-    if (!data.chapters) {
-      data.chapters = [];
+    } catch (error) {
+      console.error('Error fetching course:', error);
+      setCourseMetadata({ chapters: [], public: false });
+    } finally {
+      setLoading(false);
     }
+  };
+/*
+ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  từ api
+
+*/
+  // Normalize metadata structure (remove moduleContent, keep contentTypes)
+  //chuẩn hóa dữ liệu giúp ta tránh null ở các chapter và module
+  const normalizeMetadata = (data) => {
+    if (!data.chapters) data.chapters = [];
     
     data.chapters = data.chapters.map(chapter => ({
       ...chapter,
-      modules: chapter.modules || []
+      modules: (chapter.modules || []).map(module => ({
+        moduleId: module.moduleId,
+        titleOfModule: module.titleOfModule,
+        createDate: module.createDate,
+        orderInChapter: module.orderInChapter,
+        contentTypes: module.contentTypes || []
+      }))
     }));
     
-    data.chapters.forEach(chapter => {
-      chapter.modules = chapter.modules.map(module => ({
-        ...module,
-        moduleContent: module.moduleContent || []
-      }));
-    });
-    
-    setCourseData(data);
-    localStorage.setItem(`course_data_${courseId}`, JSON.stringify(data));
+    return data;
+  };
 
-    // Auto expand
-    if (data.chapters?.length > 0) {
-      setExpandedChapters(new Set([data.chapters[0].chapterId]));
-      if (data.chapters[0].modules?.length > 0) {
-        setExpandedModules(new Set([data.chapters[0].modules[0].moduleId]));
-      }
+  // 📤 Lazy load content by type when user clicks on content type
+  // hàm sau tải data bằng content type và moduleId +chapter id course Id
+  // vì là lazyload nó chỉ dc tải khi ta click vào 
+  // ta sẽ  chekc nếu nội dung đã được tải rồi thì ta ko tải nữa 
+  const fetchContentByType = async (chapterId, moduleId, contentType) => {
+    const cacheKey = `${courseId}_${chapterId}_${moduleId}_${contentType}`;
+    
+    // Check cache first
+    if (loadedContents[cacheKey]) {
+      return loadedContents[cacheKey];
     }
 
-  } catch (error) {
-    console.error('Error fetching course:', error);
-    // ✅ Set default data nếu lỗi
-    setCourseData({
-      ...courseData,
-      chapters: []
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+    setContentLoading(true);
+    try {
+      const response = await getContentByTypeAndModule(contentType, moduleId, chapterId, courseId);
+      const contents = response.data;
 
-//
-const saveModuleContent = async (chapterId, moduleId, updateData) => {
-  const data = {
-    courseId: courseId,
-    chapterId: chapterId,
-    moduleId: moduleId,
-    moduleContent: updateData // ✅ Phải là "moduleContent", không phải "updateCourse"
+      // Cache the loaded content
+      setLoadedContents(prev => ({
+        ...prev,
+        [cacheKey]: contents
+      }));
+
+      return contents;
+    } catch (error) {
+      console.error('Error fetching content:', error);
+      return [];
+    } finally {
+      setContentLoading(false);
+    }
   };
-  
-  try {
-    const response = await updateCourseMaterial(courseId,chapterId,moduleId,data);
-    console.log(response.data)
-    updateCourseDataAfterSave(chapterId,moduleId,response.data)
-   
-    alert("Save successful");
-  } catch (error) {
-    console.error("Save failed:", error);
-    alert("Failed to save content");
-  }
-};
+
+  // Save module content to server
+  const saveModuleContent = async (chapterId, moduleId, updateData) => {
+    const data = {
+      courseId: courseId,
+      chapterId: chapterId,
+      moduleId: moduleId,
+      moduleContent: updateData
+    };
+    
+    try {
+      const response = await updateCourseMaterial(courseId, chapterId, moduleId, data);
+      
+      // Update cache with saved content
+      const contentType = updateData[0]?.typeOfContent;
+      if (contentType) {
+        const cacheKey = `${courseId}_${chapterId}_${moduleId}_${contentType}`;
+        setLoadedContents(prev => ({
+          ...prev,
+          [cacheKey]: response.data
+        }));
+      }
+      
+      alert("Save successful");
+    } catch (error) {
+      console.error("Save failed:", error);
+      alert("Failed to save content");
+    }
+  };
+
   // Toggle expand/collapse
   const toggleChapter = (chapterId) => {
     const newExpanded = new Set(expandedChapters);
@@ -196,6 +230,9 @@ const saveModuleContent = async (chapterId, moduleId, updateData) => {
     }
     setExpandedChapters(newExpanded);
   };
+  //toggle là cái drop down của các chapter và module nó có chức năng khi ta click vào chapter nó sẽ ghi lại
+  // dựa vào đó chapter nào drop sẽ dc xác định
+  // nếu ta click lại vào 1 chapter đã và dang toggg thì ta đóng nó lại 
 
   const toggleModule = (moduleId) => {
     const newExpanded = new Set(expandedModules);
@@ -209,34 +246,33 @@ const saveModuleContent = async (chapterId, moduleId, updateData) => {
 
   // CRUD Operations for Chapter
   const handleAddChapter = async (chapterName) => {
-  try {
-    const response = await createNewChapter({
-      name: chapterName,
-      courseId
-    });
+    try {
+      const response = await createNewChapter({
+        name: chapterName,
+        courseId
+      });
 
-    const createdChapter = {
-      ...response.data,
-      modules: response.data.modules || [] // ✅ Đảm bảo có modules
-    };
+      const createdChapter = {
+        ...response.data,
+        modules: response.data.modules || []
+      };
 
-    setCourseData({
-      ...courseData,
-      chapters: [...(courseData.chapters || []), createdChapter] // ✅ Null check
-    });
+      setCourseMetadata({
+        ...courseMetadata,
+        chapters: [...(courseMetadata.chapters || []), createdChapter]
+      });
 
-    setShowChapterForm(false);
-  } catch (error) {
-    console.error("Failed to create chapter:", error);
-    alert("Cannot create chapter. Please try again.");
-  }
-};
-
+      setShowChapterForm(false);
+    } catch (error) {
+      console.error("Failed to create chapter:", error);
+      alert("Cannot create chapter. Please try again.");
+    }
+  };
 
   const handleUpdateChapter = (chapterId, newName) => {
-    setCourseData({
-      ...courseData,
-      chapters: courseData.chapters.map(chapter =>
+    setCourseMetadata({
+      ...courseMetadata,
+      chapters: courseMetadata.chapters.map(chapter =>
         chapter.chapterId === chapterId
           ? { ...chapter, chapterName: newName }
           : chapter
@@ -245,61 +281,65 @@ const saveModuleContent = async (chapterId, moduleId, updateData) => {
     setEditingChapter(null);
   };
 
- const handleDeleteChapter = async (chapterId) => {
-  if (!window.confirm('Are you sure you want to delete this chapter?')) return;
+  const handleDeleteChapter = async (chapterId) => {
+    if (!window.confirm('Are you sure you want to delete this chapter?')) return;
 
-  try {
-    // Gọi API xóa chapter
-    await deleteChapter(courseId,chapterId);
+    try {
+      await deleteChapter(courseId, chapterId);
 
-    // Cập nhật state sau khi xóa thành công
-    setCourseData({
-      ...courseData,
-      chapters: courseData.chapters.filter(chapter => chapter.chapterId !== chapterId)
-    });
-  } catch (error) {
-    console.error("Failed to delete chapter:", error);
-    alert("Cannot delete chapter. Please try again.");
-  }
-};
+      // Clear related cache
+      const keysToDelete = Object.keys(loadedContents).filter(key => 
+        key.includes(`${courseId}_${chapterId}_`)
+      );
+      setLoadedContents(prev => {
+        const newCache = { ...prev };
+        keysToDelete.forEach(key => delete newCache[key]);
+        return newCache;
+      });
 
+      setCourseMetadata({
+        ...courseMetadata,
+        chapters: courseMetadata.chapters.filter(chapter => chapter.chapterId !== chapterId)
+      });
+    } catch (error) {
+      console.error("Failed to delete chapter:", error);
+      alert("Cannot delete chapter. Please try again.");
+    }
+  };
 
   // CRUD Operations for Module
-const handleAddModule = async (chapterId, moduleTitle) => {
-  try {
-    console.log(courseData)
+  const handleAddModule = async (chapterId, moduleTitle) => {
+    try {
+      const response = await createNewModule(courseId, chapterId, moduleTitle);
+      const createdModule = {
+        ...response.data,
+        contentTypes: response.data.contentTypes || []
+      };
 
-    const response = await createNewModule(courseId,chapterId,moduleTitle);
-    const createdModule = {
-      ...response.data,
-      moduleContent: response.data.moduleContent || [] // ✅ Đảm bảo có moduleContent
-    };
+      setCourseMetadata({
+        ...courseMetadata,
+        chapters: (courseMetadata.chapters || []).map(chapter =>
+          chapter.chapterId === chapterId
+            ? {
+                ...chapter,
+                modules: [...(chapter.modules || []), createdModule]
+              }
+            : chapter
+        )
+      });
 
-    setCourseData({
-      ...courseData,
-      chapters: (courseData.chapters || []).map(chapter =>
-        chapter.chapterId === chapterId
-          ? {
-              ...chapter,
-              modules: [...(chapter.modules || []), createdModule] // ✅ Null check
-            }
-          : chapter
-      )
-    });
-
-    setShowModuleForm(false);
-    setSelectedChapterForModule(null);
-  } catch (error) {
-    console.error("Failed to create module:", error);
-    alert("Cannot create module. Please try again.");
-  }
-};
-
+      setShowModuleForm(false);
+      setSelectedChapterForModule(null);
+    } catch (error) {
+      console.error("Failed to create module:", error);
+      alert("Cannot create module. Please try again.");
+    }
+  };
 
   const handleUpdateModule = (chapterId, moduleId, newTitle) => {
-    setCourseData({
-      ...courseData,
-      chapters: courseData.chapters.map(chapter =>
+    setCourseMetadata({
+      ...courseMetadata,
+      chapters: courseMetadata.chapters.map(chapter =>
         chapter.chapterId === chapterId
           ? {
               ...chapter,
@@ -313,210 +353,168 @@ const handleAddModule = async (chapterId, moduleTitle) => {
       )
     });
     setEditingModule(null);
-    
   };
 
   const handleDeleteModule = async (chapterId, moduleId) => {
-  if (!window.confirm('Are you sure you want to delete this module?')) return;
+    if (!window.confirm('Are you sure you want to delete this module?')) return;
 
-  try {
-    // Gọi API xóa module
-    await deleteModule(courseId,chapterId,moduleId);
+    try {
+      await deleteModule(courseId, chapterId, moduleId);
 
-    // Cập nhật state sau khi xóa thành công
-    setCourseData({
-      ...courseData,
-      chapters: courseData.chapters.map(chapter =>
-        chapter.chapterId === chapterId
-          ? {
-              ...chapter,
-              modules: chapter.modules.filter(module => module.moduleId !== moduleId)
-            }
-          : chapter
-      )
-    });
-  } catch (error) {
-    console.error("Failed to delete module:", error);
-    alert("Cannot delete module. Please try again.");
-  }
-};
+      // Clear related cache
+      const keysToDelete = Object.keys(loadedContents).filter(key => 
+        key.includes(`${courseId}_${chapterId}_${moduleId}_`)
+      );
+      setLoadedContents(prev => {
+        const newCache = { ...prev };
+        keysToDelete.forEach(key => delete newCache[key]);
+        return newCache;
+      });
 
-  //
-const updateCourseDataAfterSave = (chapterId, moduleId, savedContents) => {
-  
-  if (!savedContents?.length) {
-    console.warn('No saved contents to update.');
-    return;
-  }
-
-  const currentType = savedContents[0].typeOfContent;
-
-  setCourseData(prevData => ({
-    ...prevData,
-    chapters: prevData.chapters.map(chapter => 
-      chapter.chapterId === chapterId
-        ? {
-            ...chapter,
-            modules: chapter.modules.map(module =>
-              module.moduleId === moduleId
-                ? {
-                    ...module,
-                    moduleContent: [
-                      ...module.moduleContent.filter(
-                        mc => mc.typeOfContent !== currentType
-                      ),
-                      ...savedContents
-                    ]
-                  }
-                : module // ✅ Không thay đổi module khác
-            )
-          }
-        : chapter // ✅ Không thay đổi chapter khác
-    )
-  }));
-  localStorage.removeItem(`course_data_${courseId}`)
-  localStorage.setItem(`course_data_${courseId}`,courseData)
-  console.log(`✅ Updated contents for type: ${currentType}`,updateCourse);
-};
-
-  // CRUD Operations for Module Content
-const handleAddContent = (chapterId, moduleId, newContents) => {
-  // Đảm bảo newContents luôn là mảng
-  const contentsToAdd = Array.isArray(newContents) ? newContents : [newContents];
-
-  setCourseData({
-    ...courseData,
-    chapters: courseData.chapters.map(chapter =>
-      chapter.chapterId === chapterId
-        ? {
-            ...chapter,
-            modules: chapter.modules.map(module =>
-              module.moduleId === moduleId
-                ? {
-                    ...module,
-                    moduleContent: [...module.moduleContent, ...contentsToAdd]
-                  }
-                : module
-            )
-          }
-        : chapter
-    )
-  });
-
-  setShowContentDropdown(false);
-  setSelectedModuleForContent(null);
-};
-//
-const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
-  const chapter = (courseData.chapters || []).find(ch => ch.chapterId === chapterId);
-  if (!chapter) return;
-
-  const module = (chapter.modules || []).find(m => m.moduleId === moduleId);
-  if (!module) return;
-
-  // ✅ Đảm bảo moduleContent là mảng
-  const moduleContent = module.moduleContent || [];
-
-  const toUpdate = updatedData.filter(u =>
-    moduleContent.some(content => content.mcId === u.mcId)
-  );
-  
-  const toAdd = updatedData
-    .filter(u => !u.mcId || !moduleContent.some(content => content.mcId === u.mcId))
-    .map(u => ({ ...u, mcId: u.mcId ?? tempIdCounter.current-- }));
-
-  const updatedCourseData = {
-    ...courseData,
-    chapters: (courseData.chapters || []).map(chapter =>
-      chapter.chapterId === chapterId
-        ? {
-            ...chapter,
-            modules: (chapter.modules || []).map(module =>
-              module.moduleId === moduleId
-                ? {
-                    ...module,
-                    moduleContent: (module.moduleContent || []).map(content => {
-                      const found = toUpdate.find(u => u.mcId === content.mcId);
-                      return found ? { ...content, ...found } : content;
-                    })
-                  }
-                : module
-            )
-          }
-        : chapter
-    )
-  };
-
-  setCourseData(updatedCourseData);
-
-  if (toAdd.length > 0) {
-    handleAddContent(chapterId, moduleId, toAdd);
-  }
-};
-//
-  const handleDeleteContent = async(chapterId, moduleId, mcId) => {
-    if (window.confirm('Are you sure you want to delete this content?')) {
-      try{
-       const response= await deleteModuleContent(courseId,chapterId,moduleId,mcId)
-      
-       
-      setCourseData({
-        ...courseData,
-        chapters: courseData.chapters.map(chapter =>
+      setCourseMetadata({
+        ...courseMetadata,
+        chapters: courseMetadata.chapters.map(chapter =>
           chapter.chapterId === chapterId
             ? {
                 ...chapter,
-                modules: chapter.modules.map(module =>
-                  module.moduleId === moduleId
-                    ? {
-                        ...module,
-                        moduleContent: module.moduleContent.filter(content => content.mcId !== mcId)
-                      }
-                    : module
-                )
+                modules: chapter.modules.filter(module => module.moduleId !== moduleId)
               }
             : chapter
         )
       });
-         }catch(e){
-      alert("error to delete",e)
-    }
+    } catch (error) {
+      console.error("Failed to delete module:", error);
+      alert("Cannot delete module. Please try again.");
     }
   };
-  //handle type of content
-  const handleDeleteTypeOfContent =async (chapterId, moduleId, typeOfContent) => {
-    
-  if (window.confirm(`Are you sure you want to delete all ${typeOfContent} contents in this module?`)) {
-    try{
-      const response=await deleteModuleContentByType(typeOfContent,moduleId,chapterId,courseId)
-  
-    setCourseData({
-      ...courseData,
-      chapters: courseData.chapters.map(chapter =>
-        chapter.chapterId === chapterId
-          ? {
-              ...chapter,
-              modules: chapter.modules.map(module =>
-                module.moduleId === moduleId
-                  ? {
-                      ...module,
-                      moduleContent: module.moduleContent.filter(
-                        content => content.typeOfContent !== typeOfContent
-                      )
-                    }
-                  : module
-              )
-            }
-          : chapter
-      )
-    });
- 
-  }catch(e){
- alert("error to delete ",e)
-  }
-  }
-};
 
+  // Handle content selection with lazy loading
+  //khi 1 modulecontent dc chọn ta gọi api để lấy content đso và chuyển nó về dạng object
+  // {[{mcid,...},{}],moduleId, chapterId}
+  const handleSelectContentType = async (chapterId, moduleId, contentType) => {
+    try {
+      const contents = await fetchContentByType(chapterId, moduleId, contentType);
+      
+      handleSelectItem('content', {
+        0: contents[0] || createEmptyContent(contentType),
+        ...contents.slice(1).reduce((acc, item, idx) => {
+          acc[idx + 1] = item;
+          return acc;
+        }, {}),
+        chapterId,
+        moduleId
+      });
+    } catch (error) {
+      console.error('Error loading content:', error);
+    }
+  };
+
+  // Update content in cache
+  const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
+    const contentType = updatedData[0]?.typeOfContent;
+    if (!contentType) return;
+
+    const cacheKey = `${courseId}_${chapterId}_${moduleId}_${contentType}`;
+    const cachedContent = loadedContents[cacheKey] || [];
+
+    const toUpdate = updatedData.filter(u =>
+      cachedContent.some(content => content.mcId === u.mcId)
+    );
+    
+    const toAdd = updatedData
+      .filter(u => !u.mcId || !cachedContent.some(content => content.mcId === u.mcId))
+      .map(u => ({ ...u, mcId: u.mcId ?? tempIdCounter.current-- }));
+
+    const updatedCache = cachedContent.map(content => {
+      const found = toUpdate.find(u => u.mcId === content.mcId);
+      return found ? { ...content, ...found } : content;
+    });
+
+    setLoadedContents(prev => ({
+      ...prev,
+      [cacheKey]: [...updatedCache, ...toAdd]
+    }));
+
+    // Update contentTypes in metadata if new type added
+    if (toAdd.length > 0) {
+      setCourseMetadata(prev => ({
+        ...prev,
+        chapters: prev.chapters.map(ch =>
+          ch.chapterId === chapterId
+            ? {
+                ...ch,
+                modules: ch.modules.map(mod =>
+                  mod.moduleId === moduleId
+                    ? {
+                        ...mod,
+                        contentTypes: Array.from(new Set([...(mod.contentTypes || []), contentType]))
+                      }
+                    : mod
+                )
+              }
+            : ch
+        )
+      }));
+    }
+  };
+
+  const handleDeleteContent = async (chapterId, moduleId, mcId) => {
+    if (window.confirm('Are you sure you want to delete this content?')) {
+      try {
+        await deleteModuleContent(courseId, chapterId, moduleId, mcId);
+        
+        // Update cache
+        Object.keys(loadedContents).forEach(key => {
+          if (key.includes(`${courseId}_${chapterId}_${moduleId}_`)) {
+            setLoadedContents(prev => ({
+              ...prev,
+              [key]: prev[key].filter(content => content.mcId !== mcId)
+            }));
+          }
+        });
+      } catch (e) {
+        alert("Error to delete: " + e);
+      }
+    }
+  };
+
+  const handleDeleteTypeOfContent = async (chapterId, moduleId, typeOfContent) => {
+    if (window.confirm(`Are you sure you want to delete all ${typeOfContent} contents in this module?`)) {
+      try {
+        await deleteModuleContentByType(typeOfContent, moduleId, chapterId, courseId);
+    
+        // Clear cache for this type
+        const cacheKey = `${courseId}_${chapterId}_${moduleId}_${typeOfContent}`;
+        setLoadedContents(prev => {
+          const newCache = { ...prev };
+          delete newCache[cacheKey];
+          return newCache;
+        });
+
+        // Update metadata
+        setCourseMetadata(prev => ({
+          ...prev,
+          chapters: prev.chapters.map(ch =>
+            ch.chapterId === chapterId
+              ? {
+                  ...ch,
+                  modules: ch.modules.map(mod =>
+                    mod.moduleId === moduleId
+                      ? {
+                          ...mod,
+                          contentTypes: mod.contentTypes.filter(type => type !== typeOfContent)
+                        }
+                      : mod
+                  )
+                }
+              : ch
+          )
+        }));
+      } catch (e) {
+        alert("Error to delete: " + e);
+      }
+    }
+  };
 
   // Create empty content based on type
   const createEmptyContent = (contentType) => {
@@ -528,62 +526,24 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
     switch (contentType) {
       case 'FLASHCARD':
         return { ...baseContent, word: '', meaning: '', imageUrl: null };
-      
       case 'GAPFILL':
         return { ...baseContent, questionText: '', feedback: '' };
-      
       case 'MULTIPLE_CHOICE':
         return { ...baseContent, questionText: '', feedback: '' };
-      
       case 'VIDEO':
-        return { 
-          ...baseContent, 
-          titleVideo: '', 
-          videoUrl: '', 
-          capacityMB: 0, 
-          durationMinutes: 0 
-        };
-      
+        return { ...baseContent, titleVideo: '', videoUrl: '', capacityMB: 0, durationMinutes: 0 };
       case 'WRITING':
-        return { 
-          ...baseContent, 
-          question: '', 
-          requirements: null, 
-          imageUrl: null 
-        };
-      
+        return { ...baseContent, question: '', requirements: null, imageUrl: null };
       case 'LISTEN_CHOICE':
-        return { 
-          ...baseContent, 
-          question: '', 
-          audioUrl: '', 
-          options: [] 
-        };
-      
+        return { ...baseContent, question: '', audioUrl: '', options: [] };
       case 'READING':
-        return { 
-          ...baseContent, 
-          title: '', 
-          content: '', 
-          readingQuestion: [] 
-        };
-      
+        return { ...baseContent, title: '', content: '', readingQuestion: [] };
       case 'SPEAKING_PASSAGE':
         return { ...baseContent, passage: '', title: '' };
-      
       case 'SPEAKING_PICTURE':
-        return { 
-          ...baseContent, 
-          pictureUrl: '', 
-          speakingPictureListQuestions: [] 
-        };
-        case 'PDF':
-      return { 
-        ...baseContent, 
-        pdfUrl: '', 
-        titlePdf: '',
-        capacityMB: 0 
-      };
+        return { ...baseContent, pictureUrl: '', speakingPictureListQuestions: [] };
+      case 'PDF':
+        return { ...baseContent, pdfUrl: '', titlePdf: '', capacityMB: 0 };
       default:
         return baseContent;
     }
@@ -592,7 +552,7 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
   // Save course data
   const handleSaveCourse = async () => {
     try {
-      await updateCourse(courseId, courseData);
+      await updateCourse(courseId, courseMetadata);
       alert('Course saved successfully!');
     } catch (error) {
       console.error('Error saving course:', error);
@@ -623,11 +583,11 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
             className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
               selectedItem?.type === 'course' ? 'bg-blue-100 border-2 border-blue-300' : 'hover:bg-gray-100'
             }`}
-            onClick={() => handleSelectItem('course', courseData)}
+            onClick={() => handleSelectItem('course', courseMetadata)}
           >
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <BookOpen className="w-5 h-5 text-blue-600 flex-shrink-0" />
-              <span className="font-semibold text-gray-800 truncate">{courseData.name}</span>
+              <span className="font-semibold text-gray-800 truncate">{courseMetadata.name}</span>
             </div>
             <button
               onClick={(e) => {
@@ -639,13 +599,12 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
             >
               <Plus className="w-4 h-4 text-blue-600" />
             </button>
-           
           </div>
         </div>
 
         {/* Chapters List */}
         <div className="p-4 space-y-2">
-          {courseData.chapters?.map((chapter, chapterIndex) => (
+          {courseMetadata.chapters?.map((chapter) => (
             <div key={chapter.chapterId}>
               {/* Chapter Item */}
               <div 
@@ -738,7 +697,7 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
               {/* Modules List */}
               {expandedChapters.has(chapter.chapterId) && (
                 <div className="ml-6 mt-1 space-y-1">
-                  {chapter.modules?.map((module, moduleIndex) => (
+                  {chapter.modules?.map((module) => (
                     <div key={module.moduleId}>
                       {/* Module Item */}
                       <div
@@ -787,7 +746,7 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
                                 {module.titleOfModule}
                               </span>
                               <span className="text-xs text-gray-400 flex-shrink-0">
-                                ({module.moduleContent?.length || 0})
+                                ({module.contentTypes?.length || 0})
                               </span>
                             </>
                           )}
@@ -828,63 +787,48 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
                         </div>
                       </div>
 
-                      {/* Module Contents */}
-                      {/* Module Contents */}
-{expandedModules.has(module.moduleId) && (
-  <div className="ml-6 mt-1 space-y-1">
-    {Object.entries(
-      ((module.moduleContent || []).reduce((acc, item) => { // ✅ Null check
-        if (!acc[item.typeOfContent]) {
-          acc[item.typeOfContent] = [];
-        }
-        acc[item.typeOfContent].push(item);
-        return acc;
-      }, {}))
-    ).map(([type, contents]) => {
-      const ContentIcon = CONTENT_TYPES[type]?.icon || FileText;
-      const iconColor = CONTENT_TYPES[type]?.color || "text-gray-600";
+                      {/* Content Types List */}
+                      {expandedModules.has(module.moduleId) && (
+                        <div className="ml-6 mt-1 space-y-1">
+                          {(module.contentTypes || []).map((type) => {
+                            const ContentIcon = CONTENT_TYPES[type]?.icon || FileText;
+                            const iconColor = CONTENT_TYPES[type]?.color || "text-gray-600";
 
-      return (
-        <div
-          key={type}
-          className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
-            selectedItem?.type === 'content' &&
-            selectedItem?.data?.[0]?.typeOfContent === type &&
-            selectedItem?.data?.chapterId === chapter.chapterId &&
-            selectedItem?.data?.moduleId === module.moduleId
-              ? 'bg-orange-100 border-2 border-orange-300'
-              : 'hover:bg-gray-100'
-          }`}
-          onClick={() =>
-            handleSelectItem('content', {
-              ...contents,
-              chapterId: chapter.chapterId,
-              moduleId: module.moduleId
-            })
-          }
-        >
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <ContentIcon className={`w-3 h-3 ${iconColor} flex-shrink-0`} />
-            <span className="text-xs text-gray-600 truncate">
-              {CONTENT_TYPES[type]?.label || type} ({contents.length})
-            </span>
-          </div>
+                            return (
+                              <div
+                                key={type}
+                                className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
+                                  selectedItem?.type === 'content' &&
+                                  selectedItem?.data?.[0]?.typeOfContent === type &&
+                                  selectedItem?.data?.chapterId === chapter.chapterId &&
+                                  selectedItem?.data?.moduleId === module.moduleId
+                                    ? 'bg-orange-100 border-2 border-orange-300'
+                                    : 'hover:bg-gray-100'
+                                }`}
+                                onClick={() => handleSelectContentType(chapter.chapterId, module.moduleId, type)}
+                              >
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <ContentIcon className={`w-3 h-3 ${iconColor} flex-shrink-0`} />
+                                  <span className="text-xs text-gray-600 truncate">
+                                    {CONTENT_TYPES[type]?.label || type}
+                                  </span>
+                                </div>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteTypeOfContent(chapter.chapterId, module.moduleId, type);
-            }}
-            className="p-1 hover:bg-red-200 rounded flex-shrink-0"
-            title={`Delete all ${CONTENT_TYPES[type]?.label || type}`}
-          >
-            <Trash2 className="w-2.5 h-2.5 text-red-600" />
-          </button>
-        </div>
-      );
-    })}
-  </div>
-)}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteTypeOfContent(chapter.chapterId, module.moduleId, type);
+                                  }}
+                                  className="p-1 hover:bg-red-200 rounded flex-shrink-0"
+                                  title={`Delete all ${CONTENT_TYPES[type]?.label || type}`}
+                                >
+                                  <Trash2 className="w-2.5 h-2.5 text-red-600" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -919,18 +863,18 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
 
     // Course Overview
     if (selectedItem.type === 'course') {
-     const totalModules = (courseData.chapters || []).reduce((sum, chapter) => 
-    sum + ((chapter.modules || []).length), 0); // ✅ Null checks
-    
-  const totalContents = (courseData.chapters || []).reduce((sum, chapter) => 
-    sum + ((chapter.modules || []).reduce((mSum, module) => 
-      mSum + ((module.moduleContent || []).length), 0)), 0); // ✅ Null checks
+      const totalModules = (courseMetadata.chapters || []).reduce((sum, chapter) => 
+        sum + ((chapter.modules || []).length), 0);
+      
+      const totalContentTypes = (courseMetadata.chapters || []).reduce((sum, chapter) => 
+        sum + ((chapter.modules || []).reduce((mSum, module) => 
+          mSum + ((module.contentTypes || []).length), 0)), 0);
 
       return (
         <div className="flex-1 p-6 overflow-y-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">{courseData.name}</h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">{courseMetadata.name}</h2>
               <p className="text-gray-600">Course Overview and Management</p>
             </div>
             <button
@@ -948,7 +892,7 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
                 <Folder className="w-8 h-8 text-blue-600" />
                 <div>
                   <p className="text-sm text-blue-600 font-medium">Chapters</p>
-                  <p className="text-2xl font-bold text-blue-800">{courseData.chapters?.length || 0}</p>
+                  <p className="text-2xl font-bold text-blue-800">{courseMetadata.chapters?.length || 0}</p>
                 </div>
               </div>
             </div>
@@ -967,8 +911,8 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
               <div className="flex items-center gap-3 mb-2">
                 <Brain className="w-8 h-8 text-purple-600" />
                 <div>
-                  <p className="text-sm text-purple-600 font-medium">Contents</p>
-                  <p className="text-2xl font-bold text-purple-800">{totalContents}</p>
+                  <p className="text-sm text-purple-600 font-medium">Content Types</p>
+                  <p className="text-2xl font-bold text-purple-800">{totalContentTypes}</p>
                 </div>
               </div>
             </div>
@@ -978,9 +922,9 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
             <h3 className="font-semibold text-gray-800 mb-2">Course Status</h3>
             <div className="flex items-center gap-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                courseData.public ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                courseMetadata.public ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
               }`}>
-                {courseData.public ? 'Public' : 'Private'}
+                {courseMetadata.public ? 'Public' : 'Private'}
               </span>
             </div>
           </div>
@@ -1040,10 +984,10 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
                   <div className="flex items-center justify-between mb-3">
                     <FileText className="w-5 h-5 text-indigo-600" />
                     <span className="text-xs text-gray-500">
-                      {module.moduleContent?.length || 0} items
+                      {module.contentTypes?.length || 0} types
                     </span>
                   </div>
-                <h3 className="font-medium text-gray-800 mb-2">{module.titleOfModule}</h3>
+                  <h3 className="font-medium text-gray-800 mb-2">{module.titleOfModule}</h3>
                   <p className="text-sm text-gray-500">Order: {module.orderInChapter}</p>
                 </div>
               ))}
@@ -1096,72 +1040,116 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-2 p-3">
-                  {Object.entries(CONTENT_TYPES).map(([type, config]) => {
-  const IconComponent = config.icon;
-  return (
-    <button
-      key={type}
-      onClick={() => {
-        // Tạo empty content
-        
-        const newContent = createEmptyContent(type);
-        
-        // Add vào module
-        handleAddContent(
-          selectedModuleForContent.chapterId, 
-          selectedModuleForContent.moduleId, 
-          newContent
-        );
-        
-        // Đóng dropdown
-        setShowContentDropdown(false);
-        
-        // TỰ ĐỘNG SELECT content vừa tạo để hiện form
-        setTimeout(() => {
-          handleSelectItem('content', { 
-            0: newContent,
-            chapterId: selectedModuleForContent.chapterId, 
-            moduleId: selectedModuleForContent.moduleId 
-          });
-        }, 100);
-      }}
-      className="flex flex-col items-center gap-2 p-3 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors group"
-    >
-      <IconComponent className={`w-6 h-6 ${config.color} group-hover:scale-110 transition-transform`} />
-      <span className="text-xs text-center font-medium text-gray-700">
-        {config.label}
-      </span>
-    </button>
-  );
-})}
+                    {Object.entries(CONTENT_TYPES).map(([type, config]) => {
+                      const IconComponent = config.icon;
+                      return (
+                        <button
+                          key={type}
+                          onClick={async () => {
+                            setShowContentDropdown(false);
+                            
+                            // Create empty content and trigger lazy load
+                            await handleSelectContentType(
+                              selectedModuleForContent.chapterId,
+                              selectedModuleForContent.moduleId,
+                              type
+                            );
+                            
+                            // Update contentTypes in metadata
+                            setCourseMetadata(prev => ({
+                              ...prev,
+                              chapters: prev.chapters.map(ch =>
+                                ch.chapterId === selectedModuleForContent.chapterId
+                                  ? {
+                                      ...ch,
+                                      modules: ch.modules.map(mod =>
+                                        mod.moduleId === selectedModuleForContent.moduleId
+                                          ? {
+                                              ...mod,
+                                              contentTypes: Array.from(new Set([...(mod.contentTypes || []), type]))
+                                            }
+                                          : mod
+                                      )
+                                    }
+                                  : ch
+                              )
+                            }));
+                          }}
+                          className="flex flex-col items-center gap-2 p-3 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors group"
+                        >
+                          <IconComponent className={`w-6 h-6 ${config.color} group-hover:scale-110 transition-transform`} />
+                          <span className="text-xs text-center font-medium text-gray-700">
+                            {config.label}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-         
+          {/* Module content types list */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(module.contentTypes || []).map((type) => {
+              const ContentIcon = CONTENT_TYPES[type]?.icon || FileText;
+              const iconColor = CONTENT_TYPES[type]?.color || "text-gray-600";
+              
+              return (
+                <div
+                  key={type}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => handleSelectContentType(module.chapterId, module.moduleId, type)}
+                >
+                  <div className="flex items-center gap-3">
+                    <ContentIcon className={`w-6 h-6 ${iconColor}`} />
+                    <div>
+                      <h3 className="font-medium text-gray-800">{CONTENT_TYPES[type]?.label || type}</h3>
+                      <p className="text-xs text-gray-500">Click to edit</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {(module.contentTypes || []).length === 0 && (
+            <div className="text-center py-12 text-gray-500">
+              <Brain className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+              <p>No content in this module yet. Add some content to get started.</p>
+            </div>
+          )}
         </div>
       );
     }
 
     // Content View - Display appropriate form based on content type
     if (selectedItem.type === 'content') {
+      if (contentLoading) {
+        return (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+              <p className="text-gray-600">Loading content...</p>
+            </div>
+          </div>
+        );
+      }
+
       const content = selectedItem.data;
-      let arr = Object.keys(content)
+      const arr = Object.keys(content)
+        .filter(key => !isNaN(key))
+        .map(key => content[key]);
       
-    .filter(key => !isNaN(key)) // chỉ lấy key là số
-    .map(key => content[key]);
-    //bay h mik can lay dc th  nay tu server dua vao? moduleId,+ typeOfContent +
-    //lay dc
-    //
-      const ContentIcon = CONTENT_TYPES[content.typeOfContent]?.icon || FileText;
-      const iconColor = CONTENT_TYPES[content.typeOfContent]?.color || "text-gray-600";
-      const label = CONTENT_TYPES[content.typeOfContent]?.label || content.typeOfContent;
+      const ContentIcon = CONTENT_TYPES[arr[0]?.typeOfContent]?.icon || FileText;
+      const iconColor = CONTENT_TYPES[arr[0]?.typeOfContent]?.color || "text-gray-600";
+      const label = CONTENT_TYPES[arr[0]?.typeOfContent]?.label || arr[0]?.typeOfContent;
      
-      const handleDeleteM=(mcId)=>{
-      handleDeleteContent(  content.chapterId,  content.moduleId, mcId)
-    };
+      const handleDeleteM = (mcId) => {
+        handleDeleteContent(content.chapterId, content.moduleId, mcId);
+      };
+      
       const handleContentSubmit = (updatedData) => {
         handleUpdateContent(
           content.chapterId, 
@@ -1170,37 +1158,36 @@ const handleUpdateContent = (chapterId, moduleId, mcId, updatedData) => {
           updatedData
         );
       };
-      const savedata=()=>{
-        console.log(arr)
-saveModuleContent( content.chapterId, 
-          content.moduleId, 
-          
-          arr)
-      }
       
+      const savedata = () => {
+        saveModuleContent(content.chapterId, content.moduleId, arr);
+      };
   
       return (
         <div className="flex-1 p-6 overflow-y-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <div className={`p-3 rounded-lg bg-gray-100`}>
-              <ContentIcon className={`w-8 h-8 ${iconColor}`} />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className={`p-3 rounded-lg bg-gray-100`}>
+                <ContentIcon className={`w-8 h-8 ${iconColor}`} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">{label}</h2>
+                <p className="text-gray-600">Edit Content</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">{label}</h2>
-              <p className="text-gray-600">Edit Content</p>
-            </div>
+
+            <button
+              onClick={savedata}
+              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
+            >
+              <Save className="w-5 h-5" />
+              Save Changes
+            </button>
           </div>
-            {/* ✅ Nút Save Changes */}
-        <button
-          onClick={savedata}
-          className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
-        >
-          <Save className="w-5 h-5" />
-          Save Changes
-        </button>
+
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             {/* Render appropriate form based on content type */}
-            {content[0].typeOfContent === 'VIDEO' && (
+            {arr[0]?.typeOfContent === 'VIDEO' && (
               <VideoUploadForm 
                 initialData={arr}
                 onSubmit={handleContentSubmit} 
@@ -1208,24 +1195,23 @@ saveModuleContent( content.chapterId,
               />
             )}
             
-            {content[0].typeOfContent === 'FLASHCARD' && (
+            {arr[0]?.typeOfContent === 'FLASHCARD' && (
               <FlashCardForm 
                 initialData={arr}
                 onSubmit={handleContentSubmit} 
                 onDelete={handleDeleteM}
-              
               />
             )}
             
-            {content[0].typeOfContent === 'LISTEN_CHOICE' && (
+            {arr[0]?.typeOfContent === 'LISTEN_CHOICE' && (
               <ListeningChoiceForm 
                 initialData={arr}
                 onSubmit={handleContentSubmit} 
-                 onDelete={handleDeleteM}
+                onDelete={handleDeleteM}
               />
             )}
             
-            {content[0].typeOfContent === 'MULTIPLE_CHOICE' && (
+            {arr[0]?.typeOfContent === 'MULTIPLE_CHOICE' && (
               <MultipleChoiceForm 
                 initialData={arr}
                 onSubmit={handleContentSubmit} 
@@ -1233,7 +1219,7 @@ saveModuleContent( content.chapterId,
               />
             )}
             
-            {content[0].typeOfContent === 'GAPFILL' && (
+            {arr[0]?.typeOfContent === 'GAPFILL' && (
               <GapFillForm 
                 initialData={arr}
                 onSubmit={handleContentSubmit} 
@@ -1241,7 +1227,7 @@ saveModuleContent( content.chapterId,
               />
             )}
             
-            {content[0].typeOfContent === 'READING' && (
+            {arr[0]?.typeOfContent === 'READING' && (
               <ReadingQuestionForm 
                 initialData={arr}
                 onSubmit={handleContentSubmit}
@@ -1249,7 +1235,7 @@ saveModuleContent( content.chapterId,
               />
             )}
             
-            {content[0].typeOfContent === 'SPEAKING_PASSAGE' && (
+            {arr[0]?.typeOfContent === 'SPEAKING_PASSAGE' && (
               <SpeakingPassageForm 
                 initialData={arr}
                 onSubmit={handleContentSubmit} 
@@ -1257,7 +1243,7 @@ saveModuleContent( content.chapterId,
               />
             )}
             
-            {content[0].typeOfContent === 'SPEAKING_PICTURE' && (
+            {arr[0]?.typeOfContent === 'SPEAKING_PICTURE' && (
               <SpeakingPictureForm 
                 initialData={arr}
                 onSubmit={handleContentSubmit} 
@@ -1265,14 +1251,15 @@ saveModuleContent( content.chapterId,
               />
             )}
             
-            {content[0].typeOfContent === 'WRITING' && (
+            {arr[0]?.typeOfContent === 'WRITING' && (
               <WritingQuestionForm 
                 initialData={arr}
                 onSubmit={handleContentSubmit} 
                 onDelete={handleDeleteM}
               />
             )}
-             {content[0].typeOfContent === 'PDF' && (
+            
+            {arr[0]?.typeOfContent === 'PDF' && (
               <PdfUploadForm 
                 initialData={arr}
                 onSubmit={handleContentSubmit} 
@@ -1298,7 +1285,7 @@ saveModuleContent( content.chapterId,
     );
   }
 
-  if (!courseData) {
+  if (!courseMetadata) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50">
         <div className="text-center text-red-600">

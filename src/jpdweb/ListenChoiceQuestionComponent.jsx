@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
 
-export default function ListeningQuiz({ question, options,inCreNum }) {
+export default function ListeningQuiz({ question, options,inCreNum,img }) {
   const [selected, setSelected] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const audioRef = useRef(null);
+  const [searchParams] = useSearchParams();
+  const language = searchParams.get('language') || 'en-US';
   console.log(question)
    console.log(options)
 useEffect(() => {
@@ -35,7 +38,7 @@ const handleReset=()=>{
 
   const  speak=(text)=>{
     const utterance=new SpeechSynthesisUtterance(text)
-    utterance.lang="ja-JP"
+    utterance.lang=language
     window.speechSynthesis.speak(utterance)
 }
 
@@ -57,6 +60,14 @@ if(!options||!question)return <>a</>
         🔊
       </button>
     {question.question!=null &&<span>${question.question}</span>}
+    {/* Ảnh ở phía trên */}
+  {img && (
+    <img
+      src={img}
+      alt="Flashcard illustration"
+      className="w-full h-24 object-cover"
+    />
+  )}
       <form>
         <div className="space-y-3">
           {options.map((option, i) => {
@@ -64,8 +75,8 @@ if(!options||!question)return <>a</>
             const isOptionCorrect = submitted && option.correct;
             const isOptionWrong = submitted && isOptionSelected && !option.correct;
 
-            const baseClasses =
-              "relative block rounded-lg px-4 py-2 border cursor-pointer transition-transform duration-300 hover:scale-105";
+          const baseClasses =
+  "relative block rounded-lg px-6 py-4 border cursor-pointer transition-transform duration-300 hover:scale-105 text-lg font-medium";
             const selectedBorder = isOptionSelected ? "border-blue-500" : "border-gray-300";
             const bgColor = isOptionCorrect
               ? "bg-green-100"

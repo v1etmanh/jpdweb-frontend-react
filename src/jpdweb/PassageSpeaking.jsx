@@ -5,7 +5,7 @@ import { useReactMediaRecorder } from 'react-media-recorder';
 
 const ReadPractice = ({ paragraph, increNum,evaluateAnswerSpeaking }) => {
   // Split paragraph into sentences
-  const sentences = paragraph.split(/[。！？]/).filter(Boolean);
+  const sentences = paragraph.split(/[。.！？]/).filter(Boolean);
   const halfCount = Math.ceil(sentences.length / 2);
 
   // Component state

@@ -28,6 +28,7 @@ export default function FlashCardContainer({ flashcards, onComplete }) {
         backText={flashcards[currentIndex].meaning}
         currentIndex={currentIndex}
         totalCards={flashcards.length}
+        img={flashcards[currentIndex].imgUrl}
       />
 
       <Row className="justify-content-center mt-4">
