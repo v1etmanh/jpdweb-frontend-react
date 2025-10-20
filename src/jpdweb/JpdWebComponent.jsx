@@ -26,8 +26,11 @@ import CourseContentOverviewComponent from "./CourseContentOverviewComponent";
 
 
 export default function JpdWebComponent(){
-  const[isCreator,setCreator]=useState(false)
+
+//TODO: setCreator để hiện sidebar creator
+  const[isCreator,setCreator]=useState(true)
    const [showDirect, setShowDirect] = useState(false);
+
 return (<div>
 
     <BrowserRouter>
@@ -133,7 +136,7 @@ return (<div>
 
 
 {/* Nút toggle Sidebar */}
-<button
+{/* <button
   onClick={() => setCreator((prev) => !prev)}
   style={{
     position: 'fixed',
@@ -163,30 +166,12 @@ return (<div>
   }}
 >
   {isCreator ? <X size={22} /> : <Menu size={22} />}
-</button>
+</button> */}
 
 
     
 {/* Creator Sidebar */}
-{isCreator&& <div
-  className={`creator-sidebar ${isCreator ? 'show' : ''}`}
-  style={{
-    position: 'fixed',
-    top: '0',
-    left: isCreator ? '0' : '-280px',   // hiệu ứng trượt
-    width: '280px',
-    height: '100vh',
-    backgroundColor: '#fdfdfd',
-    boxShadow: '2px 0 15px rgba(0,0,0,0.1)',
-    zIndex: 999,
-    transition: 'left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-    borderRight: '1px solid #e9ecef',
-    display: 'flex',
-    flexDirection: 'column'
-  }}
->
-  <Sidebar />
-</div>}
+{isCreator&&  <Sidebar />}
     <div className="main-content bg-white">
                         <Routes>
                         <Route path="/" element={<HomepageComponent></HomepageComponent>}></Route>
