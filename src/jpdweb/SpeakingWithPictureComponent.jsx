@@ -1,7 +1,9 @@
 import  { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { evaluateAnswer } from './api/ApiConnect';
 
 
-const SpeakingPictureQuestion = ({ imageUrl, questions, increNum ,evaluateAnswerSpeaking}) => {
+const SpeakingPictureQuestion = ({ imageUrl, questions, increNum }) => {
   
   const [currentIdx, setCurrentIdx] = useState(0);
   const [phase, setPhase] = useState('idle'); // 'idle', 'recording', 'playing'
@@ -17,7 +19,8 @@ const SpeakingPictureQuestion = ({ imageUrl, questions, increNum ,evaluateAnswer
   // Set to track API calls in progress
   const [pendingRequests, setPendingRequests] = useState(new Set());
   const [processingStatus, setProcessingStatus] = useState('');
-
+ const [searchParams] = useSearchParams();
+  const language = searchParams.get('language') || 'en-US';
   // Refs for resources that need cleanup
   const audioChunks = useRef([]);
   const recordingTimerRef = useRef(null);
@@ -46,7 +49,7 @@ const handleOutOfRequests = () => {
 };
   // Initialize on component mount
   useEffect(() => {
-    if (!isInitialized) {
+    if (!isInitialized) {       
       console.log("Initializing component");
       setHasCalledIncreNum(false);
       setResults([]);
@@ -102,8 +105,8 @@ const handleOutOfRequests = () => {
       const formData = new FormData();
       formData.append('audio', blob, `audio_${questionIdx}.webm`);
       formData.append('sentence', questions[questionIdx].answer);
-      
-      const response = await evaluateAnswerSpeaking(formData);
+      formData.append('language','en')
+      const response = await evaluateAnswer(formData);
       console.log(`Audio for question ${questionIdx + 1} sent successfully`);
       
       // Add result to results array

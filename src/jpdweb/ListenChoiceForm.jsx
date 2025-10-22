@@ -274,7 +274,7 @@ const ListeningChoiceForm = ({ onSubmit, initialData, onDelete }) => {
       options: q.options
         .filter(opt => opt.optionText.trim() !== '')
         .map(opt => ({
-          optionId: opt.optionId,
+          optionId: null,
           optionText: opt.optionText.trim(),
           correct: opt.correct
         }))

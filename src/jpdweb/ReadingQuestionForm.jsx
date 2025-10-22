@@ -23,10 +23,10 @@ const ReadingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
           question: '',
           feedBack: '',
           readingQuestionOptions: [
-            { id: null, optionText: '', correct: false },
-            { id: null, optionText: '', correct: false },
-            { id: null, optionText: '', correct: false },
-            { id: null, optionText: '', correct: false }
+            {  optionText: '', correct: false },
+            {  optionText: '', correct: false },
+            {  optionText: '', correct: false },
+            {optionText: '', correct: false }
           ]
         }
       ]
@@ -46,13 +46,13 @@ const ReadingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
           const loadedOptions = q.readingQuestionOptions || [];
           const normalizedOptions = [
             ...loadedOptions.map(opt => ({
-              id: opt.id || null,
+             
               optionText: opt.optionText || '',
               correct: opt.correct || false
             })),
             // Thêm options rỗng nếu < 4
             ...Array(Math.max(0, 4 - loadedOptions.length)).fill({
-              id: null,
+         
               optionText: '',
               correct: false
             })
@@ -73,10 +73,10 @@ const ReadingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
             question: '',
             feedBack: '',
             readingQuestionOptions: [
-              { id: null, optionText: '', correct: false },
-              { id: null, optionText: '', correct: false },
-              { id: null, optionText: '', correct: false },
-              { id: null, optionText: '', correct: false }
+              { ptionText: '', correct: false },
+              {  optionText: '', correct: false },
+              {  optionText: '', correct: false },
+              {  optionText: '', correct: false }
             ]
           });
         }
@@ -106,10 +106,10 @@ const ReadingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
           question: '',
           feedBack: '',
           readingQuestionOptions: [
-            { id: null, optionText: '', correct: false },
-            { id: null, optionText: '', correct: false },
-            { id: null, optionText: '', correct: false },
-            { id: null, optionText: '', correct: false }
+            {optionText: '', correct: false },
+            { optionText: '', correct: false },
+            {  optionText: '', correct: false },
+            {  optionText: '', correct: false }
           ]
         }
       ]
@@ -151,10 +151,10 @@ const ReadingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
       question: '',
       feedBack: '',
       readingQuestionOptions: [
-        { id: null, optionText: '', correct: false },
-        { id: null, optionText: '', correct: false },
-        { id: null, optionText: '', correct: false },
-        { id: null, optionText: '', correct: false }
+        { optionText: '', correct: false },
+        {optionText: '', correct: false },
+        {  optionText: '', correct: false },
+        {  optionText: '', correct: false }
       ]
     };
     newPassages[passageIndex].readingQuestion.push(newQuestion);
@@ -182,7 +182,7 @@ const ReadingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
     const newPassages = [...passages];
     const question = newPassages[passageIndex].readingQuestion[questionIndex];
     if (question.readingQuestionOptions.length < 6) {
-      question.readingQuestionOptions.push({ id: null, optionText: '', correct: false });
+      question.readingQuestionOptions.push({  optionText: '', correct: false });
       setPassages(newPassages);
     }
   };
@@ -273,13 +273,13 @@ const ReadingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
       title: passage.title.trim(),
       content: passage.content.trim(),
       readingQuestion: passage.readingQuestion.map(q => ({
-        rqId: q.rqId, // Giữ rqId để update
+        rqId: null, // Giữ rqId để update
         question: q.question.trim(),
         feedBack: q.feedBack.trim() || null,
         readingQuestionOptions: q.readingQuestionOptions
           .filter(opt => opt.optionText.trim() !== '')
           .map(opt => ({
-            id: opt.id, // Giữ id để update
+            // Giữ id để update
             optionText: opt.optionText.trim(),
             correct: opt.correct
           }))
@@ -300,10 +300,10 @@ const ReadingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
           question: '',
           feedBack: '',
           readingQuestionOptions: [
-            { id: null, optionText: '', correct: false },
-            { id: null, optionText: '', correct: false },
-            { id: null, optionText: '', correct: false },
-            { id: null, optionText: '', correct: false }
+            { optionText: '', correct: false },
+            {  optionText: '', correct: false },
+            { optionText: '', correct: false },
+            {optionText: '', correct: false }
           ]
         }]
       }]);
@@ -635,10 +635,10 @@ const ReadingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
                     question: '',
                     feedBack: '',
                     readingQuestionOptions: [
-                      { id: null, optionText: '', correct: false },
-                      { id: null, optionText: '', correct: false },
-                      { id: null, optionText: '', correct: false },
-                      { id: null, optionText: '', correct: false }
+                      {optionText: '', correct: false },
+                      {  optionText: '', correct: false },
+                      {  optionText: '', correct: false },
+                      { optionText: '', correct: false }
                     ]
                   }]
                 }]);

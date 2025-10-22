@@ -42,6 +42,9 @@ import {
   updateCourseMaterial,
   getContentByTypeAndModule 
 } from './api/ApiConnect';
+import { creatorApi } from './api/creatorApi';
+import { API_RESPONSE_TYPES, showSuccessNotification, showWarningNotification } from './api/apiClient';
+import { apiclient } from './api/BaseApi';
 
 // Content type mapping
 const CONTENT_TYPES = {
@@ -79,7 +82,38 @@ const CourseManagementInterface = () => {
   const [editingModule, setEditingModule] = useState(null);
   const [selectedChapterForModule, setSelectedChapterForModule] = useState(null);
   const [selectedModuleForContent, setSelectedModuleForContent] = useState(null);
+//
+const handleApiError = (response, defaultMessage = 'Có lỗi xảy ra') => {
+    const message = response.message || defaultMessage
 
+    switch (response.responseType) {
+      case API_RESPONSE_TYPES.UNAUTHORIZED:
+        showWarningNotification('Bạn không có quyền thực hiện tác vụ này')
+        break
+
+      case API_RESPONSE_TYPES.NOT_FOUND:
+        showWarningNotification('Tài nguyên không được tìm thấy')
+        break
+
+      case API_RESPONSE_TYPES.CONFLICT:
+        showWarningNotification(message || 'Dữ liệu bị xung đột')
+        break
+
+      case API_RESPONSE_TYPES.VALIDATION_ERROR:
+        showWarningNotification('Dữ liệu không hợp lệ')
+        console.error('Validation errors:', response.details)
+        break
+
+      default:
+        showWarningNotification(message)
+        console.error('API Error:', {
+          status: response.status,
+          code: response.code,
+          traceId: response.traceId,
+          details: response.details
+        })
+    }
+  }
   // Load course metadata only
   useEffect(() => {
     fetchCourseMetadata();
@@ -94,20 +128,19 @@ const CourseManagementInterface = () => {
 
   // 📥 Fetch course metadata (without full moduleContent)
   const fetchCourseMetadata = async () => {
-    try {
+  
       const cached = localStorage.getItem(`course_metadata_${courseId}`);
       if (cached) {
+        try{
         const parsed = JSON.parse(cached);
         setCourseMetadata(normalizeMetadata(parsed));
         // neu chapter do dai lon .0
-        if (parsed.chapters?.length > 0) {
-          setExpandedChapters(new Set([parsed.chapters[0].chapterId]));
-          if (parsed.chapters[0].modules?.length > 0) {
-            setExpandedModules(new Set([parsed.chapters[0].modules[0].moduleId]));
-          }
-        }
+       setupInitialExpanded(parsed)
         setLoading(false);
         return;
+        }catch(e){
+           console.warn('Cache parse error:', e)
+        }
       }
       // setup expand chapter and expand module
       // chức năng về UI nó cho phép khi render ta sẽ mặc định ban đầu list các content từ chapter tới module ở chapter 1
@@ -115,27 +148,61 @@ const CourseManagementInterface = () => {
 
       setLoading(true);
       //loading sẽ hiển thị trạng thái  tải để tránh lỗi
-      const response = await getCourseById(courseId);
+      const response = await creatorApi.getCourseById(courseId);
+      if(response.success){
       const data = response.data;
       
       const normalized = normalizeMetadata(data);
       setCourseMetadata(normalized);
       localStorage.setItem(`course_metadata_${courseId}`, JSON.stringify(normalized));
 
-      if (normalized.chapters?.length > 0) {
-        setExpandedChapters(new Set([normalized.chapters[0].chapterId]));
-        if (normalized.chapters[0].modules?.length > 0) {
-          setExpandedModules(new Set([normalized.chapters[0].modules[0].moduleId]));
-        }
-      }
+     setupInitialExpanded(data)
 
-    } catch (error) {
-      console.error('Error fetching course:', error);
+    } else  {
+      handleApiError(response, 'Không thể tải thông tin khóa học')
       setCourseMetadata({ chapters: [], public: false });
-    } finally {
-      setLoading(false);
     }
+      setLoading(false);
+    
   };
+
+  //
+ const handleBeforeCreateContent = async(chapterId, moduleId, type) => {
+  // Tìm chapter
+  const chapter = courseMetadata.chapters.find(ch => ch.chapterId === chapterId)
+  
+  if (!chapter) {
+    showWarningNotification('Chương không tồn tại')
+    return
+  }
+  
+  // Tìm module trong chapter
+  const module = chapter.modules.find(m => m.moduleId === moduleId)
+  
+  if (!module) {
+    showWarningNotification('Mô-đun không tồn tại')
+    return
+  }
+  
+  // Check xem contentType có tồn tại không
+  if (!module.contentTypes.includes(type)) {
+    
+    return
+  }
+  
+  // Nếu tất cả valid, load content
+  await handleSelectContentType(chapterId, moduleId, type)
+}
+  //
+  const setupInitialExpanded = (data) => {
+    if (data.chapters?.length > 0) {
+      setExpandedChapters(new Set([data.chapters[0].chapterId]))
+
+      if (data.chapters[0].modules?.length > 0) {
+        setExpandedModules(new Set([data.chapters[0].modules[0].moduleId]))
+      }
+    }
+  }
 /*
 ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  từ api
 
@@ -172,22 +239,23 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
     }
 
     setContentLoading(true);
-    try {
-      const response = await getContentByTypeAndModule(contentType, moduleId, chapterId, courseId);
-      const contents = response.data;
+   
+      const response = await creatorApi.getContentByType( courseId,chapterId,moduleId, contentType);
+      console.log(response)
 
       // Cache the loaded content
+       if (response.success){
       setLoadedContents(prev => ({
         ...prev,
-        [cacheKey]: contents
+        [cacheKey]: response.data
       }));
-
-      return contents;
-    } catch (error) {
-      console.error('Error fetching content:', error);
-      return [];
-    } finally {
-      setContentLoading(false);
+     setContentLoading(false)
+      return response.data;
+    }
+    else{
+     //  handleApiError(response, 'Không thể tải nội dung')
+     setContentLoading(false)
+      return []
     }
   };
 
@@ -200,10 +268,11 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
       moduleContent: updateData
     };
     
-    try {
-      const response = await updateCourseMaterial(courseId, chapterId, moduleId, data);
+    
+      const response = await creatorApi.updateModuleContent(courseId, chapterId, moduleId, data);
       
       // Update cache with saved content
+      if(response.success){
       const contentType = updateData[0]?.typeOfContent;
       if (contentType) {
         const cacheKey = `${courseId}_${chapterId}_${moduleId}_${contentType}`;
@@ -213,10 +282,11 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
         }));
       }
       
-      alert("Save successful");
-    } catch (error) {
-      console.error("Save failed:", error);
-      alert("Failed to save content");
+     showSuccessNotification("Save Successfull")
+    }
+    else{
+    handleApiError(response,"fail to fetch content ")
+      
     }
   };
 
@@ -246,12 +316,12 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
 
   // CRUD Operations for Chapter
   const handleAddChapter = async (chapterName) => {
-    try {
-      const response = await createNewChapter({
-        name: chapterName,
-        courseId
-      });
-
+    if (!chapterName.trim()) {
+      showWarningNotification('Vui lòng nhập tên chương')
+      return
+    }
+      const response =  await creatorApi.createChapter(courseId, chapterName.trim())
+ if (response.success) {
       const createdChapter = {
         ...response.data,
         modules: response.data.modules || []
@@ -263,13 +333,20 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
       });
 
       setShowChapterForm(false);
-    } catch (error) {
-      console.error("Failed to create chapter:", error);
-      alert("Cannot create chapter. Please try again.");
+ }
+      else {
+      handleApiError(response, 'Không thể thêm chương')
     }
+    
   };
 
-  const handleUpdateChapter = (chapterId, newName) => {
+  const handleUpdateChapter = async(chapterId, newName) => {
+    if (!newName.trim()) {
+      showWarningNotification('Vui lòng nhập tên chương')
+      return
+    }
+      const response =  await creatorApi.updateChapter( newName.trim(),chapterId,courseId)
+      if(response.success){
     setCourseMetadata({
       ...courseMetadata,
       chapters: courseMetadata.chapters.map(chapter =>
@@ -278,16 +355,22 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
           : chapter
       )
     });
-    setEditingChapter(null);
+     setEditingChapter(null);
+  }
+  else{
+     handleApiError(response, 'Không thể update chương')
+  }
+   
   };
 
   const handleDeleteChapter = async (chapterId) => {
     if (!window.confirm('Are you sure you want to delete this chapter?')) return;
 
-    try {
-      await deleteChapter(courseId, chapterId);
+   
+    const response=  await creatorApi.deleteChapter(courseId, chapterId);
 
       // Clear related cache
+      if(response.success){
       const keysToDelete = Object.keys(loadedContents).filter(key => 
         key.includes(`${courseId}_${chapterId}_`)
       );
@@ -301,16 +384,17 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
         ...courseMetadata,
         chapters: courseMetadata.chapters.filter(chapter => chapter.chapterId !== chapterId)
       });
-    } catch (error) {
-      console.error("Failed to delete chapter:", error);
-      alert("Cannot delete chapter. Please try again.");
+    }
+    else{
+     handleApiError(response,"Server gap loi trong qua trinh xu li deletechapter")
     }
   };
 
   // CRUD Operations for Module
   const handleAddModule = async (chapterId, moduleTitle) => {
-    try {
-      const response = await createNewModule(courseId, chapterId, moduleTitle);
+  
+      const response = await creatorApi.createModule(courseId, chapterId, moduleTitle);
+       if (response.success) {
       const createdModule = {
         ...response.data,
         contentTypes: response.data.contentTypes || []
@@ -330,13 +414,19 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
 
       setShowModuleForm(false);
       setSelectedChapterForModule(null);
-    } catch (error) {
-      console.error("Failed to create module:", error);
-      alert("Cannot create module. Please try again.");
-    }
+       }
+       else{
+       handleApiError(response, 'Không thể thêm mô-đun')
+       }
   };
 
-  const handleUpdateModule = (chapterId, moduleId, newTitle) => {
+  const handleUpdateModule = async(chapterId, moduleId, newTitle) => {
+     if (!newTitle.trim()) {
+      showWarningNotification('Vui lòng nhập tên chương')
+      return
+    }
+      const response =  await creatorApi.updateModule( newTitle.trim(),moduleId,chapterId,courseId)
+      if(response.success){
     setCourseMetadata({
       ...courseMetadata,
       chapters: courseMetadata.chapters.map(chapter =>
@@ -353,15 +443,20 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
       )
     });
     setEditingModule(null);
+  }
+  else{
+   handleApiError(response, 'Không thể update mô-đun')
+  }
   };
 
   const handleDeleteModule = async (chapterId, moduleId) => {
     if (!window.confirm('Are you sure you want to delete this module?')) return;
 
-    try {
-      await deleteModule(courseId, chapterId, moduleId);
+    
+     const response= await  creatorApi.deleteModule(courseId, chapterId, moduleId);
 
       // Clear related cache
+      if (response.success) {
       const keysToDelete = Object.keys(loadedContents).filter(key => 
         key.includes(`${courseId}_${chapterId}_${moduleId}_`)
       );
@@ -382,10 +477,11 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
             : chapter
         )
       });
-    } catch (error) {
-      console.error("Failed to delete module:", error);
-      alert("Cannot delete module. Please try again.");
     }
+     else {
+          handleApiError(response, 'Không thể xóa mô-đun')
+        }
+    
   };
 
   // Handle content selection with lazy loading
@@ -458,12 +554,13 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
     }
   };
 
-  const handleDeleteContent = async (chapterId, moduleId, mcId) => {
+   const handleDeleteContent = async (chapterId, moduleId, mcId) => {
     if (window.confirm('Are you sure you want to delete this content?')) {
-      try {
-        await deleteModuleContent(courseId, chapterId, moduleId, mcId);
+     
+     const response=   await  creatorApi.deleteModuleContent(courseId, chapterId, moduleId, mcId);
         
         // Update cache
+        if(response.success){
         Object.keys(loadedContents).forEach(key => {
           if (key.includes(`${courseId}_${chapterId}_${moduleId}_`)) {
             setLoadedContents(prev => ({
@@ -472,17 +569,20 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
             }));
           }
         });
-      } catch (e) {
-        alert("Error to delete: " + e);
       }
+      else{
+        handleApiError(response, 'Không thể xóa content')
+      }
+        
+      
     }
-  };
+  }; 
 
-  const handleDeleteTypeOfContent = async (chapterId, moduleId, typeOfContent) => {
+ const handleDeleteTypeOfContent = async (chapterId, moduleId, typeOfContent) => {
     if (window.confirm(`Are you sure you want to delete all ${typeOfContent} contents in this module?`)) {
-      try {
-        await deleteModuleContentByType(typeOfContent, moduleId, chapterId, courseId);
-    
+     
+     const response=   await creatorApi.deleteContentByType(typeOfContent, moduleId, chapterId, courseId);
+    if(response.success){
         // Clear cache for this type
         const cacheKey = `${courseId}_${chapterId}_${moduleId}_${typeOfContent}`;
         setLoadedContents(prev => {
@@ -510,11 +610,11 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
               : ch
           )
         }));
-      } catch (e) {
-        alert("Error to delete: " + e);
+      }else{
+       handleApiError(response, 'Không thể xóa  content type nafy ')
       }
     }
-  };
+  }; 
 
   // Create empty content based on type
   const createEmptyContent = (contentType) => {
@@ -640,11 +740,11 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
                       className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
                       autoFocus
                       onBlur={(e) => handleUpdateChapter(chapter.chapterId, e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleUpdateChapter(chapter.chapterId, e.target.value);
-                        }
-                      }}
+                     onKeyDown={(e) => {
+  if (e.key === 'Enter') {
+    handleUpdateChapter(chapter.chapterId, e.target.value);
+  }
+}}
                       onClick={(e) => e.stopPropagation()}
                     />
                   ) : (
@@ -1049,7 +1149,7 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
                             setShowContentDropdown(false);
                             
                             // Create empty content and trigger lazy load
-                            await handleSelectContentType(
+                            await handleBeforeCreateContent(
                               selectedModuleForContent.chapterId,
                               selectedModuleForContent.moduleId,
                               type

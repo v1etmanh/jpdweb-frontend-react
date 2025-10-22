@@ -360,7 +360,7 @@ const GapFillForm = ({ onSubmit, initialData, onDelete }) => {
       answers: q.answers
         .filter(ans => ans.answer.trim() !== '')
         .map(ans => ({
-          answerId: ans.answerId || undefined,
+          answerId: null,
           answer: ans.answer.trim()
         }))
     }));

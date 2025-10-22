@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { addToWishlist, createTransaction, enrollCourse, getCourseDetail } from "./api/ApiConnect";
-
+//addToWishlist,enrollCourse
+//createOrder
+//getCourseDetail
+import { customerApi } from "./api/customerApi";
+import {paymentApi} from "./api/paymentApi"
+import {courseApi} from "./api/courseApi"
+import { 
+  
+  API_RESPONSE_TYPES, 
+  showSuccessNotification,
+  showWarningNotification ,
+  showErrorUI
+} from "./api/apiClient";
 // ==================== CONSTANTS ====================
 const ACCESS_MODE = {
   PAID: 'PAID',
@@ -15,20 +26,46 @@ export default function CourseDescription() {
   const [isProcessing, setIsProcessing] = useState(false);
   const { id } = useParams();
   const nav = useNavigate();
-
+const handleEnrollmentError = (result) => {
+   
+    switch (result.responseType) {
+      case API_RESPONSE_TYPES.CONFLICT:
+        showWarningNotification("Bạn đã đăng ký khóa học này rồi");
+       
+        break;
+      
+      case API_RESPONSE_TYPES.VALIDATION_ERROR:
+        console.error("Validation error:", result.details);
+        showWarningNotification("Dữ liệu không hợp lệ");
+        break;
+              
+      case API_RESPONSE_TYPES.UNAUTHORIZED:
+        showWarningNotification("Vui lòng đăng nhập để tiếp tục");
+        nav('/login');
+        break;
+      
+      case API_RESPONSE_TYPES.NOT_FOUND:
+        showWarningNotification("Khóa học không được tìm thấy hoặc có vấn đề gì đó");
+        break;
+      
+      default:
+        console.error("Error:", result.traceId, result.message);
+    }
+  };
   useEffect(() => {
     fetchData();
   }, [id]);
 
   const fetchData = async () => {
-    try {
-      const response = await getCourseDetail(id);
-      if (response.status !== 200) {
-        return;
+   
+      const result = await courseApi.getCourseDetail(id);
+      if (result.success) {
+      
+      setCourse(result.data);
       }
-      setCourse(response.data);
-    } catch (e) {
-      console.error("error to fetch data", e);
+      else {
+      // Error notification đã được handle bởi wrapper
+      console.error('Error:', result.message, result.traceId);
     }
   };
 
@@ -44,11 +81,11 @@ export default function CourseDescription() {
 
     if (!confirmed) return;
 
-    try {
+   
       setIsProcessing(true);
-      const response = await createTransaction(course.price, id);
+      const response = await paymentApi.createOrder( course.courseId,course.price);
 
-      if (response.status === 200) {
+      if (response.success) {
         const { order_id, approval_url } = response.data;
         
         nav(
@@ -57,56 +94,44 @@ export default function CourseDescription() {
           `&courseTitle=${encodeURIComponent(course.name)}` +
           `&amount=${course.price}`
         );
-      } else {
-        alert('Có lỗi xảy ra: ' + response.data.message);
       }
-    } catch (error) {
-      console.error('Payment error:', error);
-      alert('Không thể kết nối đến server: ' + error.message);
-    } finally {
+       else { handleEnrollmentError(response);
+       }
       setIsProcessing(false);
-    }
+    
   };
 
   const handlePublicCourse = async () => {
-    try {
+   
       setIsProcessing(true);
-      const response = await enrollCourse("hehe", course.courseId);
+      const response = await customerApi.enrollCourse( course.courseId,"hehe");
       
-      if (response.status === 200) {
-        alert("Đăng ký khóa học thành công!");
+      if (response.success ) {
+         showSuccessNotification("Đăng ký khóa học thành công!");
         // Optional: Redirect to course learning page
         // nav(`/courses/${course.courseId}/learn`);
-      } else {
-        alert('Đăng ký thất bại: ' + response.data.message);
-      }
-    } catch (error) {
-      console.error('Enrollment error:', error);
-      alert('Không thể đăng ký khóa học: ' + error.message);
-    } finally {
-      setIsProcessing(false);
+      } 
+      else {
+      handleEnrollmentError(response);
     }
+  
+      setIsProcessing(false);
+    
   };
 
   // add wishlist
    const addWishlist = async () => {
-    try {
+    
       setIsProcessing(true);
-      const response = await addToWishlist( course.courseId);
-      
-      if (response.status === 201) {
-        alert("Đăng ký khóa học thành công!");
-        // Optional: Redirect to course learning page
-        // nav(`/courses/${course.courseId}/learn`);
-      } else {
-        alert('Đăng ký thất bại: ' + response.data.message);
-      }
-    } catch (error) {
-      console.error('Enrollment error:', error);
-      alert('Không thể đăng ký khóa học: ' + error.message);
-    } finally {
-      setIsProcessing(false);
+      const response = await customerApi.addToWishlist(course.courseId)
+      // addToWishlist( course.courseId);
+        if (response.success) {
+      showSuccessNotification("Thêm vào danh sách yêu thích thành công!");
+    } else {
+      handleEnrollmentError(response);
     }
+      setIsProcessing(false);
+    
   };
   const handlePrivateCourse = async () => {
     const joinKey = window.prompt('Vui lòng nhập mã tham gia khóa học:');
@@ -116,23 +141,19 @@ export default function CourseDescription() {
       return;
     }
 
-    try {
+   
       setIsProcessing(true);
-      const response = await enrollCourse(joinKey.trim(), course.courseId);
+      const result = await customerApi.enrollCourse( course.courseId,joinKey.trim());
+       if (result.success) {
+      showSuccessNotification("Đăng ký khóa học thành công!");
       
-      if (response.status === 200) {
-        alert('Đăng ký khóa học thành công!');
-        // Optional: Redirect to course learning page
-        // nav(`/courses/${course.courseId}/learn`);
-      } else {
-        alert('Mã tham gia không hợp lệ: ' + response.data.message);
-      }
-    } catch (error) {
-      console.error('Enrollment error:', error);
-      alert('Mã tham gia không hợp lệ: ' + error.message);
-    } finally {
-      setIsProcessing(false);
+     
+    } else {
+      handleEnrollmentError(result);
     }
+     
+      setIsProcessing(false);
+    
   };
 
   const handleBuyNow = async () => {

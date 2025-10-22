@@ -24,7 +24,7 @@ const SpeakingPictureForm = ({ onSubmit, initialData, onDelete }) => {
       picturePreview: null,
       speakingPictureListQuestions: [
         {
-          id: null,
+         
           question: '',
           answer: ''
         }
@@ -41,14 +41,14 @@ const SpeakingPictureForm = ({ onSubmit, initialData, onDelete }) => {
     if (initialData && Array.isArray(initialData) && initialData.length > 0 && !hasLoadedInitialData.current) {
       const loadedPictureQuestions = initialData.map(item => {
         const loadedQuestions = (item.speakingPictureListQuestions || []).map(q => ({
-          id: q.id || null,
+        
           question: q.question || '',
           answer: q.answer || ''
         }));
 
         if (loadedQuestions.length === 0) {
           loadedQuestions.push({
-            id: null,
+          
             question: '',
             answer: ''
           });
@@ -86,7 +86,7 @@ const SpeakingPictureForm = ({ onSubmit, initialData, onDelete }) => {
       picturePreview: null,
       speakingPictureListQuestions: [
         {
-          id: null,
+         
           question: '',
           answer: ''
         }
@@ -190,7 +190,7 @@ const SpeakingPictureForm = ({ onSubmit, initialData, onDelete }) => {
     setPictureQuestions(prev => {
       const newQuestions = [...prev];
       newQuestions[pictureIndex].speakingPictureListQuestions.push({
-        id: null,
+       
         question: '',
         answer: ''
       });
@@ -288,7 +288,7 @@ const SpeakingPictureForm = ({ onSubmit, initialData, onDelete }) => {
       picturePreview: null,
       speakingPictureListQuestions: [
         {
-          id: null,
+        
           question: '',
           answer: ''
         }
@@ -313,7 +313,7 @@ const SpeakingPictureForm = ({ onSubmit, initialData, onDelete }) => {
         typeOfContent: "SPEAKING_PICTURE",
         pictureUrl: pictureQuestion.pictureUrl.trim(),
         speakingPictureListQuestions: pictureQuestion.speakingPictureListQuestions.map(q => ({
-          id: q.id,
+        
           question: q.question.trim(),
           answer: q.answer.trim()
         }))

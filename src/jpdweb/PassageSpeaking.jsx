@@ -1,13 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 
 import { useReactMediaRecorder } from 'react-media-recorder';
+import { evaluateAnswer } from './api/ApiConnect';
+import { useSearchParams } from 'react-router-dom';
 
 
-const ReadPractice = ({ paragraph, increNum,evaluateAnswerSpeaking }) => {
+const ReadPractice = ({ paragraph, increNum }) => {
   // Split paragraph into sentences
   const sentences = paragraph.split(/[。.！？]/).filter(Boolean);
   const halfCount = Math.ceil(sentences.length / 2);
-
+ const [searchParams] = useSearchParams();
+  const language = searchParams.get('language') || 'en-US';
   // Component state
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedIndexes, setSelectedIndexes] = useState([]);
@@ -83,12 +86,12 @@ const handleOutOfRequests = () => {
       const formData = new FormData();
       formData.append('audio', blob, `audio_${currentIdx}.webm`);
       formData.append('sentence', sentence);
-      
+      formData.append('language',"ja")
       // Make API call without waiting for response
       console.log("Đang gửi audio lên server...");
       
       // Call API asynchronously
-      evaluateAnswerSpeaking(formData)
+      evaluateAnswer(formData)
         .then(response => {
           
           console.log("Đã nhận kết quả từ API:", response.data);
@@ -321,8 +324,8 @@ const handleOutOfRequests = () => {
     
     try {
       // Calculate recording duration based on sentence length
-      const charCount = sentence.length;
-      const durationMs = Math.max(4000, Math.ceil(charCount / 2) * 1000);
+      const charCount = sentence.trim().length;
+      const durationMs = Math.max(4000, charCount * 80)+3000
       console.log(`Sẽ ghi âm trong ${durationMs/1000} giây`);
       
       // Clear any existing recording timer
@@ -402,7 +405,7 @@ const handleOutOfRequests = () => {
       }
       
       // Otherwise use local TTS API
-      audio.src = `http://localhost:9090/api/tts?text=${encodeURIComponent(text)}&lang=ja-JP`;
+      audio.src = `http://localhost:9090/api/tts?text=${encodeURIComponent(text)}&lang=${language}`;
       
       audio.onended = () => {
         console.log("Phát âm hoàn tất");
@@ -445,7 +448,7 @@ const handleOutOfRequests = () => {
       window.speechSynthesis.cancel();
       
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "ja-JP";
+      utterance.lang = language;
       utterance.rate = 0.8;
       
       utterance.onend = () => {

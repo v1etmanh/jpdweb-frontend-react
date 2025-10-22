@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import ReadPractice from './PassageSpeaking';
 import SpeakingPictureQuestion from './SpeakingWithPictureComponent';
+import { useSearchParams } from 'react-router-dom';
 // import ReadPractice from './SpeakingPassageForm';
 // import SpeakingPictureQuestion from './SpeakingPictureForm';
 
@@ -18,11 +19,12 @@ export default function SpeakingPage({ paragraphs, pictureAndQuestions, isSave, 
   // Determine which mode we're in
   const hasParagraphs = paragraphs && paragraphs.length > 0;
   const hasPictures = pictureAndQuestions && pictureAndQuestions.length > 0;
-  
+  const [searchParams] = useSearchParams();
+  const language = searchParams.get('language') || 'en-US';
   // Calculate required minimums (at least half)
   const requiredParas = hasParagraphs ? Math.ceil(paragraphs.length / 2) : 0;
   const requiredPics = hasPictures ? Math.ceil(pictureAndQuestions.length / 2) : 0;
-  
+ 
   // Reset isDone when isSave prop changes
   useEffect(() => {
     setIsDone(isSave);
@@ -143,7 +145,7 @@ export default function SpeakingPage({ paragraphs, pictureAndQuestions, isSave, 
               <ReadPractice 
                 paragraph={paragraphs[selectedPara].passage} 
                 increNum={completeReadPractice} 
-                evaluateAnswerSpeaking={()=>{}}
+               
               />
             )}
           </>
@@ -160,6 +162,7 @@ export default function SpeakingPage({ paragraphs, pictureAndQuestions, isSave, 
                 imageUrl={pictureAndQuestions[selectedPic].pictureUrl}
                 questions={pictureAndQuestions[selectedPic].speakingPictureListQuestions}
                 increNum={completeSpeakingPicture}
+
               />
             )}
           </>

@@ -5,7 +5,7 @@ import { Button, Container, Row, Col } from "react-bootstrap";
 
 export default function FlashCardContainer({ flashcards, onComplete }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-
+  
   const handleNext = () => {
     if (currentIndex === flashcards.length - 1) onComplete();
     setCurrentIndex((prevIndex) =>

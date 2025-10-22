@@ -5,7 +5,7 @@ import { Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { changeCourseStatus, retriveCourseOfCreator } from "./api/ApiConnect";
 
-const CourseCard = ({ course, onEdit }) => {
+const CourseCard = ({ course, onEdit, onStatusChanged }) => {
   const [isPublic, setIsPublic] = useState(course.public || false);
   const [isChanging, setIsChanging] = useState(false);
 
@@ -14,6 +14,10 @@ const CourseCard = ({ course, onEdit }) => {
     try {
       await changeCourseStatus(course.id);
       alert('Cập nhật trạng thái thành công!');
+      // Notify parent component về sự thay đổi
+      if (onStatusChanged) {
+        onStatusChanged(course.id, isPublic);
+      }
     } catch (error) {
       console.error('Lỗi khi thay đổi trạng thái:', error);
       alert('Có lỗi xảy ra, vui lòng thử lại!');
@@ -40,6 +44,7 @@ const CourseCard = ({ course, onEdit }) => {
           <p className="text-sm text-gray-500">Ngày tạo: {course.createdDate}</p>
           <div className="flex gap-3 text-sm text-gray-600 mt-1">
             <span>{course.studentCount} học viên</span>
+            <span>{course.joinKey} join key</span>
             <span>{course.reviewCount} đánh giá</span>
           </div>
           <div className="flex items-center mt-1 text-yellow-400">
@@ -63,23 +68,15 @@ const CourseCard = ({ course, onEdit }) => {
       <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <label className="text-sm font-medium text-gray-700 flex-shrink-0 sm:w-24">
-            Trạng thái:
+            Trạng thái: {course.public?'công khai':'ẩn'}
           </label>
-          <select
-            value={isPublic}
-            onChange={(e) => setIsPublic(e.target.value === 'true')}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-0"
-            disabled={isChanging}
-          >
-            <option value="true">Public (Công khai)</option>
-            <option value="false">Private (Riêng tư)</option>
-          </select>
+         
           <button
             onClick={handlePublicStatusChange}
-            disabled={isChanging || isPublic === course.public}
+            disabled={isChanging }
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm font-medium flex-shrink-0"
           >
-            {isChanging ? 'Đang lưu...' : 'Cập nhật'}
+            {isChanging ? 'Đang lưu...' : 'chuyển sang'} {course.public?'ẩn':'công khai'}
           </button>
         </div>
       </div>
@@ -90,30 +87,93 @@ const CourseCard = ({ course, onEdit }) => {
 const CoursesList = () => {
   const nav = useNavigate();
   const [coursesByType, setCoursesByType] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchCourses = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await retriveCourseOfCreator();
+      if (response.status === 200) {
+        const grouped = response.data.reduce((acc, course) => {
+          const type = course.type || "UNKNOWN";
+          if (!acc[type]) acc[type] = [];
+          acc[type].push(course);
+          return acc;
+        }, {});
+        setCoursesByType(grouped);
+      } else {
+        setError("Không thể tải danh sách khóa học");
+      }
+    } catch (error) {
+      setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
+      console.error("error", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await retriveCourseOfCreator();
-        if (response.status === 200) {
-          const grouped = response.data.reduce((acc, course) => {
-            const type = course.type || "UNKNOWN"; // phòng null
-            if (!acc[type]) acc[type] = [];
-            acc[type].push(course);
-            return acc;
-          }, {});
-          setCoursesByType(grouped);
-          console.log(response.data)
-        } else {
-          alert("error to retrieve course");
-        }
-      } catch (error) {
-        alert("error to retrieve course");
-        console.error("error", error);
-      }
-    };
-    fetchData();
+    fetchCourses();
   }, []);
+
+  const handleStatusChanged = (courseId, newStatus) => {
+    // Cập nhật course.public trong state
+    setCoursesByType(prevState => {
+      const updated = { ...prevState };
+      Object.keys(updated).forEach(type => {
+        updated[type] = updated[type].map(course =>
+          course.id === courseId ? { ...course, public: newStatus } : course
+        );
+      });
+      return updated;
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-6 h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang tải khóa học...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800 font-medium">Lỗi:</p>
+          <p className="text-red-700 text-sm mt-1">{error}</p>
+          <button
+            onClick={fetchCourses}
+            className="mt-3 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium"
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (Object.keys(coursesByType).length === 0) {
+    return (
+      <div className="flex items-center justify-center p-6 h-64">
+        <div className="text-center">
+          <p className="text-gray-600 text-lg">Bạn chưa tạo khóa học nào</p>
+          <button
+            onClick={() => nav('/create-course')}
+            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+          >
+            Tạo khóa học mới
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 p-6">
@@ -128,6 +188,7 @@ const CoursesList = () => {
                 key={course.id}
                 course={course}
                 onEdit={() => nav(`/creator/course_manage/${course.id}`)}
+                onStatusChanged={handleStatusChanged}
               />
             ))}
           </div>

@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getEnrollementByCourseId } from './api/ApiConnect';
+import { creatorApi } from './api/creatorApi';
 
+import { 
+  
+  API_RESPONSE_TYPES, 
+  showSuccessNotification,
+  
+  showErrorUI,
+  showWarningNotification
+} from "./api/apiClient";
 const CourseDetail = () => {
   const [activeTab, setActiveTab] = useState('students');
   const { courseId } = useParams();
@@ -9,11 +17,11 @@ const CourseDetail = () => {
   const [courseName, setCourseName] = useState('');
 
   const fetchData = async () => {
-    try {
-      const response = await getEnrollementByCourseId(courseId);
-      if (response.status !== 200) {
-        alert("error to fetch data");
-      } else {
+    
+      const response = await creatorApi.getEnrollementByCourseId(courseId);
+      if (response.success) {
+       
+      
         console.log(response.data);
         // Xử lý circular reference - chỉ lấy level đầu tiên
         const cleanedData = response.data.map(item => ({
@@ -26,9 +34,20 @@ const CourseDetail = () => {
           } : null
         }));
         setEnrollData(cleanedData);
+      
+    }
+    else {
+      if(response.responseType==API_RESPONSE_TYPES.VALIDATION_ERROR){
+      
+                showWarningNotification("course ID này ko tồn tại ");
       }
-    } catch (e) {
-      console.error("error to fetch", e);
+      else if(response.responseType==API_RESPONSE_TYPES.UNAUTHORIZED)
+      {
+          showWarningNotification("Course này không thuộc về bạn ");
+      }
+      else {
+         showWarningNotification("Lỗi server trong quá trình xử lí yêu cầu ");
+      }
     }
   };
 

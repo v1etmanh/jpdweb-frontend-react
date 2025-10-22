@@ -1,5 +1,6 @@
 import { Plus, Book, Search, RefreshCw, AlertTriangle } from "lucide-react";
 import { useState, useEffect } from "react";
+import { rememberWordApi } from "./api/rememberApi";
 
 export default function DirectComponent(){
     const [display, setDisplay] = useState(false);
@@ -15,57 +16,109 @@ export default function DirectComponent(){
     const [alertType, setAlertType] = useState('success');
     const [refresh, setRefresh] = useState(0);
     const [showWarn, setShowWarn] = useState(false);
-    
-    // Mock user authentication
-    const mockAuth = {
-        user: {
-            customerId: 'mock-user-123'
+
+    /**
+     * Thêm từ mới vào từ điển
+     * @param {Object} payload - { word, meaning, description }
+     */
+    const addNewWord = async (payload) => {
+        try {
+            const response = await rememberWordApi.createNew(payload);
+            
+            if (response.success) {
+                // Thêm từ mới vào state với ID từ server (nếu có)
+                const newWord = {
+                    rwId: response.data?.rwId || Date.now(), // Fallback nếu server không trả ID
+                    ...payload
+                };
+                setMyWords(prevWords => [...prevWords, newWord]);
+                
+                showAlertMessage("Thêm từ thành công!", "success");
+                
+                // Reset form
+                setWord('');
+                SetMeaning('');
+                setDescrip('');
+                setDisplay(false);
+                setRefresh(refresh + 1);
+                
+                return response;
+            } else {
+                showAlertMessage(response.message || "Thêm từ thất bại!", "danger");
+                return response;
+            }
+        } catch (error) {
+            console.error("Error adding word:", error);
+            showAlertMessage("Lỗi khi thêm từ!", "danger");
+            throw error;
         }
     };
 
-    // Mock API functions
-    const getMywords = async (customerId) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({
-                    data: [
-                        { rwId: 1, word: 'こんにちは', meaning: 'Xin chào', description: 'Lời chào thông dụng trong tiếng Nhật' },
-                        { rwId: 2, word: 'ありがとう', meaning: 'Cảm ơn', description: 'Cách nói cảm ơn lịch sự' },
-                        { rwId: 3, word: '学校', meaning: 'Trường học', description: 'Nơi để học tập' },
-                        { rwId: 4, word: '友達', meaning: 'Bạn bè', description: 'Những người bạn thân thiết' },
-                        { rwId: 5, word: '食べる', meaning: 'Ăn', description: 'Động từ chỉ hành động ăn uống' }
-                    ]
-                });
-            }, 1000);
-        });
-    };
-
-    const addNewWord = async (customerId, payload) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({ status: 200, data: payload });
-            }, 500);
-        });
-    };
-
+    /**
+     * Xóa từ khỏi từ điển
+     * @param {number} id - ID của từ cần xóa
+     */
     const deleteWords = async (id) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({ status: 204 });
-            }, 500);
-        });
+        try {
+            const response = await rememberWordApi.deleteWord(id);
+            return response;
+        } catch (error) {
+            console.error("Error deleting word:", error);
+            return { success: false, status: 500 };
+        }
     };
 
+    /**
+     * Xử lý xóa từ với UI feedback
+     */
     const handleDelete = async (id) => {
-        const response = await deleteWords(id);
-        if(response.status === 404) {
-            showAlertMessage('Xóa thất bại!', 'danger');
+        try {
+            const response = await deleteWords(id);
+            
+            if (response.success || response.status === 204) {
+                // Xóa khỏi state local
+                setMyWords(prevWords => prevWords.filter(word => word.rwId !== id));
+                showAlertMessage('Xóa từ thành công!', 'success');
+                setRefresh(refresh + 1);
+            } else if (response.status === 404) {
+                showAlertMessage('Không tìm thấy từ để xóa!', 'danger');
+            } else {
+                showAlertMessage(response.message || 'Xóa thất bại!', 'danger');
+            }
+        } catch (error) {
+            showAlertMessage('Có lỗi xảy ra khi xóa từ!', 'danger');
         }
-        if(response.status === 204) {
-            setMyWords(prevWords => prevWords.filter(word => word.rwId !== id));
-            showAlertMessage('Xóa từ thành công!', 'success');
-            setRefresh(refresh + 1);
+    };
+
+    /**
+     * Tải danh sách từ vựng của user
+     */
+    const fetchMyWords = async () => {
+        setLoading(true);
+        try {
+            const response = await rememberWordApi.getAll();
+            
+            if (response.success) {
+                setMyWords(response.data || []);
+            } else {
+                showAlertMessage('Không thể tải danh sách từ!', 'danger');
+            }
+        } catch (error) {
+            console.error("Error fetching words:", error);
+            showAlertMessage('Lỗi khi tải từ điển!', 'danger');
+        } finally {
+            setLoading(false);
         }
+    };
+
+    /**
+     * Hiển thị thông báo alert
+     */
+    const showAlertMessage = (message, type = 'success') => {
+        setAlertMessage(message);
+        setAlertType(type);
+        setShowAlert(true);
+        setTimeout(() => setShowAlert(false), 3000);
     };
 
     // Filter words based on search term
@@ -74,6 +127,9 @@ export default function DirectComponent(){
         wordItem.meaning?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    /**
+     * Kiểm tra giới hạn từ
+     */
     useEffect(() => {
         const approachLimit = () => {
             if(myWords.length >= 19) {
@@ -85,75 +141,50 @@ export default function DirectComponent(){
         approachLimit();
     }, [myWords]);
 
-    const fetchMyWords = async () => {
-        if (mockAuth.user) {
-            setLoading(true);
-            try {
-                const response = await getMywords(mockAuth.user.customerId);
-                setMyWords(response.data || []);
-            } catch (error) {
-                console.error("Error fetching words:", error);
-                showAlertMessage("Lỗi khi tải từ điển!", "danger");
-            } finally {
-                setLoading(false);
-            }
-        }
-    };
-
-    const showAlertMessage = (message, type = 'success') => {
-        setAlertMessage(message);
-        setAlertType(type);
-        setShowAlert(true);
-        setTimeout(() => setShowAlert(false), 3000);
-    };
-
+    /**
+     * Load từ điển khi chuyển tab
+     */
     useEffect(() => {
         if (activeTab === 'dictionary') {
             fetchMyWords();
         }
-    }, [activeTab, mockAuth.user, refresh]);
+    }, [activeTab, refresh]);
 
     const handleClick = () => {
         setDisplay(!display);
     };
 
+    /**
+     * Xử lý submit thêm từ mới
+     */
     const handleClick2 = async () => {
+        // Validate giới hạn
         if(myWords.length >= 20) {
             showAlertMessage("Bạn chỉ có thể lưu trữ 20 từ, hãy xóa một từ để thêm từ mới!", "warning");
             return;
         }
+        
+        // Validate input
         if (!word.trim() || !meaning.trim()) {
             showAlertMessage("Vui lòng nhập đầy đủ từ và nghĩa!", "warning");
             return;
         }
 
-        try {
-            const payload = { 
-                rwId: Date.now(),
-                word: word.trim(), 
-                meaning: meaning.trim(), 
-                description: description.trim() 
-            };
-            await addNewWord(mockAuth.user.customerId, payload);
-            
-            // Add to local state
-            setMyWords(prevWords => [...prevWords, payload]);
-            
-            setWord('');
-            SetMeaning('');
-            setDescrip('');
-            setDisplay(false);
-            
-            showAlertMessage("Thêm từ thành công!", "success");
-            
-        } catch (error) {
-            console.error("Error adding word:", error);
-            showAlertMessage("Lỗi khi thêm từ!", "danger");
-        }
+        // Tạo payload
+        const payload = { 
+            word: word.trim(), 
+            meaning: meaning.trim(), 
+            description: description.trim() 
+        };
+
+        // Gọi API thêm từ
+        await addNewWord(payload);
     };
 
+    // ... Phần JSX giữ nguyên như code cũ
     return (
         <div className="min-h-screen bg-gray-50 py-8">
+            {/* ... JSX code của bạn ... */}
             <div className="max-w-6xl mx-auto px-4">
                 {/* Header */}
                 <div className="text-center mb-8">

@@ -13,11 +13,10 @@ export default function GapFillQuestionComponent({ questionData, inCreNum }) {
   }, [questionData]);
 
   const parseQuestion = () => {
-    const parts = questionData.questionText.split("___");
-    const blanksCount = parts.length - 1;
-    return { parts, blanksCount };
-  };
-
+  const parts = questionData.questionText.split(/_{3,}/);
+  const blanksCount = parts.length - 1;
+  return { parts, blanksCount };
+};
   const { parts, blanksCount } = parseQuestion();
 
   const handleInputChange = (blankIndex, value) => {

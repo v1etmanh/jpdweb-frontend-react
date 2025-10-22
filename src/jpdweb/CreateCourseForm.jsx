@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createNewCourse } from './api/ApiConnect';
+import { useAuth } from './security/Authentication';
 
 // Component InputField tách riêng để tối ưu performance
 const InputField = React.memo(({ 
@@ -73,8 +74,9 @@ const CreateCourseForm = () => {
       targetAudience: '',
       requirement: '',
       learningObject: '',
-      language: 'Vietnamese',
-      teachingLanguage:'',
+       language: 'VIETNAMESE',      // ✅ Fix
+    teachingLanguage: 'VIETNAMESE', 
+      
       price: '',
       urlImg: '',
       courseType: '',
@@ -87,6 +89,7 @@ const CreateCourseForm = () => {
   const [isUpdateCertificate, setIsUpdateCertificate] = useState(() => {
     return localStorage.getItem('certificateUploaded') === 'true';
   });
+  const auth =useAuth()
  /*
  ENGLISH,
     VIETNAMESE,
@@ -241,7 +244,13 @@ const teachingLanguages = useMemo(() => [
           newErrors.image = 'Hình ảnh khóa học là bắt buộc';
         }
         break;
-
+      case 4:
+        if (!courseData.language || courseData.language === '') {
+    newErrors.language = 'Ngôn ngữ là bắt buộc';
+  } break;
+   case 5:if (!courseData.teachingLanguage || courseData.teachingLanguage === '') {
+    newErrors.teachingLanguage = 'Ngôn ngữ giảng dạy là bắt buộc';
+  } break;
       default:
         break;
     }
@@ -266,9 +275,10 @@ const teachingLanguages = useMemo(() => [
     setIsSubmitting(true);
     
     // Kiểm tra certificate cho PAID course
-    if (courseData.courseType === "PAID" && !isUpdateCertificate) {
+    console.log(auth.creatorInfor.status)
+    if (courseData.courseType === "PAID" && auth.creatorInfor.status!=="SUCCESS") {
       localStorage.setItem('courseDraft', JSON.stringify(courseData));
-      navigate("/upload_profile", { 
+      navigate("/creator/profile", { 
         state: { 
           redirectTo: '/create-course',
           message: 'Vui lòng cập nhật chứng chỉ và thông tin thanh toán để tạo khóa học có phí'

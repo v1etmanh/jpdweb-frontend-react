@@ -388,7 +388,7 @@ const applySuggestion = () => {
       options: q.options
         .filter(opt => opt.optionText.trim() !== '')
         .map(opt => ({
-          mcoId: opt.mcoId,
+          mcoId: null,
           optionText: opt.optionText.trim(),
           correct: opt.isCorrect
         }))

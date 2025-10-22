@@ -162,3 +162,16 @@ export const loadModuleContent=(courseId,chapterId,moduleId,typeOfContent)=>{
     typeOfContent:typeOfContent
   }})
 }
+export const generateFeaturesAi=(question,url)=>{
+   return apiclient.post("/api/creator/AI/task1/analyze",null,{params:{
+    imgUrl:url,
+    question:question
+   }   });
+}
+export const evaluateAnswer=(formData)=>{
+  return apiclient.post("/api/customer/evaluate/evaluate", formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+}

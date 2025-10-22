@@ -83,6 +83,7 @@ const handleCertificateSubmit = (files) => {
 const reload=async()=>{
   try{
   const response=await getCreatorAccount();
+  console.log(response)
   if(response.status==200)
     setCreatorInfor(response.data)
   else {

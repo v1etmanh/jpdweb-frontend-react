@@ -6,7 +6,8 @@ import flashcard from '../images/flashcard.png';
 import AIvoice from '../images/AIvoice.png'
 import qiuz from '../images/qiuz.png'
 import { Search } from "lucide-react";
-import { retrieveRecommendCourses } from "./api/ApiConnect";
+import { courseApi } from "./api/courseApi"
+import { showWarningNotification } from "./api/apiClient";
 
 
 
@@ -100,10 +101,13 @@ export default function HomepageComponent() {
         fetchdata()
     }, [])
 const fetchdata=async()=>{
-   const response = await retrieveRecommendCourses();
-  const data = response.data;
+   const response = await courseApi.getRecommendCourses();
+//   const data = response.data;
 
   // Nhóm dữ liệu theo 'language'
+  if(!response.success){showWarningNotification(response) 
+    return}
+ const data = response.data;
   const grouped = data.reduce((acc, obj) => {
     const key = obj.language || 'Unknown';
     if (!acc[key]) acc[key] = [];

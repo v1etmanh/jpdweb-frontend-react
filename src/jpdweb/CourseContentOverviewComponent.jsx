@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { loadContentOverview, loadModuleContent } from "./api/ApiConnect";
 
+import { customerApi } from "./api/customerApi";
+import { API_RESPONSE_TYPES, showErrorNotification, showWarningNotification } from "./api/apiClient";
 export default function CourseContentOverviewComponent(){
   const { id } = useParams();
   const nav = useNavigate();
@@ -12,31 +13,53 @@ export default function CourseContentOverviewComponent(){
   const [error, setError] = useState(null);
   const [expandedChapters, setExpandedChapters] = useState(new Set([0]));
   const [expandedModules, setExpandedModules] = useState(new Set());
-
-  useEffect(() => {
-    const fetchCourseOverview = async () => {
+  const handleError = (response) => {
+    switch (response.responseType) {
+      case API_RESPONSE_TYPES.UNAUTHORIZED:
+        showWarningNotification("Bạn không có quyền truy cập khóa học này")
+        // Redirect to course list
+        nav('/courses')
+        break
+      
+      case API_RESPONSE_TYPES.NOT_FOUND:
+        showWarningNotification("Khóa học không được tìm thấy")
+        nav('/courses')
+        break
+      
+      case API_RESPONSE_TYPES.CONFLICT:
+        showWarningNotification("Có lỗi xảy ra với khóa học này")
+        break
+      
+      default:
+        showWarningNotification("Có lỗi xảy ra, vui lòng thử lại sau")
+        console.error("Error:", response.traceId, response.message)
+    }
+  }
+   
+    const loadCourseOverview = async () => {
       setIsLoading(true);
-      try {
-        const response = await loadContentOverview(id);
+      
+        const response = await customerApi.loadContentOverview(id);
         
-        if (response.status !== 200) {
-          throw new Error('Failed to load course');
-        }
+        if (response.success) {
+       
+        
 
         const data = response.data;
         setCourseData(data);
-      } catch (err) {
-        setError(err.message || 'An error occurred');
-        console.error('Error fetching course:', err);
-      } finally {
+        }
+       else {
+       handleError(response)
+      } 
         setIsLoading(false);
-      }
+      
     };
-
+ useEffect(() => {
     if (id) {
-      fetchCourseOverview();
+      loadCourseOverview()
     }
-  }, [id]);
+  }, [id])
+   
 
   const mapContentType = (type) => {
     const typeMap = {
@@ -139,16 +162,16 @@ export default function CourseContentOverviewComponent(){
   };
 
   const handleContentClick = async (chapter, module, contentType) => {
-    try {
+    
       const contentKey = `${module.moduleId}-${contentType}`;
       setLoadingContent(contentKey);
       
-      const response = await loadModuleContent(id, chapter.chapterId, module.moduleId, contentType);
+      const response = await customerApi.loadModuleContent(id, chapter.chapterId, module.moduleId, contentType);
 
-      if (response.status !== 200) {
-        throw new Error(`Failed to load content: ${response.statusText}`);
-      }
-
+    if(!response.success){
+      handleError(response)
+    }
+else{
       const contents = response.data;
         const languageMap = {
     'ENGLISH': 'en-US',
@@ -166,12 +189,9 @@ export default function CourseContentOverviewComponent(){
       nav(`/course/content/${module.moduleId}/${contentType}?language=${languageMap[courseData.language]}&teachingLanguage=${languageMap[courseData.teachingLanguage]}`, {
         state: { contents }
       });
-    } catch (err) {
-      console.error('Error fetching content:', err);
-      alert('Failed to load content. Please try again.');
-    } finally {
-      setLoadingContent(null);
     }
+      setLoadingContent(null);
+    
   };
 
   if (isLoading) {

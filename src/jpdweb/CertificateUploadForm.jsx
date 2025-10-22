@@ -1,6 +1,7 @@
 import { AlertCircle, Upload, X } from "lucide-react";
 import { useState } from "react";
-import { uploadCertificate } from "./api/ApiConnect";
+import { creatorApi } from "./api/creatorApi";
+import { showErrorNotification, showSuccessNotification } from "./api/apiClient";
 
 export const CertificateUploadForm = ({ onSubmit, onCancel }) => {
   const [files, setFiles] = useState([]);
@@ -71,11 +72,11 @@ export const CertificateUploadForm = ({ onSubmit, onCancel }) => {
   setUploading(true);
   setError('');
 
-  try {
-    const response = await uploadCertificate(files); // ✅ Đúng - truyền files vào
+  
+    const response = await  creatorApi.uploadCertificate(files); // ✅ Đúng - truyền files vào
     
-    if (response.status === 201) { // Backend trả về 201 CREATED
-      alert("Bạn đã gửi thành công! Vui lòng chờ 2-3 ngày để admin xác nhận chứng chỉ của bạn. Cảm ơn!");
+    if (response.success) { 
+      showSuccessNotification("Bạn đã upload chứng chỉ thành công , hãy chờ admin phê duyệt hồ sơ của bạn")
       
       // Reset form
       setFiles([]);
@@ -84,13 +85,12 @@ export const CertificateUploadForm = ({ onSubmit, onCancel }) => {
       if (onSubmit) onSubmit();
       onCancel();
     }
-    
-  } catch (error) {
-    console.error('Upload error:', error);
-    setError(error.response?.data?.error || 'Có lỗi xảy ra khi tải lên. Vui lòng thử lại.');
-  } finally {
+    else{
+      showErrorNotification("quá trình upload gặp vấn đề ")
+    }
+  
     setUploading(false);
-  }
+  
 };
 
   const formatFileSize = (bytes) => {

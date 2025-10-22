@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, FileText, ImageIcon, XIcon, Loader2Icon, ListChecks } from 'lucide-react';
 import { saveImg } from './api/ApiConnect';
+import { useSearchParams } from 'react-router-dom';
 
 const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
   const [questions, setQuestions] = useState([
@@ -10,7 +11,8 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
       imageUrl: '', 
       requirements: '',
       taskTypeCategory: 'REPORT',
-      criterias: [] 
+      templates: [] ,
+     
     }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,7 +31,8 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
     { value: 'STORY', label: 'Story' },
     { value: 'FORM_FILLING', label: 'Form Filling' }
   ];
-
+const [searchParams] = useSearchParams();
+  const language = searchParams.get('language') || 'en-US';
   // Load dữ liệu đầu vào
   useEffect(() => {
     console.log(initialData)
@@ -40,7 +43,8 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
         imageUrl: item.imageUrl || item.imgUrl || '',
         requirements: item.requirements || '',
         taskTypeCategory: item.taskTypeCategory || 'REPORT',
-        criterias: item.criterias || []
+        templates: item.templates || [],
+       
       }));
       setQuestions(loadedQuestions);
       hasLoadedInitialData.current = true;
@@ -55,7 +59,8 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
       imageUrl: '', 
       requirements: '',
       taskTypeCategory: 'REPORT',
-      criterias: [] 
+      templates: [] ,
+     
     }]);
   };
 
@@ -87,27 +92,33 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
   };
 
   // Thêm criteria mới
-  const addCriteria = (index) => {
+  const addtemplates= (index) => {
     const newQuestions = [...questions];
-    newQuestions[index].criterias.push('');
+    newQuestions[index].templates.push('');
     setQuestions(newQuestions);
   };
+  //
 
   // Xóa criteria
-  const removeCriteria = (questionIndex, criteriaIndex) => {
+  const removetemplates = (questionIndex, criteriaIndex) => {
     const newQuestions = [...questions];
-    newQuestions[questionIndex].criterias = newQuestions[questionIndex].criterias.filter(
+    newQuestions[questionIndex].templates = newQuestions[questionIndex].templates.filter(
       (_, i) => i !== criteriaIndex
     );
     setQuestions(newQuestions);
   };
+//
 
   // Cập nhật criteria
-  const updateCriteria = (questionIndex, criteriaIndex, value) => {
+  const updatetemplates = (questionIndex, criteriaIndex, value) => {
     const newQuestions = [...questions];
-    newQuestions[questionIndex].criterias[criteriaIndex] = value;
+    newQuestions[questionIndex].templates[criteriaIndex] = value;
     setQuestions(newQuestions);
   };
+//
+
+  //
+  const [generatingIndex, setGeneratingIndex] = useState(null);
 
   // Upload ảnh
   const handleImageUpload = async (index, file) => {
@@ -169,7 +180,9 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
         imageUrl: q.imageUrl || null,
         requirements: q.requirements.trim() || null,
         taskTypeCategory: q.taskTypeCategory,
-        criterias: q.criterias.filter(c => c.trim()).map(c => c.trim()),
+        templates: q.templates.filter(c => c.trim()).map(c => c.trim()),
+      
+        
         typeOfContent: "WRITING"
       }));
 
@@ -187,7 +200,8 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
         imageUrl: '', 
         requirements: '',
         taskTypeCategory: 'REPORT',
-        criterias: [] 
+        templates: [] ,
+       
       }]);
       hasLoadedInitialData.current = false;
       alert('Upload câu hỏi thành công!');
@@ -351,26 +365,28 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
                 />
               </div>
 
-              {/* Criterias Section */}
+            
+              {/*feature section*/}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                   <ListChecks className="w-4 h-4" />
-                  Tiêu chí chấm điểm (tùy chọn)
+                template
                 </label>
+               
                 
                 <div className="space-y-2">
-                  {question.criterias.map((criteria, criteriaIndex) => (
+                  {question.templates.map((criteria, criteriaIndex) => (
                     <div key={criteriaIndex} className="flex gap-2">
                       <input
                         type="text"
                         value={criteria}
-                        onChange={(e) => updateCriteria(index, criteriaIndex, e.target.value)}
+                        onChange={(e) => updatetemplates(index, criteriaIndex, e.target.value)}
                         placeholder={`Tiêu chí ${criteriaIndex + 1}...`}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       />
                       <button
                         type="button"
-                        onClick={() => removeCriteria(index, criteriaIndex)}
+                        onClick={() => removetemplates(index, criteriaIndex)}
                         className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-md transition-colors"
                         title="Xóa tiêu chí"
                       >
@@ -381,11 +397,11 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
                   
                   <button
                     type="button"
-                    onClick={() => addCriteria(index)}
+                    onClick={() => addtemplates(index)}
                     className="flex items-center gap-2 px-3 py-2 text-sm text-green-600 border border-green-600 rounded-md hover:bg-green-50 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
-                    Thêm tiêu chí
+                    Thêm template
                   </button>
                 </div>
               </div>
@@ -413,7 +429,7 @@ const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
                   imageUrl: '', 
                   requirements: '',
                   taskTypeCategory: 'REPORT',
-                  criterias: [] 
+                  templates: [] 
                 }]);
                 hasLoadedInitialData.current = false;
               }}
