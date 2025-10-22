@@ -30,17 +30,9 @@ import SpeakingPassageForm from './SpeakingPassageForm';
 import WritingQuestionForm from './WritingQuestionForm';
 import SpeakingPictureForm from './SpeakingPictureForm';
 import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  createNewChapter, 
-  createNewModule, 
-  deleteChapter, 
-  deleteModule, 
-  deleteModuleContent, 
-  deleteModuleContentByType, 
-  getCourseById, 
+import {
   updateCourse, 
-  updateCourseMaterial,
-  getContentByTypeAndModule 
+ 
 } from './api/ApiConnect';
 import { creatorApi } from './api/creatorApi';
 import { API_RESPONSE_TYPES, showSuccessNotification, showWarningNotification } from './api/apiClient';

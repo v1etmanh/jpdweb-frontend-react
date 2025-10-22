@@ -64,9 +64,9 @@ export default function WritingComponent({ data, onComplete }) {
 
 📊 ĐIỂM SỐ:
 -------------------------------------------------
-• Ngữ pháp (Grammar):     ${evaluationResult.grammarScore.toFixed(1)}/10
-• Từ vựng (Vocabulary):   ${evaluationResult.vocabularyScore.toFixed(1)}/10
-• Điểm trung bình:        ${((evaluationResult.grammarScore + evaluationResult.vocabularyScore) / 2).toFixed(1)}/10
+• Ngữ pháp (Grammar):     ${evaluationResult.grammar.toFixed(1)}/10
+• Từ vựng (Vocabulary):   ${evaluationResult.vocabulary.toFixed(1)}/10
+• Điểm trung bình:        ${((evaluationResult.feedback + evaluationResult.vocabularyScore) / 2).toFixed(1)}/10
 
 📝 NHẬN XÉT CHI TIẾT:
 -------------------------------------------------

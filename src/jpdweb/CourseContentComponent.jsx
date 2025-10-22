@@ -13,16 +13,14 @@ import WritingContainer from "./WritingContainer";
 import VideoContainer from "./VideoContainer";
 import PdfContainer from "./PdfContainer";
 
-export default function CourseContentComponent() {
+export default function CourseContentComponent({contents,moduleid,contentType}) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
   // ✅ Fixed: Use contentType instead of contentid to match route
-  const { moduleid, contentType } = useParams();
-  const location = useLocation();
-
-  const contents = location.state?.contents;
+ 
+  
 
   useEffect(() => {
     const fetchData = async () => {

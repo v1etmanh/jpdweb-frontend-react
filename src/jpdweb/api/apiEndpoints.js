@@ -73,5 +73,11 @@ export const API_ENDPOINTS = {
     ,
     AI:{
         WRITING_EVALUATE:'/api/customer/evaluate/evaluateWriting'
+    },
+    REPORT:{
+      REPORT_COURSE:'/api/customer/report'
+    },
+    FEEDBACK:{
+        CREATE_FEEDBACK:'/api/customer/feedback/:courseId'
     }
 };
