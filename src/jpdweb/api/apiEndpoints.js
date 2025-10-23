@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
         EVALUATE: '/api/customer/evaluate/evaluate',
         ADD_WISHLIST: '/api/wishlist/:courseId',
         ENROLL_COURSE: '/api/enroll/:courseId',
+        FINISH_CONTENT:'/api/customer/learning/:courseId/:moduleId/finish_content'
     },
 
     // Creator

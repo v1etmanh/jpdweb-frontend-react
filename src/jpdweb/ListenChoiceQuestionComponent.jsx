@@ -2,14 +2,22 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
 
-export default function ListeningQuiz({ question, options,inCreNum,img }) {
+export default function ListeningQuiz({ question, options,inCreNum,img ,language}) {
   const [selected, setSelected] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const audioRef = useRef(null);
-  const [searchParams] = useSearchParams();
-  const language = searchParams.get('language') || 'en-US';
-  console.log(question)
-   console.log(options)
+  const languageMap = {
+        'ENGLISH': 'en-US',
+        'VIETNAMESE': 'vi-VN',
+        'CHINESE': 'zh-CN',
+        'JAPANESE': 'ja-JP',
+        'KOREAN': 'ko-KR',
+        'FRENCH': 'fr-FR',
+        'GERMAN': 'de-DE',
+        'SPANISH': 'es-ES',
+        'ITALIAN': 'it-IT',
+        'RUSSIAN': 'ru-RU',
+      };
 useEffect(() => {
   
    
@@ -39,7 +47,7 @@ const handleReset=()=>{
   const  speak=(text)=>{
     const utterance=new SpeechSynthesisUtterance(text)
     utterance.lang=language
-    window.speechSynthesis.speak(utterance)
+    window.speechSynthesis.speak(languageMap["ENGLISH"])
 }
 
   const isCorrect = submitted && options[selected]?.correct;
@@ -51,7 +59,7 @@ if(!options||!question)return <>a</>
       <button
         onClick={() => {
           const utterance = new SpeechSynthesisUtterance(question);
-          utterance.lang = "ja-JP";
+          utterance.lang = languageMap[language];
           utterance.rate = 0.8;
           window.speechSynthesis.speak(utterance);
         }}

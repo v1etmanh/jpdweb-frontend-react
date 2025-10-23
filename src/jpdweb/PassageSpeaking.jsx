@@ -5,12 +5,11 @@ import { evaluateAnswer } from './api/ApiConnect';
 import { useSearchParams } from 'react-router-dom';
 
 
-const ReadPractice = ({ paragraph, increNum }) => {
+const ReadPractice = ({ paragraph, increNum,language }) => {
   // Split paragraph into sentences
   const sentences = paragraph.split(/[。.！？]/).filter(Boolean);
   const halfCount = Math.ceil(sentences.length / 2);
- const [searchParams] = useSearchParams();
-  const language = searchParams.get('language') || 'en-US';
+  
   // Component state
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedIndexes, setSelectedIndexes] = useState([]);
@@ -30,6 +29,18 @@ const ReadPractice = ({ paragraph, increNum }) => {
   const countdownTimerRef = useRef(null);
   const recordingTimerRef = useRef(null);
   const phaseChangeTimerRef = useRef(null);
+  const languageMap = {
+        'ENGLISH': 'en-US',
+        'VIETNAMESE': 'vi-VN',
+        'CHINESE': 'zh-CN',
+        'JAPANESE': 'ja-JP',
+        'KOREAN': 'ko-KR',
+        'FRENCH': 'fr-FR',
+        'GERMAN': 'de-DE',
+        'SPANISH': 'es-ES',
+        'ITALIAN': 'it-IT',
+        'RUSSIAN': 'ru-RU',
+      };
 const handleOutOfRequests = () => {
   console.log("Xử lý hết lượt request");
   
@@ -80,13 +91,14 @@ const handleOutOfRequests = () => {
   const processAudioAsync = async (blob, sentence) => {
     try {
       // Increment pending API calls counter
+      
       setPendingApiCalls(prev => prev + 1);
       
       // Send audio to server
       const formData = new FormData();
       formData.append('audio', blob, `audio_${currentIdx}.webm`);
       formData.append('sentence', sentence);
-      formData.append('language',"ja")
+      formData.append('language',languageMap[language].substring(0,2))
       // Make API call without waiting for response
       console.log("Đang gửi audio lên server...");
       
@@ -405,7 +417,7 @@ const handleOutOfRequests = () => {
       }
       
       // Otherwise use local TTS API
-      audio.src = `http://localhost:9090/api/tts?text=${encodeURIComponent(text)}&lang=${language}`;
+      audio.src = `http://localhost:9090/api/tts?text=${encodeURIComponent(text)}&lang=${languageMap[language].substring(0,2)}`;
       
       audio.onended = () => {
         console.log("Phát âm hoàn tất");
@@ -448,7 +460,7 @@ const handleOutOfRequests = () => {
       window.speechSynthesis.cancel();
       
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = language;
+      utterance.lang = languageMap[language];
       utterance.rate = 0.8;
       
       utterance.onend = () => {

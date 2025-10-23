@@ -27,7 +27,7 @@ export async function callApi(apiFunc, options = {}) {
 
     try {
          const response = await apiFunc();
-         console.log(response)
+         
     // Nếu đến đây nghĩa là status đã 2xx rồi (axios tự động throw error nếu >= 400)
     return {
         success: true,

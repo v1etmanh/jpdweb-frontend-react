@@ -241,14 +241,7 @@ const location = useLocation();
               </ProtectedRoute>
             } 
           />
-          <Route
-            path="/course/content/:moduleid/:contentType"
-            element={
-              <ProtectedRoute>
-                <CourseContentComponent />
-              </ProtectedRoute>
-            }
-          />
+         
          
           
           {/* Upload Profile - Chỉ cần authentication */}

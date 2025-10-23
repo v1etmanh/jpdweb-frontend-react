@@ -12,12 +12,14 @@ import PdfComponent from "./PdfComponent";
 import WritingContainer from "./WritingContainer";
 import VideoContainer from "./VideoContainer";
 import PdfContainer from "./PdfContainer";
+import { customerApi } from "./api/customerApi";
+import { showSuccessNotification, showWarningNotification } from "./api/apiClient";
 
-export default function CourseContentComponent({contents,moduleid,contentType}) {
+export default function CourseContentComponent({contents,moduleid,contentType,language,isFinish,onComplete}) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+  const{id}=useParams()
   // ✅ Fixed: Use contentType instead of contentid to match route
  
   
@@ -43,9 +45,7 @@ export default function CourseContentComponent({contents,moduleid,contentType}) 
     }
   }, [moduleid, contentType, contents]);
 
-  const onComplete = () => {
-    console.log('Content completed!', { moduleid, contentType });
-  };
+  
 
   const handlePost = () => {
     console.log('Speaking exercise completed!');
@@ -54,7 +54,7 @@ export default function CourseContentComponent({contents,moduleid,contentType}) 
 
   const defineContent = () => {
     if (!data) return null;
-console.log(data)
+
     switch (data[0].typeOfContent) {
       case 'FLASHCARD':
         return (
@@ -62,7 +62,7 @@ console.log(data)
             <FlashCardContainer 
               flashcards={data} 
               onComplete={onComplete} 
-            
+               language={language}
             />
           </div>
         );
@@ -105,6 +105,7 @@ console.log(data)
               pictureAndQuestions={null}
               isSave={false}
               postP={handlePost}
+              language={language}
             />
           </div>
         );
@@ -117,6 +118,9 @@ console.log(data)
               pictureAndQuestions={data}
               isSave={false}
               postP={handlePost}
+              language={language
+
+              }
             />
           </div>
         );
@@ -127,6 +131,7 @@ console.log(data)
             <ListenChoiceContainer 
               questions={data} 
               onComplete={onComplete} 
+              language={language}
             />
           </div>
         );

@@ -3,12 +3,12 @@ import ListeningQuiz from "./ListenChoiceQuestionComponent";
 import { ArrowLeft, ArrowRight, CheckCircleFill } from "react-bootstrap-icons";
 import { Button, Row, Col, FormLabel, ProgressBar } from "react-bootstrap";
 
-export default function ListenChoiceContainer({questions, onComplete}) {
+export default function ListenChoiceContainer({questions, onComplete,language}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [numTrueAns, setNumTrueAns] = useState(0);
   const [finished, setFinished] = useState(false);
   const [showCompleteEffect, setShowCompleteEffect] = useState(false);
-console.log(questions)
+
   const nextQuestion = () => {
     setCurrentIndex((prev) =>
       prev < questions.length - 1 ? prev + 1 : prev // không quay lại từ đầu
@@ -101,6 +101,7 @@ console.log(questions)
         options={questions[currentIndex].options}
         inCreNum={increNum}
         img={questions[currentIndex].imgUrl}
+        language={language}
       />
 
       <Row className="justify-content-center mt-4">

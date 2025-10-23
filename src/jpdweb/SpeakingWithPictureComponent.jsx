@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { evaluateAnswer } from './api/ApiConnect';
 
 
-const SpeakingPictureQuestion = ({ imageUrl, questions, increNum }) => {
+const SpeakingPictureQuestion = ({ imageUrl, questions, increNum,language }) => {
   
   const [currentIdx, setCurrentIdx] = useState(0);
   const [phase, setPhase] = useState('idle'); // 'idle', 'recording', 'playing'
@@ -19,8 +19,7 @@ const SpeakingPictureQuestion = ({ imageUrl, questions, increNum }) => {
   // Set to track API calls in progress
   const [pendingRequests, setPendingRequests] = useState(new Set());
   const [processingStatus, setProcessingStatus] = useState('');
- const [searchParams] = useSearchParams();
-  const language = searchParams.get('language') || 'en-US';
+ 
   // Refs for resources that need cleanup
   const audioChunks = useRef([]);
   const recordingTimerRef = useRef(null);
@@ -30,7 +29,18 @@ const SpeakingPictureQuestion = ({ imageUrl, questions, increNum }) => {
   const halfCount = Math.ceil(questions.length/2);
   // Thêm state này vào đầu component
 const [isOutOfRequests, setIsOutOfRequests] = useState(false);
-
+const languageMap = {
+        'ENGLISH': 'en-US',
+        'VIETNAMESE': 'vi-VN',
+        'CHINESE': 'zh-CN',
+        'JAPANESE': 'ja-JP',
+        'KOREAN': 'ko-KR',
+        'FRENCH': 'fr-FR',
+        'GERMAN': 'de-DE',
+        'SPANISH': 'es-ES',
+        'ITALIAN': 'it-IT',
+        'RUSSIAN': 'ru-RU',
+      };
 // Thêm hàm xử lý khi hết lượt
 const handleOutOfRequests = () => {
   console.log("Xử lý hết lượt request");
@@ -105,7 +115,7 @@ const handleOutOfRequests = () => {
       const formData = new FormData();
       formData.append('audio', blob, `audio_${questionIdx}.webm`);
       formData.append('sentence', questions[questionIdx].answer);
-      formData.append('language','en')
+      formData.append('language',languageMap[language].substring(0,2))
       const response = await evaluateAnswer(formData);
       console.log(`Audio for question ${questionIdx + 1} sent successfully`);
       
@@ -361,7 +371,7 @@ const handleOutOfRequests = () => {
     window.speechSynthesis.cancel();
     
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "ja-JP";
+    utterance.lang = languageMap[language];
     utterance.rate = 0.9;
     
     utterance.onend = () => {

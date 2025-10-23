@@ -3,12 +3,22 @@ import { useState } from "react";
 import ReactCardFlip from "react-card-flip";
 import { useSearchParams } from "react-router-dom";
 
-export default function FlashCardComponent({ frontText, backText, currentIndex, totalCards,img }) {
+export default function FlashCardComponent({ frontText, backText, currentIndex, totalCards,img,language }) {
   const [isFlipped, setIsFlipped] = useState(false);
   // chinh lai ham ni de nhan dau vao la ngon ngu
-  console.log(img)
-  const [searchParams] = useSearchParams();
-  const language = searchParams.get('language') || 'en-US';
+ 
+  const languageMap = {
+        'ENGLISH': 'en-US',
+        'VIETNAMESE': 'vi-VN',
+        'CHINESE': 'zh-CN',
+        'JAPANESE': 'ja-JP',
+        'KOREAN': 'ko-KR',
+        'FRENCH': 'fr-FR',
+        'GERMAN': 'de-DE',
+        'SPANISH': 'es-ES',
+        'ITALIAN': 'it-IT',
+        'RUSSIAN': 'ru-RU',
+      };
   const handleClick = () => {
     setIsFlipped(!isFlipped);
   };
@@ -18,7 +28,7 @@ export default function FlashCardComponent({ frontText, backText, currentIndex, 
   
 
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang =language || 'en-US';
+  utterance.lang =languageMap[language] || 'en-US';
   window.speechSynthesis.speak(utterance);
 };
 return (<div className="flex flex-col items-center my-8">

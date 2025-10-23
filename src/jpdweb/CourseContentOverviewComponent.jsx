@@ -17,7 +17,7 @@ export default function CourseContentOverviewComponent(){
   const [error, setError] = useState(null);
   const [expandedChapters, setExpandedChapters] = useState(new Set([0]));
   const [expandedModules, setExpandedModules] = useState(new Set());
-  
+  const [isFinish,setFinish]=useState(false)
   // Current content state
   const [currentContent, setCurrentContent] = useState(null);
   const [currentChapter, setCurrentChapter] = useState(null);
@@ -73,12 +73,13 @@ export default function CourseContentOverviewComponent(){
       showWarningNotification("Vui lòng nhập nội dung phản hồi");
       return;
     }
+    
 
     setIsSubmittingFeedback(true);
     
     try {
       const response = await feedbackApi.createFeedback(id, feedbackDetail.trim());
-      
+     
       if (response.success) {
         showSuccessNotification("Cảm ơn bạn đã gửi phản hồi!");
         setShowFeedbackPopup(false);
@@ -98,11 +99,12 @@ export default function CourseContentOverviewComponent(){
     setIsLoading(true);
     
     const response = await customerApi.loadContentOverview(id);
-    
+   
     if (response.success) {
       const data = response.data;
+     
       setCourseData(data);
-      
+    
       // Auto load first content
       if (data.chapters && data.chapters.length > 0) {
         const firstChapter = data.chapters[0];
@@ -179,6 +181,62 @@ export default function CourseContentOverviewComponent(){
       loadCourseOverview()
     }
   }, [id])
+ const onComplete = async () => {
+  // Đã check finish rồi nên chắc chắn chưa hoàn thành
+  if(!isFinish){
+  try {
+    setLoadingContent(`${currentModule.moduleId}-${currentContentType}`);
+    
+    const response = await customerApi.finishContent(
+      id, 
+      currentModule.moduleId, 
+      currentContentType
+    );
+
+    if (response.success) {
+      // Cập nhật courseData - THÊM TRỰC TIẾP không cần check
+      setCourseData(prevData => {
+        if (!prevData || !prevData.chapters) return prevData;
+
+        return {
+          ...prevData,
+          chapters: prevData.chapters.map(chapter => ({
+            ...chapter,
+            modules: chapter.modules?.map(module => {
+              if (module.moduleId === currentModule.moduleId) {
+                return {
+                  ...module,
+                  customerModuleContents: [
+                    ...(module.customerModuleContents || []),
+                    {
+                      cqId: response.data?.cqId || Date.now(),
+                      availableRequest: response.data?.availableRequest || 5,
+                      typeOfContent: [currentContentType]
+                    }
+                  ]
+                };
+              }
+              return module;
+            })
+          }))
+        };
+      });
+
+      showSuccessNotification('Bạn đã hoàn thành nội dung', currentContentType);
+      setFinish(true);
+      
+    } else {
+      showWarningNotification(response.message || "Không lưu thành công");
+    }
+    
+  } catch (error) {
+    console.error('Error finishing content:', error);
+    showWarningNotification("Có lỗi xảy ra, vui lòng thử lại!");
+  } finally {
+    setLoadingContent(null);
+  }
+}
+};
    
   const mapContentType = (type) => {
     const typeMap = {
@@ -195,7 +253,19 @@ export default function CourseContentOverviewComponent(){
     };
     return typeMap[type] || 'video';
   };
-
+const checkFinish = (moduleId, contentType, allModules) => {
+  // Tìm module theo moduleId
+  const module = allModules?.find(m => m.moduleId === moduleId);
+  
+  if (!module) {
+    return false;
+  }
+  
+  // Kiểm tra hoàn thành
+  return module.customerModuleContents?.some(
+    content => content.typeOfContent?.includes(contentType)
+  ) || false;
+};
   const formatContentType = (type) => {
     return type
       .split('_')
@@ -296,6 +366,9 @@ export default function CourseContentOverviewComponent(){
       setCurrentModule(module);
       setCurrentContentType(contentType);
       setLoadingContent(null);
+      const isFinished = checkFinish(module.moduleId, contentType, chapter.modules);
+  
+      setFinish(isFinished)
     }
   };
 
@@ -363,6 +436,9 @@ export default function CourseContentOverviewComponent(){
                 <CourseContentComponent contents={currentContent}
                 moduleid={currentModule.moduleId}
                   contentType={currentContentType}
+                  language={courseData.language}
+                  isFinish={isFinish}
+                  onComplete={onComplete}
                 />
               </div>
             ) : (
@@ -464,83 +540,116 @@ export default function CourseContentOverviewComponent(){
 
                           return (
                             <div key={module.moduleId}>
-                              <div
-                                className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition text-sm ${
-                                  isModuleExpanded
-                                    ? 'bg-gray-700 text-white'
-                                    : isCurrentModule
-                                    ? 'bg-blue-900/30 text-blue-300'
-                                    : 'text-gray-400 hover:bg-gray-700/50 hover:text-gray-300'
-                                }`}
-                                onClick={() => toggleModule(moduleKey)}
-                              >
-                                <svg
-                                  className={`w-4 h-4 transition-transform ${
-                                    isModuleExpanded ? 'rotate-90' : ''
-                                  }`}
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"/>
-                                </svg>
+    <div
+      className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition text-sm ${
+        isModuleExpanded
+          ? 'bg-gray-700 text-white'
+          : isCurrentModule
+          ? 'bg-blue-900/30 text-blue-300'
+          : 'text-gray-400 hover:bg-gray-700/50 hover:text-gray-300'
+      }`}
+      onClick={() => toggleModule(moduleKey)}
+    >
+      <svg
+        className={`w-4 h-4 transition-transform ${
+          isModuleExpanded ? 'rotate-90' : ''
+        }`}
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd"/>
+      </svg>
 
-                                <div className="flex-1 min-w-0">
-                                  <div className="truncate">{module.titleOfModule}</div>
-                                  <div className="text-xs text-gray-500 mt-0.5">
-                                    {contentTypes.length} nội dung
-                                  </div>
-                                </div>
-                              </div>
+      <div className="flex-1 min-w-0">
+        <div className="truncate">{module.titleOfModule}</div>
+        <div className="text-xs text-gray-500 mt-0.5">
+          {contentTypes.length} nội dung
+          {/* Hiển thị số content đã hoàn thành */}
+         <span className="ml-2 text-green-400">
+  ({
+    contentTypes.filter(type => 
+      module.customerModuleContents?.some(
+        content => content.typeOfContent?.includes(type)
+      )
+    ).length
+  }/{contentTypes.length} hoàn thành)
+</span>
+        </div>
+      </div>
 
-                              {isModuleExpanded && (
-                                <div className="ml-6 mt-1 space-y-1">
-                                  {contentTypes.map((contentType, contentIndex) => {
-                                    const isLoadingThis = loadingContent === `${module.moduleId}-${contentType}`;
-                                    const isActive = 
-                                      isCurrentModule && 
-                                      currentContentType === contentType;
+      {/* Icon check nếu module hoàn thành tất cả content */}
+      {module.customerModuleContents?.length === contentTypes.length && contentTypes.length > 0 && (
+        <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+        </svg>
+      )}
+    </div>
 
-                                    return (
-                                      <div
-                                        key={contentIndex}
-                                        className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition text-sm ${
-                                          isActive
-                                            ? 'bg-blue-600 text-white'
-                                            : 'text-gray-400 hover:bg-gray-700/50 hover:text-gray-300'
-                                        } ${isLoadingThis ? 'opacity-60 cursor-wait' : ''}`}
-                                        onClick={() => {
-                                          if (!loadingContent) {
-                                            handleContentClick(chapter, module, contentType);
-                                          }
-                                        }}
-                                      >
-                                        <div className="flex-shrink-0">
-                                          {isLoadingThis ? (
-                                            <div className="animate-spin">
-                                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m1.364 6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1M3.636 5.636l.707.707"/>
-                                              </svg>
-                                            </div>
-                                          ) : (
-                                            getContentIcon(mapContentType(contentType))
-                                          )}
-                                        </div>
+    {isModuleExpanded && (
+      <div className="ml-6 mt-1 space-y-1">
+        {contentTypes.map((contentType, contentIndex) => {
+          const isLoadingThis = loadingContent === `${module.moduleId}-${contentType}`;
+          const isActive = 
+            isCurrentModule && 
+            currentContentType === contentType;
+          
+          // Kiểm tra xem content type này đã hoàn thành chưa
+          const isCompleted = module.customerModuleContents?.some(
+    content => content.typeOfContent?.includes(contentType)
+    
+  );
 
-                                        <span className="flex-1 truncate">
-                                          {formatContentType(contentType)}
-                                        </span>
+          return (
+            <div
+              key={contentIndex}
+              className={`flex items-center space-x-3 px-3 py-2 rounded-lg cursor-pointer transition text-sm ${
+                isActive
+                  ? 'bg-blue-600 text-white'
+                  : isCompleted
+                  ? 'bg-green-900/30 text-green-300 hover:bg-green-800/40'
+                  : 'text-gray-400 hover:bg-gray-700/50 hover:text-gray-300'
+              } ${isLoadingThis ? 'opacity-60 cursor-wait' : ''}`}
+              onClick={() => {
+                if (!loadingContent) {
+                  handleContentClick(chapter, module, contentType);
+                }
+              }}
+            >
+              <div className="flex-shrink-0">
+                {isLoadingThis ? (
+                  <div className="animate-spin">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m1.364 6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1M3.636 5.636l.707.707"/>
+                    </svg>
+                  </div>
+                ) : (
+                  getContentIcon(mapContentType(contentType))
+                )}
+              </div>
 
-                                        {isActive && (
-                                          <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
-                                          </svg>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </div>
+              <span className="flex-1 truncate">
+                {formatContentType(contentType)}
+              </span>
+
+              {/* Hiển thị icon check cho content đã hoàn thành */}
+              {isCompleted && !isActive && (
+                <svg className="w-4 h-4 flex-shrink-0 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                </svg>
+              )}
+
+              {/* Hiển thị icon active cho content đang xem */}
+              {isActive && (
+                <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                </svg>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </div>
                           );
                         })}
                       </div>

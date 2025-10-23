@@ -120,5 +120,20 @@ export const customerApi = {
                 showNotification: true
             }
         );
+    },
+    finishContent: (courseId, moduleId,type) => {
+        return callApi(
+            () => apiclient.post(
+                API_ENDPOINTS.CUSTOMER.FINISH_CONTENT.replace(':courseId', courseId)
+                .replace(':moduleId',moduleId),
+                null,
+                { params: { type } }
+            ),
+            { 
+                errorMessage: 'khong the luu qua trinh',
+                showNotification: true
+            }
+        );
     }
+
 };

@@ -3,7 +3,7 @@ import FlashCardComponent from "./FlashCardComponent";
 import { ArrowLeft, ArrowRight } from "react-bootstrap-icons";
 import { Button, Container, Row, Col } from "react-bootstrap";
 
-export default function FlashCardContainer({ flashcards, onComplete }) {
+export default function FlashCardContainer({ flashcards, onComplete,language }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   
   const handleNext = () => {
@@ -29,6 +29,7 @@ export default function FlashCardContainer({ flashcards, onComplete }) {
         currentIndex={currentIndex}
         totalCards={flashcards.length}
         img={flashcards[currentIndex].imgUrl}
+        language={language}
       />
 
       <Row className="justify-content-center mt-4">
