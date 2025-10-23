@@ -11,7 +11,7 @@ import {
   Save
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { customerApi } from './api/customerApi';
+
 import { useAuth } from './security/Authentication';
 import { API_RESPONSE_TYPES, showSuccessNotification, showWarningNotification } from './api/apiClient';
 import { creatorApi } from './api/creatorApi';

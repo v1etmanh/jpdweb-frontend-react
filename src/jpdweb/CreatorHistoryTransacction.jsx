@@ -11,37 +11,89 @@ import {
 } from 'lucide-react';
 import { retrieveTransactionHistory } from './api/ApiConnect';
 import { creatorApi } from './api/creatorApi';
-import { showErrorNotification } from './api/apiClient';
+import { API_RESPONSE_TYPES, showErrorNotification, showWarningNotification } from './api/apiClient';
+import { useNavigate } from 'react-router-dom';
 
 const WithdrawHistory = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('ALL'); // ALL, PENDING, SUCCESS, FAILED
-
+const navigate=useNavigate()
   useEffect(() => {
     fetchTransactionHistory();
   }, []);
 
   const fetchTransactionHistory = async () => {
-    setLoading(true);
-    setError(null);
-    
-      const response = await creatorApi.getTransactionHistory();
-      
-      if (response.success) {
-        // Sort by date descending (newest first)
-        const sortedData = response.data.sort((a, b) => 
-          new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        setTransactions(sortedData);
-      } else {
-        showErrorNotification('Không thể tải lịch sử giao dịch');
+  setLoading(true);
+  setError(null);
+  
+  const response = await creatorApi.getTransactionHistory();
+  
+  if (response.success) {
+    // Sort by date descending (newest first)
+    const sortedData = response.data.sort((a, b) => 
+      new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    setTransactions(sortedData);
+  } else {
+    handleFetchTransactionHistoryError(response);
+  }
+  
+  setLoading(false);
+};
+
+// ✅ Hàm xử lý lỗi riêng cho fetch transaction history
+const handleFetchTransactionHistoryError = (response) => {
+  const message = response.message || 'Không thể tải lịch sử giao dịch';
+
+  switch (response.responseType) {
+    case API_RESPONSE_TYPES.UNAUTHORIZED:
+      // Không có quyền xem lịch sử giao dịch
+      showWarningNotification('Bạn không có quyền xem lịch sử giao dịch');
+      // Redirect về dashboard
+      navigate('/creator/dashboard');
+      break;
+
+    case API_RESPONSE_TYPES.NOT_FOUND:
+      // Chưa có giao dịch nào
+      // ⚠️ Không cần notification, chỉ set empty state
+      setTransactions([]);
+      console.log('No transactions found');
+      // UI sẽ tự hiển thị empty state:
+      // "Bạn chưa có giao dịch nào"
+      break;
+
+    case API_RESPONSE_TYPES.VALIDATION_ERROR:
+      // Query params không hợp lệ (nếu có filter by date range, status, etc.)
+      showWarningNotification('Tham số tìm kiếm không hợp lệ');
+      if (response.details) {
+        console.error('Validation errors:', response.details);
       }
-    
-      setLoading(false);
-    
-  };
+      break;
+
+    case API_RESPONSE_TYPES.SERVER_ERROR:
+      // Lỗi query database / tính toán số liệu
+      showErrorNotification('Hệ thống đang bận. Vui lòng thử lại sau');
+      setError('server_error');
+      console.error('Fetch Transaction History Server Error:', {
+        status: response.status,
+        code: response.code,
+        traceId: response.traceId
+      });
+      break;
+
+    default:
+      // Lỗi khác (network, timeout, etc.)
+      showErrorNotification(message);
+      setError('unknown_error');
+      console.error('Fetch Transaction History Error:', {
+        status: response.status,
+        code: response.code,
+        traceId: response.traceId
+      });
+  }
+};
 
   const formatCurrency = (amount, currency = 'USD') => {
     if (currency === 'USD') {

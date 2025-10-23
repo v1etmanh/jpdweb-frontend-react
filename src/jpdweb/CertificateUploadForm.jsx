@@ -1,7 +1,7 @@
 import { AlertCircle, Upload, X } from "lucide-react";
 import { useState } from "react";
 import { creatorApi } from "./api/creatorApi";
-import { showErrorNotification, showSuccessNotification } from "./api/apiClient";
+import { API_RESPONSE_TYPES, showErrorNotification, showSuccessNotification, showWarningNotification } from "./api/apiClient";
 
 export const CertificateUploadForm = ({ onSubmit, onCancel }) => {
   const [files, setFiles] = useState([]);
@@ -61,8 +61,8 @@ export const CertificateUploadForm = ({ onSubmit, onCancel }) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault(); // THIẾU dòng này!
+const handleSubmit = async (e) => {
+  e.preventDefault();
   
   if (files.length === 0) {
     setError('Vui lòng chọn ít nhất một file');
@@ -72,25 +72,56 @@ export const CertificateUploadForm = ({ onSubmit, onCancel }) => {
   setUploading(true);
   setError('');
 
+  const response = await creatorApi.uploadCertificate(files);
   
-    const response = await  creatorApi.uploadCertificate(files); // ✅ Đúng - truyền files vào
+  if (response.success) { 
+    showSuccessNotification("Bạn đã upload chứng chỉ thành công, hãy chờ admin phê duyệt hồ sơ của bạn");
     
-    if (response.success) { 
-      showSuccessNotification("Bạn đã upload chứng chỉ thành công , hãy chờ admin phê duyệt hồ sơ của bạn")
-      
-      // Reset form
-      setFiles([]);
-      
-      // Close modal
-      if (onSubmit) onSubmit();
-      onCancel();
-    }
-    else{
-      showErrorNotification("quá trình upload gặp vấn đề ")
-    }
+    // Reset form
+    setFiles([]);
+    
+    // Close modal
+    if (onSubmit) onSubmit();
+    onCancel();
+  } else {
+    // ✅ Handle error cụ thể cho upload certificate
+    handleUploadCertificateError(response);
+  }
   
-    setUploading(false);
-  
+  setUploading(false);
+};
+
+// ✅ Hàm xử lý lỗi riêng cho upload certificate
+const handleUploadCertificateError = (response) => {
+  const message = response.message || 'Không thể upload chứng chỉ';
+
+  switch (response.responseType) {
+    case API_RESPONSE_TYPES.VALIDATION_ERROR:
+      // File không hợp lệ (sai định dạng, quá lớn, etc.)
+      showWarningNotification('File không hợp lệ. Vui lòng kiểm tra định dạng và kích thước file');
+      if (response.details) {
+        console.error('Validation errors:', response.details);
+      }
+      break;
+
+    case API_RESPONSE_TYPES.CONFLICT:
+      // Đã upload chứng chỉ trước đó / đang chờ duyệt
+      showWarningNotification(message || 'Bạn đã gửi chứng chỉ trước đó. Vui lòng chờ admin phê duyệt');
+      break;
+
+    case API_RESPONSE_TYPES.UNAUTHORIZED:
+      showWarningNotification('Bạn cần đăng nhập để upload chứng chỉ');
+      break;
+
+    default:
+      // Lỗi server / network
+      showErrorNotification(message);
+      console.error('Upload Error:', {
+        status: response.status,
+        code: response.code,
+        traceId: response.traceId
+      });
+  }
 };
 
   const formatFileSize = (bytes) => {

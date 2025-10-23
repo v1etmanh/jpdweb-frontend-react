@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from './security/Authentication';
 import { retriveCreatorStatistic, createWithdraw } from './api/ApiConnect';
 import { creatorApi } from './api/creatorApi';
-import { showErrorNotification } from './api/apiClient';
+import { API_RESPONSE_TYPES, showErrorNotification, showWarningNotification } from './api/apiClient';
 
 const CreatorHomePage = () => { 
   const [selectedPeriod, setSelectedPeriod] = useState('thisMonth');
@@ -37,22 +37,64 @@ const CreatorHomePage = () => {
     }
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
-    
-      const response = await creatorApi.getStatistic();
-      
-      if (response.success) {
-        setData(response.data);
-      }
-        
-     else{
-      showErrorNotification("Error fetching statistics:");
-     
-     }
-      setLoading(false);
-    
-  };
+ const fetchData = async () => {
+  setLoading(true);
+  
+  const response = await creatorApi.getStatistic();
+  
+  if (response.success) {
+    setData(response.data);
+  } else {
+    handleFetchStatisticError(response);
+  }
+  
+  setLoading(false);
+};
+
+// ✅ Hàm xử lý lỗi riêng cho fetch statistics
+const handleFetchStatisticError = (response) => {
+  const message = response.message || 'Không thể tải thống kê';
+
+  switch (response.responseType) {
+    case API_RESPONSE_TYPES.UNAUTHORIZED:
+      // Không có quyền xem thống kê (chỉ creator/admin)
+      showWarningNotification('Bạn không có quyền xem thống kê');
+      // Có thể redirect về trang khác
+      // navigate('/dashboard');
+      break;
+
+    case API_RESPONSE_TYPES.NOT_FOUND:
+      // Chưa có dữ liệu thống kê (creator mới, chưa có course)
+      showWarningNotification('Chưa có dữ liệu thống kê. Hãy tạo khóa học đầu tiên của bạn!');
+      // Set empty data để UI hiển thị empty state
+      setData({
+        totalRevenue: 0,
+        totalStudents: 0,
+        totalCourses: 0,
+        // ... other default values
+      });
+      break;
+
+    case API_RESPONSE_TYPES.SERVER_ERROR:
+      // Lỗi server khi tính toán thống kê
+      showErrorNotification('Hệ thống đang bận. Vui lòng thử lại sau');
+      console.error('Statistics Server Error:', {
+        status: response.status,
+        code: response.code,
+        traceId: response.traceId
+      });
+      break;
+
+    default:
+      // Lỗi khác
+      showErrorNotification(message);
+      console.error('Statistics Error:', {
+        status: response.status,
+        code: response.code,
+        traceId: response.traceId
+      });
+  }
+};
 
   const handleWithdrawClick = () => {
     const balance = stats.totalRevenue || 0;

@@ -4,7 +4,7 @@ import { useAuth } from "./security/Authentication";
 import { useNavigate } from "react-router-dom";
 import { uploadProfile } from "./api/ApiConnect";
 import { customerApi } from "./api/customerApi";
-import { showErrorNotification } from "./api/apiClient";
+import { API_RESPONSE_TYPES, showErrorNotification, showSuccessNotification, showWarningNotification } from "./api/apiClient";
 
 export default function CreatorProfileComponent() {
     // Chỉ còn 3 required steps
@@ -136,41 +136,93 @@ export default function CreatorProfileComponent() {
     };
 
     const handleSubmit = async () => {
-        if (!validateCurrentStep()) return;
+  if (!validateCurrentStep()) return;
 
-        setIsSubmitting(true);
-        try {
-            const formDataToSend = new FormData();
-            formDataToSend.append('fullName', formData.fullName);
-            formDataToSend.append('phone', formData.phone);
-            formDataToSend.append('bio', formData.bio);
-            formDataToSend.append('profileImage', formData.profileImage);
-            formDataToSend.append('agreedToTerms', formData.agreedToTerms);
+  setIsSubmitting(true);
+  
+  const formDataToSend = new FormData();
+  formDataToSend.append('fullName', formData.fullName);
+  formDataToSend.append('phone', formData.phone);
+  formDataToSend.append('bio', formData.bio);
+  formDataToSend.append('profileImage', formData.profileImage);
+  formDataToSend.append('agreedToTerms', formData.agreedToTerms);
 
-            const response = await customerApi.uploadProfile(formData);
-          
-           
-            if (response.success) {
-                // Clear draft
-                sessionStorage.removeItem('creatorProfileDraft');
-                
-                // Update auth context
-              setCreator(true)
-                setCreatorInfor(response.data)
-                // Show success and redirect
-                alert('Chúc mừng! Bạn đã trở thành Creator');
-                navigate('/creator/commercial/dashboard');
-            } else {
-                const error =  response.data
-                showErrorNotification(error.message || 'Có lỗi xảy ra, vui lòng thử lại');
-            }
-        } catch (error) {
-            console.error('Submit error:', error);
-            alert('Không thể kết nối đến server');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+  const response = await customerApi.uploadProfile(formData);
+  
+  if (response.success) {
+    // Clear draft
+    sessionStorage.removeItem('creatorProfileDraft');
+    
+    // Update auth context
+    setCreator(true);
+    setCreatorInfor(response.data);
+    
+    // Show success and redirect
+    showSuccessNotification('Chúc mừng! Bạn đã trở thành Creator');
+    navigate('/creator/commercial/dashboard');
+  } else {
+    handleUploadProfileError(response);
+  }
+  
+  setIsSubmitting(false);
+};
+
+// ✅ Hàm xử lý lỗi riêng cho upload creator profile
+const handleUploadProfileError = (response) => {
+  const message = response.message || 'Không thể tạo hồ sơ Creator';
+
+  switch (response.responseType) {
+    case API_RESPONSE_TYPES.VALIDATION_ERROR:
+      // Dữ liệu form không hợp lệ
+      showWarningNotification('Thông tin không hợp lệ. Vui lòng kiểm tra lại các trường');
+      
+      // Hiển thị chi tiết lỗi validation nếu có
+      if (response.details) {
+        console.error('Validation errors:', response.details);
+        // Có thể set error cho từng field cụ thể
+        // setFieldErrors(response.details);
+      }
+      break;
+
+    case API_RESPONSE_TYPES.CONFLICT:
+      // Đã là creator rồi / đang chờ duyệt
+      showWarningNotification(message || 'Bạn đã đăng ký làm Creator trước đó. Vui lòng chờ phê duyệt');
+      // Có thể redirect về trang chờ duyệt
+      // navigate('/creator/pending-approval');
+      break;
+
+    case API_RESPONSE_TYPES.UNAUTHORIZED:
+      // Session hết hạn / chưa login
+      showWarningNotification('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại');
+      // Save draft trước khi redirect
+      sessionStorage.setItem('creatorProfileDraft', JSON.stringify(formData));
+      navigate('/login', { state: { from: '/creator/register' } });
+      break;
+
+    case API_RESPONSE_TYPES.SERVER_ERROR:
+      // Lỗi upload ảnh / lưu database
+      showErrorNotification('Hệ thống đang bận. Vui lòng thử lại sau vài phút');
+      // Save draft để user không mất dữ liệu
+      sessionStorage.setItem('creatorProfileDraft', JSON.stringify(formData));
+      console.error('Upload Profile Server Error:', {
+        status: response.status,
+        code: response.code,
+        traceId: response.traceId
+      });
+      break;
+
+    default:
+      // Lỗi khác
+      showErrorNotification(message);
+      // Save draft
+      sessionStorage.setItem('creatorProfileDraft', JSON.stringify(formData));
+      console.error('Upload Profile Error:', {
+        status: response.status,
+        code: response.code,
+        traceId: response.traceId
+      });
+  }
+};
 
     // Load draft on mount
     useState(() => {
