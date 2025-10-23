@@ -10,6 +10,8 @@ import {
   FileText
 } from 'lucide-react';
 import { retrieveTransactionHistory } from './api/ApiConnect';
+import { creatorApi } from './api/creatorApi';
+import { showErrorNotification } from './api/apiClient';
 
 const WithdrawHistory = () => {
   const [transactions, setTransactions] = useState([]);
@@ -24,24 +26,21 @@ const WithdrawHistory = () => {
   const fetchTransactionHistory = async () => {
     setLoading(true);
     setError(null);
-    try {
-      const response = await retrieveTransactionHistory();
+    
+      const response = await creatorApi.getTransactionHistory();
       
-      if (response.status === 200) {
+      if (response.success) {
         // Sort by date descending (newest first)
         const sortedData = response.data.sort((a, b) => 
           new Date(b.createdAt) - new Date(a.createdAt)
         );
         setTransactions(sortedData);
       } else {
-        setError('Không thể tải lịch sử giao dịch');
+        showErrorNotification('Không thể tải lịch sử giao dịch');
       }
-    } catch (err) {
-      console.error('Error fetching transaction history:', err);
-      setError('Có lỗi xảy ra khi tải dữ liệu');
-    } finally {
+    
       setLoading(false);
-    }
+    
   };
 
   const formatCurrency = (amount, currency = 'USD') => {

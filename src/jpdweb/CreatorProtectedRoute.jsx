@@ -2,6 +2,8 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './security/Authentication';
 import { getCreatorAccount } from './api/ApiConnect';
 import { useEffect } from 'react';
+import { creatorApi } from './api/creatorApi';
+import { showErrorNotification } from './api/apiClient';
 
 function CreatorProtectedRoute({ children }) {
   const { isAuthentication, isLoading, isCreator,setCreatorInfor ,creatorInfor} = useAuth();
@@ -9,12 +11,15 @@ function CreatorProtectedRoute({ children }) {
 useEffect(() => {
     const fetchCreator = async () => {
       if (!creatorInfor && isAuthentication && isCreator) {
-        try {
-          const response = await getCreatorAccount();
+       
+          const response = await creatorApi.getAccount();
+          if(response.success)
+          {
           setCreatorInfor(response.data);
           console.log(response.data)
-        } catch (error) {
-          console.error("Error fetching creator account:", error);
+          }
+      else{
+          showErrorNotification("Error fetching creator account:", response.data.message);
         }
       }
     };

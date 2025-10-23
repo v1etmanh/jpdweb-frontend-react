@@ -11,8 +11,10 @@ import {
   Save
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { createNewCourse } from './api/ApiConnect';
+import { customerApi } from './api/customerApi';
 import { useAuth } from './security/Authentication';
+import { API_RESPONSE_TYPES, showSuccessNotification, showWarningNotification } from './api/apiClient';
+import { creatorApi } from './api/creatorApi';
 
 // Component InputField tách riêng để tối ưu performance
 const InputField = React.memo(({ 
@@ -268,7 +270,27 @@ const teachingLanguages = useMemo(() => [
   const handlePrevStep = useCallback(() => {
     setCurrentStep(prev => prev - 1);
   }, []);
-
+ const handleError = (response) => {
+    switch (response.responseType) {
+      case API_RESPONSE_TYPES.UNAUTHORIZED:
+        showWarningNotification("Bạn không có quyền tao khoa hoc")
+       
+        break
+      
+      case API_RESPONSE_TYPES.NOT_FOUND:
+        showWarningNotification("không tìm thấy tài khoản của bạn")
+       
+        break
+      
+      case API_RESPONSE_TYPES.CONFLICT:
+        showWarningNotification("Dữ liệu đầu vào bị xung đột")
+        break
+      
+      default:
+        showWarningNotification("Có lỗi xảy ra, vui lòng thử lại sau")
+        console.error("Error:", response.traceId, response.message)
+    }
+  }
   const handleSubmit = useCallback(async () => {
     if (!validateStep(3)) return;
     
@@ -322,52 +344,25 @@ const teachingLanguages = useMemo(() => [
         });
       }
 
-      const response = await createNewCourse(formData);
+      const response = await creatorApi.createCourse(formData);
       
-      if (response.status === 200 || response.status === 201) {
+      if (response.success) {
         // Clear draft
         localStorage.removeItem('courseDraft');
         
-        alert('Khóa học đã được tạo thành công!');
+        showSuccessNotification('Khóa học đã được tạo thành công!');
         
         // Redirect tới trang quản lý khóa học
-        navigate('/my-courses');
+        navigate('/creator/courseList');
+      }
+      else{
+         handleError(response)
       }
     } catch (error) {
-      console.error('Error creating course:', error);
+      showWarningNotification('Error creating course:', error);
       
-      let errorMessage = 'Có lỗi xảy ra khi tạo khóa học';
-      
-      if (error.response) {
-        const status = error.response.status;
-        const data = error.response.data;
-        
-        switch(status) {
-          case 403:
-            errorMessage = 'Bạn cần cập nhật thông tin thanh toán và chứng chỉ trước khi tạo khóa học có phí';
-            setTimeout(() => navigate("/upload_profile"), 2000);
-            break;
-            
-          case 404:
-            errorMessage = 'Không tìm thấy tài khoản hoặc hồ sơ giảng viên. Vui lòng đăng nhập lại';
-            break;
-            
-          case 400:
-            errorMessage = data?.error || data?.message || 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin';
-            break;
-            
-          case 500:
-            errorMessage = 'Lỗi server. Vui lòng thử lại sau';
-            break;
-            
-          default:
-            errorMessage = data?.error || data?.message || errorMessage;
-        }
-      } else if (error.request) {
-        errorMessage = 'Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng';
-      }
-      
-      alert(errorMessage);
+     
+    
     } finally {
       setIsSubmitting(false);
     }

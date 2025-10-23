@@ -24,6 +24,7 @@ const CourseDetail = () => {
       
         console.log(response.data);
         // Xử lý circular reference - chỉ lấy level đầu tiên
+        if(!response.data)return
         const cleanedData = response.data.map(item => ({
           enrollId: item.enrollId,
           createDate: item.createDate,

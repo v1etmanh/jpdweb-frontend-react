@@ -4,6 +4,8 @@ import { useAuth } from './security/Authentication';
 import { PayPalVerificationForm } from './PayPalVerificationForm';
 import { CertificateUploadForm } from './CertificateUploadForm';
 import { getCreatorAccount } from './api/ApiConnect';
+import { creatorApi } from './api/creatorApi';
+import { showErrorNotification } from './api/apiClient';
 
 
 const CreatorAccountInfo = () => {
@@ -81,16 +83,15 @@ const handleCertificateSubmit = (files) => {
   setShowCertificateForm(false);
 };
 const reload=async()=>{
-  try{
-  const response=await getCreatorAccount();
-  console.log(response)
-  if(response.status==200)
+
+  const response=await creatorApi.getAccount();
+ 
+  if(response.success)
     setCreatorInfor(response.data)
   else {
-    console.error("error to fetch data")
-  }
-  }catch(e){
-    console.error("daaaa",e)
+ 
+ 
+   showErrorNotification('ko the load data')
   }
 }
   const getIcon = (key) => {

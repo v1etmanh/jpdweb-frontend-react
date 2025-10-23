@@ -1,7 +1,8 @@
 import { Button } from "bootstrap";
 import { useEffect,useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { findCourseByKey } from "./api/ApiConnect";
+import {courseApi} from './api/courseApi'
+import { showErrorNotification, showSuccessNotification } from "./api/apiClient";
 //create
 
 export default function CoursesResultComponent(){
@@ -15,14 +16,14 @@ export default function CoursesResultComponent(){
     const nav = useNavigate();
     
     const findCourses = async() => {
-      try{
-      const response=await findCourseByKey(name)
-      
-        console.log("API Response:", response.data); // Debug: see actual data structure
+   
+      const response=await courseApi.searchCourse(name)
+      if(response.success){
+        
         setTargetCourses(response.data);
       }
-      catch(e){
-  console.error("Error fetching courses:", e);
+      else{
+  showErrorNotification("Error fetching courses");
         setTargetCourses([]);
       }
     }

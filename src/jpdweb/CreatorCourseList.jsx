@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { changeCourseStatus, retriveCourseOfCreator } from "./api/ApiConnect";
+import { creatorApi } from "./api/creatorApi";
+import { showErrorNotification, showSuccessNotification } from "./api/apiClient";
 
 const CourseCard = ({ course, onEdit, onStatusChanged }) => {
   const [isPublic, setIsPublic] = useState(course.public || false);
@@ -11,20 +13,19 @@ const CourseCard = ({ course, onEdit, onStatusChanged }) => {
 
   const handlePublicStatusChange = async () => {
     setIsChanging(true);
-    try {
-      await changeCourseStatus(course.id);
-      alert('Cập nhật trạng thái thành công!');
+    
+   const response=   await creatorApi.changeCoursesStatus(course.id);
+if(response.success){
+      showSuccessNotification('Cập nhật trạng thái thành công!');
       // Notify parent component về sự thay đổi
       if (onStatusChanged) {
         onStatusChanged(course.id, isPublic);
       }
-    } catch (error) {
-      console.error('Lỗi khi thay đổi trạng thái:', error);
-      alert('Có lỗi xảy ra, vui lòng thử lại!');
-      setIsPublic(course.public);
-    } finally {
+    } else {
+      showErrorNotification('Lỗi khi thay đổi trạng thái:');
+         } 
       setIsChanging(false);
-    }
+    
   };
 
   return (
@@ -93,9 +94,9 @@ const CoursesList = () => {
   const fetchCourses = async () => {
     setLoading(true);
     setError(null);
-    try {
-      const response = await retriveCourseOfCreator();
-      if (response.status === 200) {
+   
+      const response = await creatorApi.getCourses();
+      if (response.success) {
         const grouped = response.data.reduce((acc, course) => {
           const type = course.type || "UNKNOWN";
           if (!acc[type]) acc[type] = [];
@@ -104,14 +105,11 @@ const CoursesList = () => {
         }, {});
         setCoursesByType(grouped);
       } else {
-        setError("Không thể tải danh sách khóa học");
+        showErrorNotification("Không thể tải danh sách khóa học");
       }
-    } catch (error) {
-      setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
-      console.error("error", error);
-    } finally {
+   
       setLoading(false);
-    }
+    
   };
 
   useEffect(() => {

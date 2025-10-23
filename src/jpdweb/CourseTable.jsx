@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { retrieveCCourse } from './api/ApiConnect';
+import { creatorApi } from './api/creatorApi';
+import { showErrorNotification } from './api/apiClient';
 
 const CoursesTable = () => {
   const nav = useNavigate();
@@ -14,16 +15,16 @@ const CoursesTable = () => {
   };
   
   const fetchData = async () => {
-    try {
-      const response = await retrieveCCourse();
-      if (response.status !== 200) {
-        alert("error to fetch data");
-      } else {
-        console.log(response.data);
+    
+      const response = await creatorApi.getCommercialCourse ();
+      if (response.success) {
+       
+       
         setCourseData(response.data);
+        console.log(response.data)
       }
-    } catch (e) {
-      console.error("error to fetch", e);
+   else{
+      showErrorNotification("error to fetch");
     }
   };
   

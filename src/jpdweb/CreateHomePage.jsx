@@ -14,6 +14,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './security/Authentication';
 import { retriveCreatorStatistic, createWithdraw } from './api/ApiConnect';
+import { creatorApi } from './api/creatorApi';
+import { showErrorNotification } from './api/apiClient';
 
 const CreatorHomePage = () => { 
   const [selectedPeriod, setSelectedPeriod] = useState('thisMonth');
@@ -37,20 +39,19 @@ const CreatorHomePage = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    try {
-      const response = await retriveCreatorStatistic();
+    
+      const response = await creatorApi.getStatistic();
       
-      if (response.status === 200) {
+      if (response.success) {
         setData(response.data);
-      } else {
-        alert("Lỗi khi tải dữ liệu");
       }
-    } catch (e) {
-      console.error("Error fetching statistics:", e);
-      alert("Không thể tải dữ liệu. Vui lòng thử lại.");
-    } finally {
+        
+     else{
+      showErrorNotification("Error fetching statistics:");
+     
+     }
       setLoading(false);
-    }
+    
   };
 
   const handleWithdrawClick = () => {
@@ -91,22 +92,20 @@ const CreatorHomePage = () => {
     
     setIsProcessing(true);
     
-    try {
-      const response = await createWithdraw(amount);
-      console.log(response.status)
-      if (response.status == 201) {
+  
+      const response = await creatorApi.createWithdraw(amount);
+     
+      if (response.success) {
         alert('Yêu cầu rút tiền đã được gửi thành công!');
         setShowWithdrawModal(false);
         fetchData(); // Refresh data
-      } else {
-        setWithdrawError('Có lỗi xảy ra. Vui lòng thử lại.');
       }
-    } catch (error) {
-      console.error('Withdraw error:', error);
-      setWithdrawError(error.response?.data?.message || 'Không thể xử lý yêu cầu rút tiền');
-    } finally {
+      else{
+     
+      showErrorNotification(response?.data?.message || 'Không thể xử lý yêu cầu rút tiền');
+    } 
       setIsProcessing(false);
-    }
+    
   };
 
   const stats = data || {

@@ -23,7 +23,8 @@ export default function CourseContentOverviewComponent(){
   const [currentChapter, setCurrentChapter] = useState(null);
   const [currentModule, setCurrentModule] = useState(null);
   const [currentContentType, setCurrentContentType] = useState(null);
-  
+  const [feedbackRate, setFeedbackRate] = useState(0);
+
   // Report popup states
   const [showReportPopup, setShowReportPopup] = useState(false);
   const [reportType, setReportType] = useState('');
@@ -78,7 +79,7 @@ export default function CourseContentOverviewComponent(){
     setIsSubmittingFeedback(true);
     
     try {
-      const response = await feedbackApi.createFeedback(id, feedbackDetail.trim());
+      const response = await feedbackApi.createFeedback(id, feedbackDetail.trim(),feedbackRate);
      
       if (response.success) {
         showSuccessNotification("Cảm ơn bạn đã gửi phản hồi!");
@@ -703,6 +704,36 @@ const checkFinish = (moduleId, contentType, allModules) => {
 
             <div className="p-6">
               <div className="mb-6">
+  <label className="block text-sm font-bold text-gray-300 mb-2">
+    Mức độ hài lòng <span className="text-red-500">*</span>
+  </label>
+  <div className="flex items-center space-x-2">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <button
+        key={star}
+        type="button"
+        onClick={() => {
+          if (feedbackRate < 1 || feedbackRate > 5) {
+    showWarningNotification("Vui lòng chọn số sao từ 1 đến 5!");
+    return;}
+    setFeedbackRate(star)
+        }}
+        disabled={isSubmittingFeedback}
+        className={`text-3xl transition ${
+          star <= feedbackRate ? "text-yellow-400" : "text-gray-500"
+        } hover:scale-110`}
+      >
+        ★
+      </button>
+    ))}
+  </div>
+  <p className="text-sm text-gray-400 mt-2">
+    {feedbackRate === 0
+      ? "Vui lòng chọn số sao (1-5)"
+      : `Bạn đã chọn ${feedbackRate} sao`}
+  </p>
+</div>
+              <div className="mb-6">
                 <label className="block text-sm font-bold text-gray-300 mb-2">
                   Nội dung phản hồi <span className="text-red-500">*</span>
                 </label>
@@ -714,6 +745,7 @@ const checkFinish = (moduleId, contentType, allModules) => {
                   rows="6"
                   className="w-full px-4 py-3 bg-gray-700 border-2 border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition disabled:bg-gray-600 disabled:cursor-not-allowed"
                 />
+                
                 <p className="mt-2 text-sm text-gray-400">
                   Hãy cho chúng tôi biết điều gì bạn thích hoặc muốn cải thiện trong khóa học này.
                 </p>

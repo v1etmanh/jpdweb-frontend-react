@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useAuth } from "./security/Authentication";
 import { useNavigate } from "react-router-dom";
 import { uploadProfile } from "./api/ApiConnect";
+import { customerApi } from "./api/customerApi";
+import { showErrorNotification } from "./api/apiClient";
 
 export default function CreatorProfileComponent() {
     // Chỉ còn 3 required steps
@@ -145,10 +147,10 @@ export default function CreatorProfileComponent() {
             formDataToSend.append('profileImage', formData.profileImage);
             formDataToSend.append('agreedToTerms', formData.agreedToTerms);
 
-            const response = await uploadProfile(formData);
+            const response = await customerApi.uploadProfile(formData);
           
-           console.log(response)
-            if (response.status==201) {
+           
+            if (response.success) {
                 // Clear draft
                 sessionStorage.removeItem('creatorProfileDraft');
                 
@@ -160,7 +162,7 @@ export default function CreatorProfileComponent() {
                 navigate('/creator/commercial/dashboard');
             } else {
                 const error =  response.data
-                alert(error.message || 'Có lỗi xảy ra, vui lòng thử lại');
+                showErrorNotification(error.message || 'Có lỗi xảy ra, vui lòng thử lại');
             }
         } catch (error) {
             console.error('Submit error:', error);

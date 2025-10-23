@@ -83,7 +83,12 @@ export const creatorApi = {
             { errorMessage: 'Không thể lấy danh sách khóa học' }
         );
     },
-
+getCommercialCourse: () => {
+        return callApi(
+            () => apiclient.get(API_ENDPOINTS.CREATOR.GET_COMMERCIAL_COURSES),
+            { errorMessage: 'Không thể lấy danh sách khóa học' }
+        );
+    },
     /**
      * Lấy chi tiết khóa học
      * @param {number} id - ID khóa học
