@@ -10,7 +10,7 @@ import CreatorHomePage from "./CreateHomePage";
 import CreatorProfileComponent from "./CreateProfileComponent";
 import { useState } from "react";
 import Sidebar from "./CreatorSideBar";
-import { BookOpen, Menu, X } from "lucide-react";
+import { BookOpen, X } from "lucide-react";
 
 import CreateCourseForm from "./CreateCourseForm";
 import CourseManagementInterface from "./CourseManagementComponent";
@@ -156,54 +156,8 @@ const location = useLocation();
             </>
           )}
 
-          {/* Nút mở Creator Sidebar */}
-          <button
-            onClick={() => setCreator((prev) => !prev)}
-            style={{
-              position: 'fixed',
-              top: '20px',
-              left: '20px',
-              zIndex: 1100,
-              backgroundColor: '#007bff',
-              border: 'none',
-              borderRadius: '50%',
-              width: '45px',
-              height: '45px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              color: 'white'
-            }}
-          >
-            {isCreator ? <X size={22} /> : <Menu size={22} />}
-          </button>
-
-          {/* Creator Sidebar */}
-          {isCreator && (
-            <div
-              className={`creator-sidebar ${isCreator ? 'show' : ''}`}
-              style={{
-                position: 'fixed',
-                top: '0',
-                left: isCreator ? '0' : '-280px',
-                width: '280px',
-                height: '100vh',
-                backgroundColor: '#fdfdfd',
-                boxShadow: '2px 0 15px rgba(0,0,0,0.1)',
-                zIndex: 999,
-                transition:
-                  'left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                borderRight: '1px solid #e9ecef',
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-            >
-              <Sidebar />
-            </div>
-          )}
+          {/* Creator Sidebar với nút draggable */}
+          <Sidebar isOpen={isCreator} onToggle={() => setCreator((prev) => !prev)} />
         </>
       )}
   
