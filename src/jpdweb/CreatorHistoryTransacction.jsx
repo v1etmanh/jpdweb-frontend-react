@@ -190,7 +190,7 @@ const handleFetchTransactionHistoryError = (response) => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#06B6D4] mx-auto"></div>
           <p className="mt-4 text-gray-600">Đang tải lịch sử giao dịch...</p>
         </div>
       </div>
@@ -205,7 +205,7 @@ const handleFetchTransactionHistoryError = (response) => {
           <p className="text-gray-800 text-lg font-semibold">{error}</p>
           <button
             onClick={fetchTransactionHistory}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-[#06B6D4] text-white rounded-lg hover:bg-[#0891B2]"
           >
             Thử lại
           </button>
@@ -226,7 +226,7 @@ const handleFetchTransactionHistoryError = (response) => {
             </div>
             <button
               onClick={fetchTransactionHistory}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-[#06B6D4] text-white rounded-lg hover:bg-[#0891B2] transition-colors"
             >
               Làm mới
             </button>
@@ -295,7 +295,7 @@ const handleFetchTransactionHistoryError = (response) => {
                 onClick={() => setFilter(status)}
                 className={`px-6 py-3 font-medium transition-colors ${
                   filter === status
-                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    ? 'text-[#06B6D4] border-b-2 border-[#06B6D4]'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >

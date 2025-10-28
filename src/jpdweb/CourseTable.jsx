@@ -37,14 +37,14 @@ const CoursesTable = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-[#243864] mb-8 text-center">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
           Danh Sách Khóa Học
         </h1>
         
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full">
-              <thead className="bg-[#243864] text-white">
+              <thead className="bg-[#06B6D4] text-white">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                     Khóa Học
@@ -80,7 +80,7 @@ const CoursesTable = () => {
                           className="w-16 h-16 rounded-lg object-cover"
                         />
                         <div>
-                          <h3 className="text-lg font-semibold text-[#243864]">
+                          <h3 className="text-lg font-semibold text-gray-800">
                             {course.title}
                           </h3>
                         </div>
@@ -88,7 +88,7 @@ const CoursesTable = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
-                        <span className="bg-[#1e88e5] text-white px-3 py-1 rounded-full text-sm font-medium">
+                        <span className="bg-[#06B6D4] text-white px-3 py-1 rounded-full text-sm font-medium">
                           {course.students.toLocaleString()}
                         </span>
                         <span className="text-gray-600 text-sm">học viên</span>
@@ -113,12 +113,12 @@ const CoursesTable = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-[#e53935] font-bold text-lg">
+                      <span className="text-[#F97316] font-bold text-lg">
                         {formatCurrency(course.revenue)}
                       </span>
                     </td>
                      <td className="px-6 py-4">
-                      <span className="text-[#e53935] font-bold text-lg">
+                      <span className="text-[#F97316] font-bold text-lg">
                         {formatCurrency(course.price)}
                       </span>
                     </td>

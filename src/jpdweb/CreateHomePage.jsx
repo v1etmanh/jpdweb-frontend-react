@@ -175,8 +175,18 @@ const handleFetchStatisticError = (response) => {
             </div>
           )}
         </div>
-        <div className={`p-3 rounded-full bg-${color}-50`}>
-          <Icon className={`w-6 h-6 text-${color}-600`} />
+        <div className={`p-3 rounded-full ${
+          color === 'blue' ? 'bg-[#06B6D4] bg-opacity-10' :
+          color === 'purple' ? 'bg-purple-50' :
+          color === 'yellow' ? 'bg-yellow-50' :
+          'bg-gray-50'
+        }`}>
+          <Icon className={`w-6 h-6 ${
+            color === 'blue' ? 'text-[#06B6D4]' :
+            color === 'purple' ? 'text-purple-600' :
+            color === 'yellow' ? 'text-yellow-600' :
+            'text-gray-600'
+          }`} />
         </div>
       </div>
     </div>
@@ -194,7 +204,7 @@ const handleFetchStatisticError = (response) => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#06B6D4] mx-auto"></div>
           <p className="mt-4 text-gray-600">Đang tải dữ liệu...</p>
         </div>
       </div>
@@ -217,13 +227,13 @@ const handleFetchStatisticError = (response) => {
               <select 
                 value={selectedPeriod} 
                 onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent"
               >
                 <option value="thisMonth">Tháng này</option>
                 <option value="lastMonth">Tháng trước</option>
                 <option value="thisYear">Năm này</option>
               </select>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+              <button className="px-4 py-2 bg-[#06B6D4] text-white rounded-lg hover:bg-[#0891B2] transition-colors flex items-center">
                 <Download className="w-4 h-4 mr-2" />
                 Xuất báo cáo
               </button>
@@ -254,7 +264,7 @@ const handleFetchStatisticError = (response) => {
                   disabled={stats.totalRevenue < 100}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center justify-center transition-colors ${
                     stats.totalRevenue >= 100
-                      ? 'bg-green-600 text-white hover:bg-green-700'
+                      ? 'bg-[#F97316] text-white hover:bg-[#EA580C]'
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   }`}
                 >
@@ -293,7 +303,7 @@ const handleFetchStatisticError = (response) => {
           <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Khóa học phổ biến</h3>
-              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+              <button className="text-[#06B6D4] hover:text-[#0891B2] text-sm font-medium">
                 Xem tất cả
               </button>
             </div>
@@ -349,7 +359,7 @@ const handleFetchStatisticError = (response) => {
                         <td className="py-4 px-4">
                           <button 
                             onClick={() => nav(`/creator/course/${course.courseId}`)}
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline"
+                            className="text-[#06B6D4] hover:text-[#0891B2] text-sm font-medium hover:underline"
                           >
                             Xem chi tiết
                           </button>
@@ -424,8 +434,8 @@ const handleFetchStatisticError = (response) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Số dư hiện tại
                 </label>
-                <div className="px-4 py-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-lg text-blue-900 font-bold">
+                <div className="px-4 py-3 bg-[#06B6D4] bg-opacity-10 rounded-lg border border-[#06B6D4] border-opacity-30">
+                  <p className="text-lg text-[#06B6D4] font-bold">
                     {formatCurrency(stats.totalRevenue)}
                   </p>
                 </div>
@@ -441,7 +451,7 @@ const handleFetchStatisticError = (response) => {
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
                   placeholder="Nhập số tiền"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent"
                   disabled={isProcessing}
                 />
                 {withdrawError && (
@@ -463,7 +473,7 @@ const handleFetchStatisticError = (response) => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-[#06B6D4] text-white rounded-lg hover:bg-[#0891B2] transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
                   disabled={isProcessing}
                 >
                   {isProcessing ? 'Đang xử lý...' : 'Xác nhận rút tiền'}

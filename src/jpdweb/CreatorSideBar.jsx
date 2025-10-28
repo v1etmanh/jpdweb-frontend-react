@@ -6,7 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 const Sidebar = ({ isOpen, onToggle }) => {
   const location = useLocation();
   const [isCommercialOpen, setIsCommercialOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 15, y: 760 });
+  const [position, setPosition] = useState({ x: 15, y: 770 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [dropdownDirection, setDropdownDirection] = useState('down'); // 'up' hoặc 'down'
@@ -134,7 +134,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
           zIndex: 1100,
           cursor: isDragging ? 'grabbing' : 'grab',
         }}
-        className="bg-[#D4B896] hover:bg-[#C4A886] text-[#5D4E37] border-none rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all duration-300 hover:shadow-xl"
+        className="bg-gradient-to-r from-[#06B6D4] to-[#0891B2] hover:from-[#F97316] hover:to-[#EA580C] text-white border-none rounded-full w-12 h-12 flex items-center justify-center shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-110"
       >
         {isOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
@@ -156,73 +156,83 @@ const Sidebar = ({ isOpen, onToggle }) => {
               : { top: `${position.y + 60}px` }
             ),
             zIndex: 1099,
-            minWidth: '280px',
-            maxWidth: '320px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3), 0 10px 20px rgba(0, 0, 0, 0.2)',
-            border: '1px solid rgba(212, 184, 150, 0.3)'
+            minWidth: '300px',
+            maxWidth: '340px',
+            boxShadow: '0 20px 60px rgba(6, 182, 212, 0.3), 0 10px 30px rgba(249, 115, 22, 0.2)',
+            border: '2px solid rgba(6, 182, 212, 0.2)'
           }}
-          className={`bg-white rounded-lg overflow-hidden ${
+          className={`bg-white rounded-2xl overflow-hidden ${
             dropdownDirection === 'up' ? 'animate-slideUp' : 'animate-slideDown'
           }`}
         >
           {/* Header */}
-          <div className="bg-[#705f44] text-white p-4">
-            <h3 className="font-bold text-lg flex items-center gap-2">
-              <BookOpen size={20} />
+          <div className="bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white p-5">
+            <h3 className="font-black text-xl flex items-center gap-3">
+              <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+                <BookOpen size={22} />
+              </div>
               Creator Menu
             </h3>
           </div>
 
           {/* Menu Items */}
-          <nav className="py-2">
+          <nav className="py-3">
             <Link
               to="/creator/create_course"
               className={`
-                flex items-center gap-3 px-4 py-3 hover:bg-[#FFFEF7] transition-colors text-[#5D4E37] hover:text-[#243864] no-underline
-                ${location.pathname === '/creator/create_course' ? 'bg-[#D4B896] text-[#5D4E37] border-r-4 border-[#243864] font-semibold' : ''}
+                flex items-center gap-3 px-5 py-3.5 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 transition-all duration-300 text-gray-700 hover:text-[#06B6D4] no-underline group
+                ${location.pathname === '/creator/create_course' ? 'bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white border-l-4 border-[#F97316] font-bold shadow-md' : ''}
               `}
               onClick={onToggle}
             >
-              <BookOpen size={20} />
-              <span className="font-medium">Create Your Course</span>
+              <div className={`p-1.5 rounded-lg transition-all ${location.pathname === '/creator/create_course' ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-[#06B6D4]/10'}`}>
+                <BookOpen size={20} />
+              </div>
+              <span className="font-semibold">Create Your Course</span>
             </Link>
 
             <Link
               to="/creator/courseList"
               className={`
-                flex items-center gap-3 px-4 py-3 hover:bg-[#FFFEF7] transition-colors text-[#5D4E37] hover:text-[#243864] no-underline
-                ${location.pathname === '/creator/courseList' ? 'bg-[#D4B896] text-[#5D4E37] border-r-4 border-[#243864] font-semibold' : ''}
+                flex items-center gap-3 px-5 py-3.5 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 transition-all duration-300 text-gray-700 hover:text-[#06B6D4] no-underline group
+                ${location.pathname === '/creator/courseList' ? 'bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white border-l-4 border-[#F97316] font-bold shadow-md' : ''}
               `}
               onClick={onToggle}
             >
-              <BarChart3 size={20} />
-              <span className="font-medium">Manager</span>
+              <div className={`p-1.5 rounded-lg transition-all ${location.pathname === '/creator/courseList' ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-[#06B6D4]/10'}`}>
+                <BarChart3 size={20} />
+              </div>
+              <span className="font-semibold">Manager</span>
             </Link>
 
             <Link
               to="/creator/profile"
               className={`
-                flex items-center gap-3 px-4 py-3 hover:bg-[#FFFEF7] transition-colors text-[#5D4E37] hover:text-[#243864] no-underline
-                ${location.pathname === '/creator/profile' ? 'bg-[#D4B896] text-[#5D4E37] border-r-4 border-[#243864] font-semibold' : ''}
+                flex items-center gap-3 px-5 py-3.5 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 transition-all duration-300 text-gray-700 hover:text-[#06B6D4] no-underline group
+                ${location.pathname === '/creator/profile' ? 'bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white border-l-4 border-[#F97316] font-bold shadow-md' : ''}
               `}
               onClick={onToggle}
             >
-              <User size={20} />
-              <span className="font-medium">Creator Account</span>
+              <div className={`p-1.5 rounded-lg transition-all ${location.pathname === '/creator/profile' ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-[#06B6D4]/10'}`}>
+                <User size={20} />
+              </div>
+              <span className="font-semibold">Creator Account</span>
             </Link>
 
             {/* Commercial Dropdown */}
-            <div className="border-t border-gray-200 mt-2 pt-2">
+            <div className="border-t-2 border-gradient-to-r from-[#06B6D4]/20 to-[#F97316]/20 mt-3 pt-3">
               <button
                 onClick={() => setIsCommercialOpen(!isCommercialOpen)}
                 className={`
-                  w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-[#FFFEF7] transition-colors text-[#5D4E37] hover:text-[#243864]
-                  ${location.pathname.startsWith('/creator/commercial') ? 'bg-[#D4B896] text-[#5D4E37] font-semibold' : ''}
+                  w-full flex items-center justify-between gap-3 px-5 py-3.5 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 transition-all duration-300 text-gray-700 hover:text-[#06B6D4] rounded-lg group
+                  ${location.pathname.startsWith('/creator/commercial') ? 'bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white font-bold shadow-md' : ''}
                 `}
               >
                 <div className="flex items-center gap-3">
-                  <BarChart3 size={20} />
-                  <span className="font-medium">Commercial</span>
+                  <div className={`p-1.5 rounded-lg transition-all ${location.pathname.startsWith('/creator/commercial') ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-[#06B6D4]/10'}`}>
+                    <BarChart3 size={20} />
+                  </div>
+                  <span className="font-semibold">Commercial</span>
                 </div>
                 <ChevronDown 
                   size={18} 
@@ -232,41 +242,47 @@ const Sidebar = ({ isOpen, onToggle }) => {
 
               {/* Submenu */}
               {isCommercialOpen && (
-                <div className="bg-[#FFFEF7] py-2">
+                <div className="bg-gradient-to-br from-cyan-50/50 to-blue-50/50 py-2 mt-2 rounded-lg mx-2">
                   <Link
                     to="/creator/commercial/dashboard"
                     className={`
-                      flex items-center gap-3 px-8 py-2.5 hover:bg-[#D4B896] transition-colors text-[#5D4E37] hover:text-[#243864] no-underline
-                      ${location.pathname === '/creator/commercial/dashboard' ? 'text-[#243864] font-semibold' : ''}
+                      flex items-center gap-3 px-6 py-3 mx-2 rounded-lg hover:bg-white hover:shadow-md transition-all duration-300 text-gray-700 hover:text-[#06B6D4] no-underline group
+                      ${location.pathname === '/creator/commercial/dashboard' ? 'bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold shadow-lg' : ''}
                     `}
                     onClick={onToggle}
                   >
-                    <LayoutDashboard size={18} />
-                    <span>Dashboard</span>
+                    <div className={`p-1 rounded ${location.pathname === '/creator/commercial/dashboard' ? 'bg-white/20' : 'bg-[#06B6D4]/10 group-hover:bg-[#06B6D4]/20'}`}>
+                      <LayoutDashboard size={18} />
+                    </div>
+                    <span className="font-semibold">Dashboard</span>
                   </Link>
 
                   <Link
                     to="/creator/commercial/courseDetail"
                     className={`
-                      flex items-center gap-3 px-8 py-2.5 hover:bg-[#D4B896] transition-colors text-[#5D4E37] hover:text-[#243864] no-underline
-                      ${location.pathname === '/creator/commercial/courseDetail' ? 'text-[#243864] font-semibold' : ''}
+                      flex items-center gap-3 px-6 py-3 mx-2 rounded-lg hover:bg-white hover:shadow-md transition-all duration-300 text-gray-700 hover:text-[#06B6D4] no-underline group
+                      ${location.pathname === '/creator/commercial/courseDetail' ? 'bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold shadow-lg' : ''}
                     `}
                     onClick={onToggle}
                   >
-                    <CreditCard size={18} />
-                    <span>Course Detail</span>
+                    <div className={`p-1 rounded ${location.pathname === '/creator/commercial/courseDetail' ? 'bg-white/20' : 'bg-[#06B6D4]/10 group-hover:bg-[#06B6D4]/20'}`}>
+                      <CreditCard size={18} />
+                    </div>
+                    <span className="font-semibold">Course Detail</span>
                   </Link>
 
                   <Link
                     to="/creator/commercial/history_transaction"
                     className={`
-                      flex items-center gap-3 px-8 py-2.5 hover:bg-[#D4B896] transition-colors text-[#5D4E37] hover:text-[#243864] no-underline
-                      ${location.pathname === '/creator/commercial/history_transaction' ? 'text-[#243864] font-semibold' : ''}
+                      flex items-center gap-3 px-6 py-3 mx-2 rounded-lg hover:bg-white hover:shadow-md transition-all duration-300 text-gray-700 hover:text-[#06B6D4] no-underline group
+                      ${location.pathname === '/creator/commercial/history_transaction' ? 'bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold shadow-lg' : ''}
                     `}
                     onClick={onToggle}
                   >
-                    <CreditCard size={18} />
-                    <span>Transaction History</span>
+                    <div className={`p-1 rounded ${location.pathname === '/creator/commercial/history_transaction' ? 'bg-white/20' : 'bg-[#06B6D4]/10 group-hover:bg-[#06B6D4]/20'}`}>
+                      <CreditCard size={18} />
+                    </div>
+                    <span className="font-semibold">Transaction History</span>
                   </Link>
                 </div>
               )}
@@ -274,8 +290,13 @@ const Sidebar = ({ isOpen, onToggle }) => {
           </nav>
 
           {/* Footer */}
-          <div className="bg-[#FFFEF7] px-4 py-3 border-t border-gray-200">
-            <p className="text-xs text-[#5D4E37] text-center">© 2024 My App</p>
+          <div className="bg-gradient-to-r from-slate-50 to-cyan-50 px-5 py-4 border-t-2 border-[#06B6D4]/20">
+            <p className="text-xs text-gray-600 text-center font-semibold">© 2024 JPD Learning Platform</p>
+            <div className="flex justify-center gap-2 mt-2">
+              <div className="w-2 h-2 rounded-full bg-[#06B6D4]"></div>
+              <div className="w-2 h-2 rounded-full bg-[#F97316]"></div>
+              <div className="w-2 h-2 rounded-full bg-[#06B6D4]"></div>
+            </div>
           </div>
         </div>
       )}
@@ -284,28 +305,28 @@ const Sidebar = ({ isOpen, onToggle }) => {
         @keyframes slideDown {
           from {
             opacity: 0;
-            transform: translateY(-10px);
+            transform: translateY(-20px) scale(0.95);
           }
           to {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
           }
         }
         @keyframes slideUp {
           from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(20px) scale(0.95);
           }
           to {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
           }
         }
         .animate-slideDown {
-          animation: slideDown 0.3s ease-out;
+          animation: slideDown 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
+          animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
       `}</style>
     </>
