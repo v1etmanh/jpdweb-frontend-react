@@ -12,7 +12,7 @@ const MixedQuestionForm = ({ onSubmit, initialData, onDelete }) => {
   
   // AI Feedback States
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(null);  
   const [aiSuggestion, setAiSuggestion] = useState('');
   const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false);
   const [feedbackStatus, setFeedbackStatus] = useState({});

@@ -21,5 +21,23 @@ export const paymentApi = {
                 showNotification: true
             }
         );
+    },
+       /**
+     * Tạo đơn hàng PayPal
+     * @param {number} courseId - ID khóa học
+     * @param {number} amount - Số tiền
+     */
+    createVNPAYOrder: (courseId, amount) => {
+        return callApi(
+            () => apiclient.post(
+                API_ENDPOINTS.PAYMENT.VNPAY_ORDER.replace(':courseId', courseId),
+                null,
+                { params: { amount } }
+            ),
+            { 
+                errorMessage: 'Không thể tạo đơn hàng',
+                showNotification: true
+            }
+        );
     }
 };

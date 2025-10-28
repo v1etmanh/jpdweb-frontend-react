@@ -64,6 +64,7 @@ export const API_ENDPOINTS = {
     // Payment
     PAYMENT: {
         CREATE_ORDER: '/api/paypal/create-order/:courseId',
+        VNPAY_ORDER:'/api/vnpay/create-order/:courseId'
     },
     REMEMBERWORD:{
         RETRIEVE_ALL:'/api/customer/dictionary',
