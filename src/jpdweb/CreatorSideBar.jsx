@@ -66,6 +66,21 @@ const Sidebar = ({ isOpen, onToggle }) => {
               <BarChart3 size={20} />
               <span>Manager</span>
             </Link>
+              <Link
+              to="/creator/class/kahoot"
+              className={`
+                w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors text-left
+                ${location.pathname === '/creator/manager' ? 'bg-blue-600 border-r-4 border-blue-400' : ''}
+              `}
+              onClick={() => {
+                if (window.innerWidth < 768) {
+                  onToggle();
+                }
+              }}
+            >
+              <BarChart3 size={20} />
+              <span>kahoot</span>
+            </Link>
              <Link
               to="/creator/profile"
               className={`
@@ -78,6 +93,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 }
               }}
             >
+              
               <BarChart3 size={20} />
               <span>Creator Account</span>
             </Link>
@@ -138,6 +154,18 @@ const Sidebar = ({ isOpen, onToggle }) => {
             >
               <CreditCard size={18} />
               <span>Transaction History</span>
+            </Link>
+             <Link
+              to="/creator/commercial/balance"
+              className={`
+                flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700
+                ${location.pathname === '/creator/commercial/code' 
+                  ? 'bg-blue-500' 
+                  : ''}
+              `}
+            >
+              <CreditCard size={18} />
+              <span>Your budget</span>
             </Link>
           </div>
         )}

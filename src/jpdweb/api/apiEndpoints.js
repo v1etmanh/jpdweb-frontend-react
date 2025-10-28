@@ -28,7 +28,7 @@ export const API_ENDPOINTS = {
         GET_ENROLLMENT: '/api/creator/enrollment/:courseId',
         CREATE_WITHDRAW: '/api/creator/createWithdraw',
         TRANSACTION_HISTORY: '/api/creator/history_transaction',
-
+         GET_BALANCE:'/api/creator/getBalance',
         // Chapter
         CREATE_CHAPTER: '/api/creator/:courseId/chapter',
         DELETE_CHAPTER: '/api/creator/:courseId/chapter/:chapterId',
@@ -80,5 +80,25 @@ export const API_ENDPOINTS = {
     },
     FEEDBACK:{
         CREATE_FEEDBACK:'/api/customer/feedback/:courseId'
+    },
+    KAHOOT: {
+            RETRIEVE_ALL: '/api/creator/kahoot/retrieveAll',
+            GET_MODULE_CONTENTS: '/api/creator/kahoot/:kahootId/moduleContents',
+            CREATE: '/api/creator/kahoot/create',
+            DELETE: '/api/creator/kahoot/:kahootId',
+            UPDATE_TITLE: '/api/creator/kahoot/:kahootID'
+        },
+         KAHOOT_MODULE_CONTENT: {
+       
+
+        /**
+         * Cập nhật danh sách ModuleContent (POST)
+         */
+        UPDATE_ALL: '/api/creator/kahootModuleContent/:kahootId',
+
+        /**
+         * Xóa 1 ModuleContent theo ID
+         */
+        DELETE_ONE: '/api/creator/kahootModuleContent/:kahootId/:moduleContentId'
     }
 };

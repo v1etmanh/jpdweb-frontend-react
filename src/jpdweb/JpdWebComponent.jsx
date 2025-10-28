@@ -30,6 +30,12 @@ import ProtectedRoute from "./ProtectedRoute";
 import CreatorProtectedRoute from "./CreatorProtectedRoute";
 import WithdrawHistory from "./CreatorHistoryTransacction";
 import TransactionDetailPage from "./TransactionDetailPage";
+import BalanceComponent from "./BalanceComponent";
+import KahootPage from "./Kahhootpage";
+import KahootList from "./KahootManagement";
+import TeacherDashboard from "./kahoot/TeacherDashboard";
+import StudentJoin from "./kahoot/StudentJoin";
+import KahootSpecificContent from "./KahootSpecificContent";
 export default function JpdWebComponent(){
   const [isCreator, setCreator] = useState(false);
   const [showDirect, setShowDirect] = useState(false);
@@ -241,6 +247,7 @@ const location = useLocation();
               </ProtectedRoute>
             } 
           />
+
          
          
           
@@ -261,6 +268,14 @@ const location = useLocation();
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/creator/commercial/balance" 
+            element={
+              <ProtectedRoute>
+                <BalanceComponent />
+              </ProtectedRoute>
+            } 
+          />
           {/* Creator Routes - Cần authentication + isCreator = true */}
           <Route 
             path="/creator/commercial/dashboard" 
@@ -276,6 +291,38 @@ const location = useLocation();
               <CreatorProtectedRoute>
                 <CourseManagementInterface />
               </CreatorProtectedRoute>
+            } 
+          />
+           <Route 
+            path="/creator/class/kahoot" 
+            element={
+              <CreatorProtectedRoute>
+                <KahootList></KahootList>
+              </CreatorProtectedRoute>
+            } 
+          />
+            <Route 
+            path="/creator/class/kahoot/:id" 
+            element={
+              <CreatorProtectedRoute>
+                <KahootSpecificContent></KahootSpecificContent>
+              </CreatorProtectedRoute>
+            } 
+          />
+           <Route 
+            path="/creator/class/kahoot/:id/start" 
+            element={
+              <CreatorProtectedRoute>
+                <TeacherDashboard></TeacherDashboard>
+              </CreatorProtectedRoute>
+            } 
+          />
+            <Route 
+            path="/creator/class/kahoot/studentJoin" 
+            element={
+              
+                <StudentJoin></StudentJoin>
+             
             } 
           />
           <Route 

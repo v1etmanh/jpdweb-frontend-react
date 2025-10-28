@@ -21,10 +21,7 @@ const CreatorHomePage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('thisMonth');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [withdrawError, setWithdrawError] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  
   const nav = useNavigate();
   const { creatorInfor } = useAuth();
 
@@ -96,59 +93,9 @@ const handleFetchStatisticError = (response) => {
   }
 };
 
-  const handleWithdrawClick = () => {
-    const balance = stats.totalRevenue || 0;
-    
-    if (balance < 100) {
-      alert("Số dư tối thiểu để rút tiền là $100");
-      return;
-    }
-    
-    setShowWithdrawModal(true);
-    setWithdrawAmount('');
-    setWithdrawError('');
-  };
+ 
 
-  const handleWithdrawSubmit = async (e) => {
-    e.preventDefault();
-    setWithdrawError('');
-    
-    const amount = parseFloat(withdrawAmount);
-    const balance = stats.totalRevenue || 0;
-    
-    // Validation
-    if (isNaN(amount) || amount <= 0) {
-      setWithdrawError('Vui lòng nhập số tiền hợp lệ');
-      return;
-    }
-    
-    if (amount > balance) {
-      setWithdrawError('Số tiền rút không được vượt quá số dư');
-      return;
-    }
-    
-    if (balance < 100) {
-      setWithdrawError('Số dư tối thiểu để rút tiền là $100');
-      return;
-    }
-    
-    setIsProcessing(true);
-    
   
-      const response = await creatorApi.createWithdraw(amount);
-     
-      if (response.success) {
-        alert('Yêu cầu rút tiền đã được gửi thành công!');
-        setShowWithdrawModal(false);
-        fetchData(); // Refresh data
-      }
-      else{
-     
-      showErrorNotification(response?.data?.message || 'Không thể xử lý yêu cầu rút tiền');
-    } 
-      setIsProcessing(false);
-    
-  };
 
   const stats = data || {
     totalRevenue: 0,
@@ -249,18 +196,7 @@ const handleFetchStatisticError = (response) => {
                 <div className="p-3 rounded-full bg-green-50">
                   <DollarSign className="w-6 h-6 text-green-600" />
                 </div>
-                <button
-                  onClick={handleWithdrawClick}
-                  disabled={stats.totalRevenue < 100}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center justify-center transition-colors ${
-                    stats.totalRevenue >= 100
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  <Wallet className="w-4 h-4 mr-1" />
-                  Rút tiền
-                </button>
+               
               </div>
             </div>
           </div>
@@ -394,85 +330,8 @@ const handleFetchStatisticError = (response) => {
         </div>
       </div>
 
-      {/* Withdraw Modal */}
-      {showWithdrawModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Rút tiền</h2>
-              <button
-                onClick={() => setShowWithdrawModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <form onSubmit={handleWithdrawSubmit} className="p-6">
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tài khoản nhận tiền
-                </label>
-                <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-sm text-gray-900 font-medium">
-                    {creatorInfor?.paypalEmail || 'Chưa có thông tin'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Số dư hiện tại
-                </label>
-                <div className="px-4 py-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-lg text-blue-900 font-bold">
-                    {formatCurrency(stats.totalRevenue)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Số tiền muốn rút
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={withdrawAmount}
-                  onChange={(e) => setWithdrawAmount(e.target.value)}
-                  placeholder="Nhập số tiền"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={isProcessing}
-                />
-                {withdrawError && (
-                  <p className="mt-2 text-sm text-red-600">{withdrawError}</p>
-                )}
-                <p className="mt-2 text-xs text-gray-500">
-                  Số tiền tối thiểu để rút: $100
-                </p>
-              </div>
-
-              <div className="flex space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowWithdrawModal(false)}
-                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                  disabled={isProcessing}
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  disabled={isProcessing}
-                >
-                  {isProcessing ? 'Đang xử lý...' : 'Xác nhận rút tiền'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+    
+    
     </div>
   );
 };

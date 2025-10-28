@@ -1,0 +1,245 @@
+.teacher-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.teacher-dashboard h1 {
+    color: white;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+}
+
+.create-session {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.create-session h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.create-session button {
+    width: 100%;
+    padding: 15px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.create-session button:hover:not(:disabled) {
+    background: #5568d3;
+}
+
+.create-session button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.session-active {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.session-info {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #eee;
+}
+
+.session-code {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.session-code .code {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #667eea;
+    letter-spacing: 5px;
+    padding: 10px 20px;
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.session-code button {
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.session-title {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 1rem 0;
+}
+
+.session-questions {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.status {
+    margin-top: 1rem;
+}
+
+.connected {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.disconnected {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.qr-code {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 2rem;
+    background: #f9f9f9;
+    border-radius: 10px;
+}
+
+.qr-code img {
+    max-width: 300px;
+    border: 5px solid white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.join-url {
+    margin-top: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+    word-break: break-all;
+}
+
+.participants-section {
+    margin: 2rem 0;
+}
+
+.participants-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.participants-header button {
+    padding: 8px 16px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.waiting {
+    text-align: center;
+    color: #999;
+    padding: 2rem;
+    font-style: italic;
+}
+
+.participants-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.participant-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.participant-number {
+    font-weight: bold;
+    color: #667eea;
+    font-size: 1.2rem;
+}
+
+.participant-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.participant-time {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+.actions {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.btn-start {
+    padding: 15px 40px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.btn-start:hover:not(:disabled) {
+    background: #45a049;
+    transform: translateY(-2px);
+}
+
+.btn-start:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
