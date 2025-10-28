@@ -83,6 +83,12 @@ export const creatorApi = {
             { errorMessage: 'Không thể lấy danh sách khóa học' }
         );
     },
+     getBalance: () => {
+        return callApi(
+            () => apiclient.get(API_ENDPOINTS.CREATOR.GET_BALANCE),
+            { errorMessage: 'Không tải balance của bạn' }
+        );
+    },
 getCommercialCourse: () => {
         return callApi(
             () => apiclient.get(API_ENDPOINTS.CREATOR.GET_COMMERCIAL_COURSES),

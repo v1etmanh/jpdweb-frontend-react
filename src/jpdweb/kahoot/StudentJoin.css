@@ -1,0 +1,123 @@
+.student-join {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.join-form, .waiting-room {
+    background: white;
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    max-width: 500px;
+    width: 100%;
+}
+
+.join-form h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.code-input {
+    text-align: center;
+    font-size: 2rem !important;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.join-form button {
+    width: 100%;
+    padding: 15px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 1rem;
+}
+
+.join-form button:hover:not(:disabled) {
+    background: #1976D2;
+}
+
+.join-form button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.waiting-room {
+    text-align: center;
+}
+
+.waiting-room h1 {
+    color: #4CAF50;
+    margin-bottom: 2rem;
+}
+
+.session-info {
+    margin-bottom: 2rem;
+}
+
+.session-info h2 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.participant-info {
+    margin: 2rem 0;
+}
+
+.avatar {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+}
+
+.participant-info h3 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.participant-id {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+.waiting-message {
+    margin-top: 3rem;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.hint {
+    color: #999;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}

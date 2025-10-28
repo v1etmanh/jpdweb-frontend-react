@@ -712,12 +712,7 @@ const checkFinish = (moduleId, contentType, allModules) => {
       <button
         key={star}
         type="button"
-        onClick={() => {
-          if (feedbackRate < 1 || feedbackRate > 5) {
-    showWarningNotification("Vui lòng chọn số sao từ 1 đến 5!");
-    return;}
-    setFeedbackRate(star)
-        }}
+        onClick={() => setFeedbackRate(star)} 
         disabled={isSubmittingFeedback}
         className={`text-3xl transition ${
           star <= feedbackRate ? "text-yellow-400" : "text-gray-500"
