@@ -73,7 +73,7 @@ const location = useLocation();
                 onClick={() => setShowDirect(true)}
                 style={{
                   position: 'fixed',
-                  bottom: '60px', // dịch lên 1 chút
+                  bottom: '25px', // dịch lên 1 chút
                   right: '20px',
                   zIndex: 998,
                   borderRadius: '50px',
@@ -82,7 +82,7 @@ const location = useLocation();
                   fontWeight: '600',
                   boxShadow: '0 4px 20px rgba(0,123,255,0.3)',
                   border: 'none',
-                  background: 'linear-gradient(45deg, #007bff, #0056b3)',
+                  background: 'linear-gradient(45deg, #dc8f48ff, #26aaceff)',
                   transition: 'all 0.3s ease'
                 }}
               >
