@@ -38,8 +38,8 @@ const InputField = React.memo(
     icon: Icon,
   }) => (
     <div className="mb-8 animate-fade-in">
-      <label className="block text-sm font-medium text-text-primary mb-3 flex items-center">
-        {Icon && <Icon className="w-4 h-4 mr-2" />}
+      <label className="block text-sm font-medium text-gray-800 mb-3 flex items-center">
+        {Icon && <Icon className="w-4 h-4 mr-2 text-cyan-600" />}
         {label} {required && <span className="text-red-500 ml-1">*</span>}
       </label>
       {textarea ? (
@@ -48,10 +48,10 @@ const InputField = React.memo(
           onChange={(e) => onChange(name, e.target.value)}
           placeholder={placeholder}
           rows={4}
-          className={`w-full px-4 py-3 border-2 bg-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-main transition-all duration-300 text-text-primary placeholder-text-muted ${
+          className={`w-full px-4 py-3 border-2 bg-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-600 transition-all duration-300 text-gray-800 placeholder-gray-500 ${
             error
               ? "border-red-500 focus:ring-red-500"
-              : "border-border-light focus:border-primary-main"
+              : "border-gray-300 focus:border-cyan-600"
           }`}
         />
       ) : (
@@ -60,10 +60,10 @@ const InputField = React.memo(
           value={value}
           onChange={(e) => onChange(name, e.target.value)}
           placeholder={placeholder}
-          className={`w-full px-4 py-3 border-2 bg-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-main transition-all duration-300 text-text-primary placeholder-text-muted ${
+          className={`w-full px-4 py-3 border-2 bg-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-600 transition-all duration-300 text-gray-800 placeholder-gray-500 ${
             error
               ? "border-red-500 focus:ring-red-500"
-              : "border-border-light focus:border-primary-main"
+              : "border-gray-300 focus:border-cyan-600"
           }`}
         />
       )}
@@ -443,10 +443,10 @@ const CreateCourseForm = () => {
               }`}
             >
               <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-semibold border-2 transition-all duration-500 shadow-soft ${
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-semibold border-2 transition-all duration-500 shadow-sm ${
                   step.number <= currentStep
-                    ? "bg-primary-main text-white border-primary-main shadow-medium"
-                    : "bg-white text-text-muted border-border-light"
+                    ? "bg-cyan-600 text-white border-cyan-600 shadow-md"
+                    : "bg-white text-gray-500 border-gray-300"
                 }`}
               >
                 {step.number < currentStep ? (
@@ -458,8 +458,8 @@ const CreateCourseForm = () => {
               <span
                 className={`text-xs mt-2 font-medium transition-colors duration-300 ${
                   step.number <= currentStep
-                    ? "text-primary-main"
-                    : "text-text-muted"
+                    ? "text-cyan-600"
+                    : "text-gray-500"
                 }`}
               >
                 {step.label}
@@ -469,8 +469,8 @@ const CreateCourseForm = () => {
               <div
                 className={`w-24 h-1 mx-4 transition-all duration-500 ${
                   step.number < currentStep
-                    ? "bg-primary-main"
-                    : "bg-border-light"
+                    ? "bg-cyan-600"
+                    : "bg-gray-300"
                 }`}
               />
             )}
@@ -492,28 +492,28 @@ const CreateCourseForm = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background py-8 font-sans">
+    <div className="min-h-screen bg-gray-50 py-8 font-sans" style={{ backgroundColor: '#F1F5F9' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Enhanced Header */}
-        <div className="bg-white rounded-3xl shadow-soft border border-border-light p-8 mb-8 animate-scale-in">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 mb-8 animate-scale-in">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button
                 onClick={handleBack}
-                className="mr-6 p-3 hover:bg-primary-light rounded-2xl transition-all duration-300 group"
+                className="mr-6 p-3 hover:bg-cyan-50 rounded-2xl transition-all duration-300 group"
               >
-                <ArrowLeft className="w-6 h-6 text-text-primary group-hover:text-primary-main transition-colors" />
+                <ArrowLeft className="w-6 h-6 text-gray-800 group-hover:text-cyan-600 transition-colors" />
               </button>
               <div>
-                <h1 className="text-3xl font-bold text-text-primary">
+                <h1 className="text-3xl font-bold text-gray-900">
                   Tạo khóa học mới
                 </h1>
-                <p className="text-text-secondary mt-2 text-lg">
+                <p className="text-gray-600 mt-2 text-lg">
                   Chia sẻ kiến thức và kiếm tiền từ khóa học của bạn
                 </p>
               </div>
             </div>
-            <div className="text-lg font-semibold text-primary-main bg-primary-light px-4 py-2 rounded-2xl">
+            <div className="text-lg font-semibold text-cyan-600 bg-cyan-50 px-4 py-2 rounded-2xl">
               Bước {currentStep}/3
             </div>
           </div>
@@ -521,19 +521,19 @@ const CreateCourseForm = () => {
 
         {StepIndicator}
 
-        <div className="bg-white rounded-3xl shadow-soft border border-border-light p-10 animate-fade-in">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-10 animate-fade-in">
           {/* Step 1: Basic Information */}
           {currentStep === 1 && (
             <div className="space-y-2">
               <div className="flex items-center mb-8">
-                <div className="p-3 bg-primary-light rounded-2xl mr-4">
-                  <BookOpen className="w-8 h-8 text-primary-main" />
+                <div className="p-3 bg-cyan-50 rounded-2xl mr-4">
+                  <BookOpen className="w-8 h-8 text-cyan-600" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-text-primary">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     Thông tin cơ bản
                   </h2>
-                  <p className="text-text-secondary mt-1">
+                  <p className="text-gray-600 mt-1">
                     Thiết lập thông tin cơ bản cho khóa học của bạn
                   </p>
                 </div>
@@ -564,15 +564,15 @@ const CreateCourseForm = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-3 flex items-center">
-                    <Globe className="w-4 h-4 mr-2" />
+                  <label className="block text-sm font-medium text-gray-800 mb-3 flex items-center">
+                    <Globe className="w-4 h-4 mr-2 text-cyan-600" />
                     Ngôn ngữ <span className="text-red-500 ml-1">*</span>
                   </label>
                   <div className="relative">
                     <select
                       value={courseData.language}
                       onChange={handleLanguageChange}
-                      className="w-full px-4 py-3 border-2 border-border-light bg-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-main focus:border-primary-main transition-all duration-300 text-text-primary appearance-none"
+                      className="w-full px-4 py-3 border-2 border-gray-300 bg-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600 transition-all duration-300 text-gray-800 appearance-none"
                     >
                       {languages.map((lang) => (
                         <option key={lang.value} value={lang.value}>
@@ -581,14 +581,14 @@ const CreateCourseForm = () => {
                       ))}
                     </select>
                     <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <Layout className="w-5 h-5 text-text-muted" />
+                      <Layout className="w-5 h-5 text-gray-500" />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-3 flex items-center">
-                    <Award className="w-4 h-4 mr-2" />
+                  <label className="block text-sm font-medium text-gray-800 mb-3 flex items-center">
+                    <Award className="w-4 h-4 mr-2 text-cyan-600" />
                     Ngôn ngữ giảng dạy{" "}
                     <span className="text-red-500 ml-1">*</span>
                   </label>
@@ -596,7 +596,7 @@ const CreateCourseForm = () => {
                     <select
                       value={courseData.teachingLanguage}
                       onChange={handleTeachingLanguageChange}
-                      className="w-full px-4 py-3 border-2 border-border-light bg-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-main focus:border-primary-main transition-all duration-300 text-text-primary appearance-none"
+                      className="w-full px-4 py-3 border-2 border-gray-300 bg-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:border-cyan-600 transition-all duration-300 text-gray-800 appearance-none"
                     >
                       {teachingLanguages.map((lang) => (
                         <option key={lang.value} value={lang.value}>
@@ -605,7 +605,7 @@ const CreateCourseForm = () => {
                       ))}
                     </select>
                     <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <Layout className="w-5 h-5 text-text-muted" />
+                      <Layout className="w-5 h-5 text-gray-500" />
                     </div>
                   </div>
                 </div>
@@ -617,14 +617,14 @@ const CreateCourseForm = () => {
           {currentStep === 2 && (
             <div className="space-y-2">
               <div className="flex items-center mb-8">
-                <div className="p-3 bg-primary-light rounded-2xl mr-4">
-                  <Target className="w-8 h-8 text-primary-main" />
+                <div className="p-3 bg-cyan-50 rounded-2xl mr-4">
+                  <Target className="w-8 h-8 text-cyan-600" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-text-primary">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     Mục tiêu & Đối tượng
                   </h2>
-                  <p className="text-text-secondary mt-1">
+                  <p className="text-gray-600 mt-1">
                     Xác định rõ mục tiêu và đối tượng học viên mục tiêu
                   </p>
                 </div>
@@ -672,14 +672,14 @@ const CreateCourseForm = () => {
           {currentStep === 3 && (
             <div className="space-y-2">
               <div className="flex items-center mb-8">
-                <div className="p-3 bg-primary-light rounded-2xl mr-4">
-                  <DollarSign className="w-8 h-8 text-primary-main" />
+                <div className="p-3 bg-cyan-50 rounded-2xl mr-4">
+                  <DollarSign className="w-8 h-8 text-cyan-600" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-text-primary">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     Định giá & Hình ảnh
                   </h2>
-                  <p className="text-text-secondary mt-1">
+                  <p className="text-gray-600 mt-1">
                     Thiết lập mô hình kinh doanh và hình ảnh cho khóa học
                   </p>
                 </div>
@@ -688,17 +688,17 @@ const CreateCourseForm = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div className="space-y-8">
                   <div className="animate-fade-in">
-                    <label className="block text-sm font-medium text-text-primary mb-3 flex items-center">
-                      <Layout className="w-4 h-4 mr-2" />
+                    <label className="block text-sm font-medium text-gray-800 mb-3 flex items-center">
+                      <Layout className="w-4 h-4 mr-2 text-cyan-600" />
                       Loại khóa học <span className="text-red-500 ml-1">*</span>
                     </label>
                     <select
                       value={courseData.courseType}
                       onChange={handleCourseTypeChange}
-                      className={`w-full px-4 py-3 border-2 bg-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-main transition-all duration-300 text-text-primary ${
+                      className={`w-full px-4 py-3 border-2 bg-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-600 transition-all duration-300 text-gray-800 ${
                         errors.courseType
                           ? "border-red-500 focus:ring-red-500"
-                          : "border-border-light focus:border-primary-main"
+                          : "border-gray-300 focus:border-cyan-600"
                       }`}
                     >
                       <option value="">-- Chọn loại khóa học --</option>
@@ -729,11 +729,11 @@ const CreateCourseForm = () => {
                       />
 
                       {revenueInfo && (
-                        <div className="p-6 bg-primary-light rounded-2xl border border-primary-main animate-scale-in">
-                          <h4 className="font-semibold text-primary-main mb-3 text-lg">
+                        <div className="p-6 bg-cyan-50 rounded-2xl border border-cyan-600 animate-scale-in">
+                          <h4 className="font-semibold text-cyan-600 mb-3 text-lg">
                             Dự kiến thu nhập:
                           </h4>
-                          <div className="space-y-2 text-sm text-primary-dark">
+                          <div className="space-y-2 text-sm text-cyan-800">
                             <div className="flex justify-between">
                               <span>Giá gốc:</span>
                               <span className="font-semibold">
@@ -749,9 +749,9 @@ const CreateCourseForm = () => {
                                 VNĐ
                               </span>
                             </div>
-                            <div className="flex justify-between pt-2 border-t border-border-main">
+                            <div className="flex justify-between pt-2 border-t border-cyan-300">
                               <span className="font-bold">Bạn nhận được:</span>
-                              <span className="font-bold text-lg text-primary-main">
+                              <span className="font-bold text-lg text-cyan-600">
                                 {revenueInfo.userRevenue.toLocaleString(
                                   "vi-VN"
                                 )}{" "}
@@ -782,13 +782,14 @@ const CreateCourseForm = () => {
                   )}
                 </div>
 
-                <di className="animate-fade-in">
-                  <label className="block text-sm font-medium text-text-primary mb-3 flex items-center">
+                <div className="animate-fade-in">
+                  <label className="block text-sm font-medium text-gray-800 mb-3 flex items-center">
+                    <Image className="w-4 h-4 mr-2 text-cyan-600" />
                     Hình ảnh khóa học{" "}
                     <span className="text-red-500 ml-1">*</span>
                   </label>
 
-                  <div className="relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 hover:shadow-medium">
+                  <div className="relative border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center transition-all duration-300 hover:shadow-md">
                     {courseData.urlImg ? (
                       <div className="relative">
                         <img
@@ -832,13 +833,13 @@ const CreateCourseForm = () => {
                       {errors.image}
                     </div>
                   )}
-                </di>
+                </div>
               </div>
             </div>
           )}
 
           {/* Enhanced Navigation Buttons */}
-          <div className="flex justify-between items-center mt-12 pt-8 border-t border-border-light">
+          <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-200">
             <button
               type="button"
               onClick={handlePrevStep}
@@ -846,7 +847,7 @@ const CreateCourseForm = () => {
               className={`px-8 py-3 rounded-2xl font-semibold transition-all duration-300 flex items-center ${
                 currentStep === 1
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-white text-text-primary border-2 border-border-light hover:bg-primary-light hover:border-primary-main hover:shadow-soft"
+                  : "bg-white text-gray-800 border-2 border-gray-300 hover:bg-cyan-50 hover:border-cyan-600 hover:shadow-sm"
               }`}
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
@@ -857,7 +858,7 @@ const CreateCourseForm = () => {
               <button
                 type="button"
                 onClick={handleNext}
-                className="px-8 py-3 bg-primary-main text-white rounded-2xl font-semibold hover:bg-primary-dark hover:shadow-medium transition-all duration-300 flex items-center group"
+                className="px-8 py-3 bg-cyan-600 text-white rounded-2xl font-semibold hover:bg-cyan-700 hover:shadow-md transition-all duration-300 flex items-center group"
               >
                 Tiếp theo
                 <Layout className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -867,7 +868,8 @@ const CreateCourseForm = () => {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-8 py-3 bg-green-600 text-white rounded-2xl font-semibold hover:bg-green-700 hover:shadow-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center group"
+                className="px-8 py-3 bg-orange-500 text-white rounded-2xl font-semibold hover:bg-orange-600 hover:shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center group"
+                style={{ backgroundColor: '#F97316' }}
               >
                 {isSubmitting ? (
                   <>
@@ -886,8 +888,8 @@ const CreateCourseForm = () => {
         </div>
 
         {/* Enhanced Tips Section */}
-        <div className="bg-primary-light rounded-3xl p-8 mt-8 border border-primary-main animate-fade-in">
-          <h3 className="font-bold text-primary-main text-xl mb-4 flex items-center">
+        <div className="bg-cyan-50 rounded-3xl p-8 mt-8 border border-cyan-600 animate-fade-in">
+          <h3 className="font-bold text-cyan-600 text-xl mb-4 flex items-center">
             <Award className="w-6 h-6 mr-2" />
             Mẹo tạo khóa học thành công
           </h3>
@@ -902,10 +904,10 @@ const CreateCourseForm = () => {
             ].map((tip, index) => (
               <div
                 key={index}
-                className="flex items-start p-3 bg-white rounded-2xl shadow-soft"
+                className="flex items-start p-3 bg-white rounded-2xl shadow-sm"
               >
                 <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-text-primary">{tip}</span>
+                <span className="text-sm text-gray-800">{tip}</span>
               </div>
             ))}
           </div>

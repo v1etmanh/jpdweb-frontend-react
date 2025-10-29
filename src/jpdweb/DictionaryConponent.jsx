@@ -157,8 +157,8 @@ export default function DirectComponent() {
     <div className="min-h-screen bg-background py-1 animate-fade-in">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-12 animate-slide-up">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-main rounded-2xl shadow-soft mb-4">
+        <div className="text-center mb-8 animate-slide-up">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-30 rounded-2xl shadow-soft mb-4">
             <Book size={28} className="text-white" />
           </div>
           <h1 className="text-4xl font-bold text-text-primary mb-3">
@@ -182,9 +182,9 @@ export default function DirectComponent() {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {alertType === "success" && <Sparkles size={18} />}
-                {alertType === "warning" && <AlertTriangle size={18} />}
-                {alertType === "error" && <AlertTriangle size={18} />}
+                {alertType === "success" && <Sparkles size={18} className="text-accent-10" />}
+                {alertType === "warning" && <AlertTriangle size={18} className="text-accent-10" />}
+                {alertType === "error" && <AlertTriangle size={18} className="text-accent-10" />}
                 <span className="font-medium">{alertMessage}</span>
               </div>
               <button
@@ -198,34 +198,34 @@ export default function DirectComponent() {
         )}
 
         {/* Navigation Tabs */}
-        <div className="bg-white rounded-xl shadow-soft mb-6 overflow-hidden border border-border-light scale-85 transform origin-top">
+        <div className="bg-white rounded-xl shadow-soft mb-6 overflow-hidden border border-border-light">
           <div className="flex p-1 bg-background m-2 rounded-xl">
             <button
               className={`flex-1 px-4 py-2.5 text-sm font-semibold rounded-xl flex items-center gap-3 transition-all duration-300 ${
                 activeTab === "add"
-                  ? "bg-primary-main text-white shadow-md"
+                  ? "bg-primary-30 text-white shadow-md"
                   : "text-text-secondary hover:text-text-primary hover:bg-white"
               }`}
               onClick={() => setActiveTab("add")}
             >
-              <Plus size={18} />
+              <Plus size={18} className={activeTab === "add" ? "text-white" : "text-accent-10"} />
               Thêm từ mới
             </button>
             <button
               className={`flex-1 px-6 py-4 text-sm font-semibold rounded-xl flex items-center gap-3 transition-all duration-300 ${
                 activeTab === "dictionary"
-                  ? "bg-primary-main text-white shadow-md"
+                  ? "bg-primary-30 text-white shadow-md"
                   : "text-text-secondary hover:text-text-primary hover:bg-white"
               }`}
               onClick={() => setActiveTab("dictionary")}
             >
-              <Book size={18} />
+              <Book size={18} className={activeTab === "dictionary" ? "text-white" : "text-accent-10"} />
               Từ điển của tôi
               <span
                 className={`px-2 py-1 rounded-full text-xs font-bold ${
                   activeTab === "dictionary"
-                    ? "bg-white text-primary-main"
-                    : "bg-primary-main text-white"
+                    ? "bg-white text-primary-30"
+                    : "bg-primary-30 text-white"
                 }`}
               >
                 {myWords.length}
@@ -237,7 +237,7 @@ export default function DirectComponent() {
         {/* Add Word Tab */}
         {activeTab === "add" && (
           <div className="bg-white rounded-2xl shadow-soft overflow-hidden border border-border-light animate-fade-in">
-            <div className="bg-primary-main p-6">
+            <div className="bg-primary-30 p-6">
               <h2 className="text-xl font-semibold text-white flex items-center gap-3">
                 <Plus size={20} />
                 Thêm từ vựng mới
@@ -246,8 +246,8 @@ export default function DirectComponent() {
             <div className="p-6">
               {!display ? (
                 <div className="text-center py-12">
-                  <div className="w-20 h-20 bg-primary-light rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-soft">
-                    <Plus size={32} className="text-primary-main" />
+                  <div className="w-20 h-20 bg-primary-30/10 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-soft">
+                    <Plus size={32} className="text-accent-10" />
                   </div>
                   <h4 className="text-xl font-semibold text-text-primary mb-3">
                     Bắt đầu xây dựng từ điển
@@ -257,7 +257,7 @@ export default function DirectComponent() {
                   </p>
                   <button
                     onClick={() => setDisplay(true)}
-                    className="bg-primary-main text-white px-6 py-3 rounded-xl hover:shadow-medium transition-all duration-300 flex items-center gap-3 mx-auto font-semibold"
+                    className="bg-accent-10 text-white px-6 py-3 rounded-xl hover:shadow-medium transition-all duration-300 flex items-center gap-3 mx-auto font-semibold hover:bg-accent-10/90"
                   >
                     <Plus size={18} />
                     Thêm từ mới
@@ -268,14 +268,14 @@ export default function DirectComponent() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-text-primary">
-                        Từ Vựng <span className="text-primary-main">*</span>
+                        Từ Vựng <span className="text-accent-10">*</span>
                       </label>
                       <input
                         type="text"
                         placeholder="Nhập từ vựng ..."
                         value={word}
                         onChange={(e) => setWord(e.target.value)}
-                        className="w-full px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-main focus:border-transparent transition-all duration-300 bg-white"
+                        className="w-full px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-30 focus:border-transparent transition-all duration-300 bg-white"
                         style={{
                           fontFamily:
                             '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
@@ -284,14 +284,14 @@ export default function DirectComponent() {
                     </div>
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-text-primary">
-                        Nghĩa <span className="text-primary-main">*</span>
+                        Nghĩa <span className="text-accent-10">*</span>
                       </label>
                       <input
                         type="text"
                         placeholder="Nhập nghĩa..."
                         value={meaning}
                         onChange={(e) => setMeaning(e.target.value)}
-                        className="w-full px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-main focus:border-transparent transition-all duration-300 bg-white"
+                        className="w-full px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-30 focus:border-transparent transition-all duration-300 bg-white"
                       />
                     </div>
                   </div>
@@ -305,7 +305,7 @@ export default function DirectComponent() {
                       placeholder="Nhập mô tả, ví dụ hoặc ghi chú..."
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      className="w-full px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-main focus:border-transparent transition-all duration-300 bg-white resize-none"
+                      className="w-full px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-30 focus:border-transparent transition-all duration-300 bg-white resize-none"
                     />
                   </div>
 
@@ -325,7 +325,7 @@ export default function DirectComponent() {
                     <button
                       type="button"
                       onClick={handleAddWord}
-                      className="px-6 py-3 bg-primary-main text-white rounded-xl hover:shadow-medium transition-all duration-300 flex items-center gap-2 font-semibold"
+                      className="px-6 py-3 bg-accent-10 text-white rounded-xl hover:shadow-medium transition-all duration-300 flex items-center gap-2 font-semibold hover:bg-accent-10/90"
                     >
                       <Plus size={18} />
                       Lưu từ vựng
@@ -340,7 +340,7 @@ export default function DirectComponent() {
         {/* Dictionary Tab */}
         {activeTab === "dictionary" && (
           <div className="bg-white rounded-2xl shadow-soft overflow-hidden border border-border-light animate-fade-in">
-            <div className="bg-primary-main p-6">
+            <div className="bg-primary-30 p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-xl font-semibold text-white flex items-center gap-3">
                   <Book size={20} />
@@ -352,12 +352,12 @@ export default function DirectComponent() {
                 <button
                   onClick={fetchMyWords}
                   disabled={loading}
-                  className="bg-white text-primary-main px-4 py-2 rounded-xl hover:shadow-medium transition-all duration-300 flex items-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-white text-primary-30 px-4 py-2 rounded-xl hover:shadow-medium transition-all duration-300 flex items-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/90"
                 >
                   {loading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-main border-t-transparent"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-30 border-t-transparent"></div>
                   ) : (
-                    <RefreshCw size={16} />
+                    <RefreshCw size={16} className="text-primary-30" />
                   )}
                   Làm mới
                 </button>
@@ -376,7 +376,7 @@ export default function DirectComponent() {
                       placeholder="Tìm kiếm từ vựng hoặc nghĩa..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-main focus:border-transparent bg-white transition-all duration-300"
+                      className="w-full pl-12 pr-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-30 focus:border-transparent bg-white transition-all duration-300"
                     />
                   </div>
                 </div>
@@ -384,15 +384,15 @@ export default function DirectComponent() {
 
               {loading ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-main border-t-transparent mx-auto mb-4"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-30 border-t-transparent mx-auto mb-4"></div>
                   <p className="text-text-secondary">Đang tải từ điển...</p>
                 </div>
               ) : (
                 <>
                   {filteredWords.length === 0 ? (
                     <div className="text-center py-12">
-                      <div className="w-16 h-16 bg-primary-light rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-soft">
-                        <Book size={28} className="text-primary-main" />
+                      <div className="w-16 h-16 bg-primary-30/10 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-soft">
+                        <Book size={28} className="text-accent-10" />
                       </div>
                       <h4 className="text-lg font-semibold text-text-primary mb-2">
                         {myWords.length === 0
@@ -407,7 +407,7 @@ export default function DirectComponent() {
                       {myWords.length === 0 && (
                         <button
                           onClick={() => setActiveTab("add")}
-                          className="bg-primary-main text-white px-6 py-3 rounded-xl hover:shadow-medium transition-all duration-300 flex items-center gap-2 mx-auto font-semibold"
+                          className="bg-accent-10 text-white px-6 py-3 rounded-xl hover:shadow-medium transition-all duration-300 flex items-center gap-2 mx-auto font-semibold hover:bg-accent-10/90"
                         >
                           <Plus size={18} />
                           Thêm từ đầu tiên
@@ -421,8 +421,8 @@ export default function DirectComponent() {
                           key={wordItem.rwId}
                           className={`border rounded-lg p-3 transition-all duration-300 group relative dropdown-container ${
                             hoveredCard === wordItem.rwId
-                              ? "bg-[#d1ba9b] border-2 border-black shadow-medium text-white"
-                              : "bg-white border-border-light shadow-soft text-text-primary"
+                              ? "bg-primary-30/10 border-2 border-primary-30 shadow-medium"
+                              : "bg-white border-border-light shadow-soft"
                           }`}
                           style={{ animationDelay: `${index * 0.05}s` }}
                           onMouseEnter={() => setHoveredCard(wordItem.rwId)}
@@ -446,8 +446,8 @@ export default function DirectComponent() {
                               <span
                                 className={`text-xs px-2 py-1 rounded font-semibold flex-shrink-0 ${
                                   hoveredCard === wordItem.rwId
-                                    ? "bg-white/20 text-white"
-                                    : "bg-primary-light text-text-primary"
+                                    ? "bg-primary-30 text-white"
+                                    : "bg-primary-30/10 text-primary-30"
                                 }`}
                               >
                                 #{index + 1}
@@ -467,7 +467,7 @@ export default function DirectComponent() {
                                     size={14}
                                     className={
                                       hoveredCard === wordItem.rwId
-                                        ? "text-white"
+                                        ? "text-primary-30"
                                         : "text-text-secondary"
                                     }
                                   />
@@ -476,7 +476,7 @@ export default function DirectComponent() {
                                 {openDropdownId === wordItem.rwId && (
                                   <div className="absolute right-0 top-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-24 dropdown-container">
                                     <button
-                                      className="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-white hover:border hover:border-black transition-all duration-200"
+                                      className="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 transition-all duration-200"
                                       onClick={() =>
                                         handleDelete(wordItem.rwId)
                                       }
@@ -492,11 +492,11 @@ export default function DirectComponent() {
                           {/* Description appears on hover */}
                           {wordItem.description &&
                             hoveredCard === wordItem.rwId && (
-                              <div className="mt-2 pt-2 border-t border-white/30 animate-scale-in">
-                                <span className="text-xs font-semibold text-[#443B3B] bg-[#DBB689]/20 px-2 py-1 rounded">
+                              <div className="mt-2 pt-2 border-t border-primary-30/30 animate-scale-in">
+                                <span className="text-xs font-semibold text-primary-30 bg-primary-30/10 px-2 py-1 rounded">
                                   Ghi chú
                                 </span>
-                                <p className="text-white/90 text-xs mt-1">
+                                <p className="text-text-primary text-xs mt-1">
                                   {wordItem.description}
                                 </p>
                               </div>

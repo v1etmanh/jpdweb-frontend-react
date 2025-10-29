@@ -1,22 +1,118 @@
-html,body{
-    height: 100%;
-    margin:0;
-    padding: 0;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    background-color: #F1F5F9; /* 60% background */
+  }
 }
-.wrapper{
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-   
+
+@layer components {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .shadow-soft {
+    box-shadow: 0 2px 12px rgba(6, 182, 212, 0.06);
+  }
+  
+  .shadow-medium {
+    box-shadow: 0 4px 20px rgba(6, 182, 212, 0.08);
+  }
+  
+  .shadow-card {
+    box-shadow: 0 8px 30px rgba(6, 182, 212, 0.1);
+  }
 }
-.header {
-  position: fixed;
-  top: 0;
-  height: 70px;
-  width: 100%;
-  z-index: 1000;
+
+@layer utilities {
+  .animate-slideUp {
+    animation: slideUp 0.5s ease-out;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
 }
-.main-content{
-    flex: 1;
- padding-top: 70px; 
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Custom color classes for the 60-30-10 rule */
+.bg-background {
+  background-color: #F1F5F9; /* 60% */
+}
+
+.bg-primary-30 {
+  background-color: #06B6D4; /* 30% */
+}
+
+.text-primary-30 {
+  color: #06B6D4; /* 30% */
+}
+
+.bg-accent-10 {
+  background-color: #F97316; /* 10% */
+}
+
+.text-accent-10 {
+  color: #F97316; /* 10% */
+}
+
+.border-border-light {
+  border-color: #E2E8F0;
+}
+
+.text-text-primary {
+  color: #1E293B;
+}
+
+.text-text-secondary {
+  color: #475569;
+}
+
+.text-text-muted {
+  color: #64748B;
 }

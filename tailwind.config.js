@@ -10,27 +10,32 @@ module.exports = {
         sans: ["Inter", "system-ui", "sans-serif"],
       },
       colors: {
-        background: "#F5E6D3",
-        surface: "#FEFAF5",
+        background: "#F1F5F9", /* 60% */
+        surface: "#FFFFFF",
         text: {
-          primary: "#5D4E37",
-          secondary: "#7A6B55",
-          muted: "#9C8E7A",
+          primary: "#1E293B",
+          secondary: "#475569",
+          muted: "#64748B",
         },
         border: {
-          light: "#E8D7C3",
-          main: "#D4B896",
-          dark: "#C8A97E",
+          light: "#E2E8F0",
+          main: "#CBD5E1",
+          dark: "#94A3B8",
         },
         primary: {
-          light: "#F3E9DD",
-          main: "#D4B896",
-          dark: "#B8945F",
+          30: "#06B6D4", /* 30% */
+          light: "#67E8F9",
+          dark: "#0E7490",
+        },
+        accent: {
+          10: "#F97316", /* 10% */
+          light: "#FDBA74",
+          dark: "#EA580C",
         },
         status: {
-          completed: "#A8C48A",
-          required: "#D4A76A", 
-          optional: "#B8A897",
+          completed: "#10B981",
+          required: "#F97316", 
+          optional: "#64748B",
         }
       },
       borderRadius: {
@@ -40,9 +45,12 @@ module.exports = {
         '3xl': '24px',
       },
       animation: {
-      'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
-      'bounce-gentle': 'bounceGentle 1s ease-in-out infinite'
-    },
+        'fade-in': 'fadeIn 0.5s ease-out',
+        'slide-up': 'slideUp 0.5s ease-out',
+        'scale-in': 'scaleIn 0.3s ease-out',
+        'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
+        'bounce-gentle': 'bounceGentle 1s ease-in-out infinite'
+      },
       keyframes: {
         fadeIn: {
           "0%": { opacity: "0" },
@@ -52,18 +60,21 @@ module.exports = {
           "0%": { opacity: "0", transform: "translateY(15px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        scaleIn: {
+          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
         progressGrow: {
           "0%": { width: "0%" },
           "100%": { width: "100%" },
         },
       },
       boxShadow: {
-        'soft': '0 2px 12px rgba(93, 78, 55, 0.06)',
-        'medium': '0 4px 20px rgba(93, 78, 55, 0.08)',
-        'card': '0 6px 25px rgba(93, 78, 55, 0.1)',
+        'soft': '0 2px 12px rgba(6, 182, 212, 0.06)',
+        'medium': '0 4px 20px rgba(6, 182, 212, 0.08)',
+        'card': '0 6px 25px rgba(6, 182, 212, 0.1)',
       },
     },
   },
-  
   plugins: [],
 };

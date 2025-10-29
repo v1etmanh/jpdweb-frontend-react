@@ -1507,5 +1507,4 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
     </div>
   );
 };
-
-export default CourseManagementInterface;
+ export default CourseManagementInterface;
