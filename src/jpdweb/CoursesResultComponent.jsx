@@ -15,7 +15,6 @@ export default function CoursesResultComponent() {
   // ✅ Search courses with cleanup and error handling
   useEffect(() => {
     let isCancelled = false;
-
     const findCourses = async () => {
       // Validate search term
       if (!name || name.trim().length < 2) {
@@ -222,7 +221,7 @@ export default function CoursesResultComponent() {
           </div>
 
           {/* Bộ lọc */}
-          <div className="flex justify-center">
+          <div className="flex justify-end">
             <select
               value={sortOption}
               onChange={(e) => {
@@ -230,7 +229,7 @@ export default function CoursesResultComponent() {
                 setSortOption(value);
                 handleFilter(value);
               }}
-              className="bg-[#243864] text-white px-8 py-4 rounded-xl border-0 shadow-lg font-semibold text-lg focus:outline-none cursor-pointer hover:bg-[#1e3a5f] transition-colors"
+              className="bg-[#243864] text-white px-4 py-2 rounded-lg border-0 shadow-md font-medium text-sm focus:outline-none cursor-pointer hover:bg-[#1e3a5f] transition-colors"
             >
               <option value={3}>📁 Sắp xếp khóa học</option>
               <option value={0}>⭐ Đánh giá cao nhất</option>

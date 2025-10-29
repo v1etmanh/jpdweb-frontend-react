@@ -28,7 +28,7 @@ const CourseCard = ({ course, type }) => {
   const handleMouseEnter = () => {
     const timer = setTimeout(() => {
       setShowPopup(true);
-    }, 400); // 2 seconds delay
+    }, 800); // 2 seconds delay
     setHoverTimer(timer);
   };
 
@@ -98,7 +98,11 @@ const CourseCard = ({ course, type }) => {
               {/* Instructor info */}
               <div className="bg-gradient-to-r from-[#06B6D4]/10 to-[#F97316]/10 p-2 rounded-lg">
                 <p className="flex items-center gap-1.5 text-[15px] text-gray-500 font-semibold mb-1">
-                  <svg className="w-3.5 h-3.5 text-[#06B6D4] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-3.5 h-3.5 text-[#06B6D4] flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
                   </svg>
                   Giảng viên
@@ -214,7 +218,7 @@ const CourseCard = ({ course, type }) => {
         <img
           src={course.img}
           alt={course.name}
-          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-450 ease-out"
         />
         {/* Gradient overlay - always visible */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent"></div>
@@ -360,9 +364,47 @@ export default function HomepageComponent() {
     // Cập nhật state
     setCourseInL(grouped);
   };
+
+  const scrollToCourses = () => {
+    const coursesSection = document.getElementById("courses-section");
+    
+    if (coursesSection) {
+      const targetPosition = coursesSection.offsetTop - 100;
+      const startPosition = window.pageYOffset;
+      const distance = targetPosition - startPosition;
+      const duration = 1000; // 1 giây
+      let start = null;
+
+      // Hàm easing để tạo hiệu ứng mượt
+      const easeInOutCubic = (t) => {
+        return t < 0.5 
+          ? 4 * t * t * t 
+          : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+      };
+
+      const animation = (currentTime) => {
+        if (start === null) start = currentTime;
+        const timeElapsed = currentTime - start;
+        const progress = Math.min(timeElapsed / duration, 1);
+        const ease = easeInOutCubic(progress);
+        
+        window.scrollTo(0, startPosition + distance * ease);
+        
+        if (timeElapsed < duration) {
+          requestAnimationFrame(animation);
+        }
+      };
+
+      requestAnimationFrame(animation);
+    }
+  };
+
   return (
     <div className="bg-gradient-to-br from-slate-50 via-white to-cyan-50 min-h-screen">
       <style>{`
+        html {
+          scroll-behavior: smooth;
+        }
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-20px); }
@@ -448,7 +490,10 @@ export default function HomepageComponent() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 pt-3">
-                  <button className="group relative bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold py-3 px-7 rounded-full shadow-2xl transition duration-300 hover:scale-110 hover:shadow-[#F97316]/50 overflow-hidden text-base">
+                  <button
+                    onClick={scrollToCourses}
+                    className="group relative bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold py-3 px-7 rounded-full shadow-2xl transition duration-300 hover:scale-110 hover:shadow-[#F97316]/50 overflow-hidden text-base"
+                  >
                     <span className="relative z-10 flex items-center justify-center gap-2">
                       Bắt đầu học ngay
                       <svg
@@ -755,7 +800,10 @@ export default function HomepageComponent() {
       </div>
 
       {/* Courses Sections */}
-      <div className="py-14 px-6 md:px-17 container mx-auto">
+      <div
+        id="courses-section"
+        className="py-14 px-6 md:px-17 container mx-auto"
+      >
         {/* Khóa học có nhiều học viên */}
         {Object.entries(courseInL).map(([lang, courses]) => (
           <div key={lang}>

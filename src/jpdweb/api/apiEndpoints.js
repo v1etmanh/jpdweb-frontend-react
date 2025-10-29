@@ -58,6 +58,7 @@ export const API_ENDPOINTS = {
     COURSE: {
         GET_DETAIL: '/api/course/:id',
         SEARCH: '/api/course/search',
+        SEARCH_PAGINATION: '/api/course/search_pagination',
         GET_RECOMMEND: '/api/course/recommend_courses',
     },
 

@@ -1,3 +1,7 @@
+import React from 'react';
+import { FaApple, FaGooglePlay, FaInstagram, FaFacebookF, FaTwitter, FaYoutube } from 'react-icons/fa';
+import { MdEmail } from 'react-icons/md';
+
 export default function FooterComponent() {
   return (
     <footer className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white w-full mt-auto relative z-10 py-8">
@@ -45,8 +49,8 @@ export default function FooterComponent() {
             <div className="space-y-3 mb-4 text-left">
               <button className="block w-full">
                 <div className="bg-[#06B6D4] text-white px-4 py-2 rounded-lg hover:bg-[#0891B2] transition flex items-center gap-2">
-                  <span className="text-2xl">📱</span>
-                  <div>
+                  <FaApple className="text-2xl" />
+                  <div className="text-left">
                     <p className="text-xs">Download on the</p>
                     <p className="text-sm font-semibold">App Store</p>
                   </div>
@@ -54,15 +58,17 @@ export default function FooterComponent() {
               </button>
               <button className="block w-full">
                 <div className="bg-[#F97316] text-white px-4 py-2 rounded-lg hover:bg-[#EA580C] transition flex items-center gap-2">
-                  <span className="text-2xl">▶️</span>
-                  <div>
+                  <FaGooglePlay className="text-2xl" />
+                  <div className="text-left">
                     <p className="text-xs">GET IT ON</p>
                     <p className="text-sm font-semibold">Google Play</p>
                   </div>
                 </div>
               </button>
             </div>
-            <h5 className="text-lg font-bold mb-2 text-[#06B6D4] text-left">Contact</h5>
+            <h5 className="text-lg font-bold mb-2 text-[#06B6D4] text-left flex items-center gap-2">
+              <MdEmail /> Contact
+            </h5>
             <p className="text-sm text-gray-300 text-left">
               Email: <a href="mailto:Mqnyle@gmail.com" className="text-[#F97316] hover:text-[#EA580C] font-semibold no-underline">Mqnyle@gmail.com</a>
             </p>
@@ -86,10 +92,18 @@ export default function FooterComponent() {
           </p>
 
           <div className="flex gap-6 items-center">
-            <button className="text-[#06B6D4] hover:text-[#F97316] transition text-2xl">📷</button>
-            <button className="text-[#06B6D4] hover:text-[#F97316] transition text-2xl">👤</button>
-            <button className="text-[#06B6D4] hover:text-[#F97316] transition text-2xl">✖️</button>
-            <button className="text-[#06B6D4] hover:text-[#F97316] transition text-2xl">▶️</button>
+            <button className="text-[#06B6D4] hover:text-[#F97316] transition text-2xl">
+              <FaInstagram />
+            </button>
+            <button className="text-[#06B6D4] hover:text-[#F97316] transition text-2xl">
+              <FaFacebookF />
+            </button>
+            <button className="text-[#06B6D4] hover:text-[#F97316] transition text-2xl">
+              <FaTwitter />
+            </button>
+            <button className="text-[#06B6D4] hover:text-[#F97316] transition text-2xl">
+              <FaYoutube />
+            </button>
           </div>
         </div>
 
