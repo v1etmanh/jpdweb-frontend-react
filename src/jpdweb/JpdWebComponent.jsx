@@ -36,6 +36,11 @@ import KahootList from "./KahootManagement";
 import TeacherDashboard from "./kahoot/TeacherDashboard";
 import StudentJoin from "./kahoot/StudentJoin";
 import KahootSpecificContent from "./KahootSpecificContent";
+import AdminCreatorManagement from "./adminPages/AdminCreatorPages";
+import AdminCreatorDetail from "./adminPages/AdminCreatorDetail";
+import AdminPendingCertificates from "./adminPages/AdminPendingCertificates";
+import CreatorViolationsHistory from "./adminPages/CreatorViolationsHistory";
+import CreatorAuditLogs from "./adminPages/CreatorAuditLogs";
 export default function JpdWebComponent(){
   const [isCreator, setCreator] = useState(false);
   const [showDirect, setShowDirect] = useState(false);
@@ -247,10 +252,47 @@ const location = useLocation();
               </ProtectedRoute>
             } 
           />
-
-         
-         
-          
+{/**admin page */}
+          <Route 
+            path="/admin/creator-page" 
+            element={
+              <ProtectedRoute>
+                <AdminCreatorManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/creatorDetail/:id" 
+            element={
+              <ProtectedRoute>
+                <AdminCreatorDetail />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/pending-certificate" 
+            element={
+              <ProtectedRoute>
+                <AdminPendingCertificates />
+              </ProtectedRoute>
+            } 
+          />
+           <Route 
+            path="/admin/violent-history/:creatorId" 
+            element={
+              <ProtectedRoute>
+                <CreatorViolationsHistory />
+              </ProtectedRoute>
+            } 
+          />
+            <Route 
+            path="/admin/auditlog-history/:creatorId" 
+            element={
+              <ProtectedRoute>
+                <CreatorAuditLogs />
+              </ProtectedRoute>
+            } 
+          />
           {/* Upload Profile - Chỉ cần authentication */}
           <Route 
             path="/upload_profile" 
@@ -260,14 +302,7 @@ const location = useLocation();
               </ProtectedRoute>
             } 
           />
-           <Route 
-            path="/creator/commercial/history_transaction" 
-            element={
-              <ProtectedRoute>
-                <WithdrawHistory />
-              </ProtectedRoute>
-            } 
-          />
+         
           <Route 
             path="/creator/commercial/balance" 
             element={
@@ -318,7 +353,7 @@ const location = useLocation();
             } 
           />
             <Route 
-            path="/creator/class/kahoot/studentJoin" 
+            path="/join/class/kahoot/:id" 
             element={
               
                 <StudentJoin></StudentJoin>
@@ -365,6 +400,7 @@ const location = useLocation();
               </CreatorProtectedRoute>
             } 
           />
+          
         </Routes>
       </div>
       

@@ -26,12 +26,9 @@ const CreatorHomePage = () => {
   const { creatorInfor } = useAuth();
 
   useEffect(() => {
-    if (creatorInfor?.status !== 'SUCCESS') {
-      console.log(creatorInfor);
-      nav("/upload_profile");
-    } else {
+  
       fetchData();
-    }
+    
   }, []);
 
  const fetchData = async () => {

@@ -143,18 +143,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
               <CreditCard size={18} />
               <span>Commercial Course Detail</span>
             </Link>
-            <Link
-              to="/creator/commercial/history_transaction"
-              className={`
-                flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-700
-                ${location.pathname === '/creator/commercial/code' 
-                  ? 'bg-blue-500' 
-                  : ''}
-              `}
-            >
-              <CreditCard size={18} />
-              <span>Transaction History</span>
-            </Link>
+           
              <Link
               to="/creator/commercial/balance"
               className={`

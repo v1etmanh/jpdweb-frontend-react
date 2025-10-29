@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react'; // ✨ Thêm useCallback
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './TeacherDashboard.css';
 import QuizWebSocketService from '../../hooks/QuizWebSocketService';
+import { useParams } from 'react-router-dom';
+import { useAuth } from '../security/Authentication';
 
 function TeacherDashboard() {
-    const [kahootId, setKahootId] = useState('1');
-    const [teacherName, setTeacherName] = useState('Teacher');
     const [session, setSession] = useState(null);
     const [participants, setParticipants] = useState([]);
     const [connected, setConnected] = useState(false);
@@ -17,6 +17,9 @@ function TeacherDashboard() {
     const [questionResult, setQuestionResult] = useState(null);
     const [showingResult, setShowingResult] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0);
+    const { id } = useParams();
+    const auth = useAuth();
+    const teacherName = auth.creatorInfor.fullName;
 
     // ✨ ĐỊNH NGHĨA handleEndQuestion với useCallback
     const handleEndQuestion = useCallback(() => {
@@ -26,6 +29,90 @@ function TeacherDashboard() {
         }
     }, [session, connected, currentQuestion, showingResult]);
 
+    // ✨ ĐỊNH NGHĨA connectWebSocket với useCallback
+    const connectWebSocket = useCallback(async (sessionCode) => {
+        try {
+            await QuizWebSocketService.connect(sessionCode, {
+                onConnected: () => {
+                    console.log('✅ WebSocket connected');
+                    setConnected(true);
+                    QuizWebSocketService.getParticipants();
+                },
+                onParticipantJoined: (data) => {
+                    console.log('👤 Participant joined:', data);
+                    setParticipants(prev => [...prev, data.participant]);
+                },
+                onParticipantsList: (data) => {
+                    console.log('👥 Participants list:', data);
+                    setParticipants(data.participants);
+                },
+                onError: (error) => {
+                    console.error('❌ WebSocket error:', error);
+                    setConnected(false);
+                },
+                onQuestionStarted: (data) => {
+                    console.log('❓ New Question Started:', data);
+                    setCurrentQuestion(data);
+                    setShowingResult(false);
+                    setQuestionResult(null);
+                    setTimerActive(true);
+                },
+                onQuestionEnded: (data) => {
+                    console.log('🏁 Question ended, received results:', data);
+                    setQuestionResult(data);
+                    setShowingResult(true);
+                    setTimerActive(false);
+                },
+                onQuizStarted: (data) => {
+                    console.log('🎉 Quiz started broadcast received!', data);
+                    setQuizStatus('ACTIVE');
+                },
+                onQuizFinished: (data) => {
+                    console.log('🏁 Quiz finished broadcast received!', data);
+                    setQuizStatus('FINISHED');
+                    setTimerActive(false);
+                    setCurrentQuestion(null);
+                    fetchFinalResults(sessionCode);
+                }
+            });
+        } catch (error) {
+            console.error('❌ Failed to connect WebSocket:', error);
+            alert('Failed to connect WebSocket');
+        }
+    }, []);
+
+    // ✨ TỰ ĐỘNG TẠO SESSION KHI COMPONENT LOAD
+    useEffect(() => {
+        const autoCreateSession = async () => {
+            if (id && teacherName && !session) {
+                console.log('🎬 Auto-creating session with kahootId:', id, 'and teacher:', teacherName);
+                setLoading(true);
+                try {
+                    const response = await axios.post('http://localhost:9090/api/quiz/create', {
+                        kahootId: parseInt(id),
+                        teacherId: 1,
+                        teacherName: teacherName
+                    });
+
+                    const sessionData = response.data;
+                    setSession(sessionData);
+                    console.log('✅ Session auto-created:', sessionData);
+
+                    await connectWebSocket(sessionData.sessionCode);
+
+                } catch (error) {
+                    console.error('❌ Error auto-creating session:', error);
+                    alert('Failed to create session: ' + error.message);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+
+        autoCreateSession();
+    }, [id, teacherName, session, connectWebSocket]);
+
+    // Cleanup WebSocket khi component unmount
     useEffect(() => {
         return () => {
             QuizWebSocketService.disconnect();
@@ -46,7 +133,6 @@ function TeacherDashboard() {
         const countdownInterval = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
-                    // Hết giờ -> Tự động gọi endQuestion
                     console.log("⏰ Time's up! Auto-ending question.");
                     handleEndQuestion();
                     return 0;
@@ -93,80 +179,6 @@ function TeacherDashboard() {
             }
         } finally {
             setLoading(false);
-        }
-    };
-
-    const createSession = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.post('http://localhost:9090/api/quiz/create', {
-                kahootId: parseInt(kahootId),
-                teacherId: 1,
-                teacherName: teacherName
-            });
-
-            const sessionData = response.data;
-            setSession(sessionData);
-            console.log('✅ Session created:', sessionData);
-
-            await connectWebSocket(sessionData.sessionCode);
-
-        } catch (error) {
-            console.error('❌ Error creating session:', error);
-            alert('Failed to create session: ' + error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const connectWebSocket = async (sessionCode) => {
-        try {
-            await QuizWebSocketService.connect(sessionCode, {
-                onConnected: () => {
-                    console.log('✅ WebSocket connected');
-                    setConnected(true);
-                    QuizWebSocketService.getParticipants();
-                },
-                onParticipantJoined: (data) => {
-                    console.log('👤 Participant joined:', data);
-                    setParticipants(prev => [...prev, data.participant]);
-                },
-                onParticipantsList: (data) => {
-                    console.log('👥 Participants list:', data);
-                    setParticipants(data.participants);
-                },
-                onError: (error) => {
-                    console.error('❌ WebSocket error:', error);
-                    setConnected(false);
-                },
-                onQuestionStarted: (data) => {
-                    console.log('❓ New Question Started:', data);
-                    setCurrentQuestion(data);
-                    setShowingResult(false);
-                    setQuestionResult(null);
-                    setTimerActive(true); // ✅ Kích hoạt timer
-                },
-                onQuestionEnded: (data) => {
-                    console.log('🏁 Question ended, received results:', data);
-                    setQuestionResult(data);
-                    setShowingResult(true);
-                    setTimerActive(false); // ✅ Dừng timer
-                },
-                onQuizStarted: (data) => {
-                    console.log('🎉 Quiz started broadcast received!', data);
-                    setQuizStatus('ACTIVE');
-                },
-                onQuizFinished: (data) => {
-                    console.log('🏁 Quiz finished broadcast received!', data);
-                    setQuizStatus('FINISHED');
-                    setTimerActive(false);
-                    setCurrentQuestion(null);
-                    fetchFinalResults(sessionCode);
-                }
-            });
-        } catch (error) {
-            console.error('❌ Failed to connect WebSocket:', error);
-            alert('Failed to connect WebSocket');
         }
     };
 
@@ -296,30 +308,15 @@ function TeacherDashboard() {
         <div className="teacher-dashboard">
             <h1>🎓 Teacher Dashboard</h1>
 
-            {!session ? (
-                <div className="create-session">
-                    <h2>Create Quiz Session</h2>
-                    <div className="form-group">
-                        <label>Kahoot ID:</label>
-                        <input
-                            type="number"
-                            value={kahootId}
-                            onChange={(e) => setKahootId(e.target.value)}
-                            placeholder="Enter Kahoot ID"
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Your Name:</label>
-                        <input
-                            type="text"
-                            value={teacherName}
-                            onChange={(e) => setTeacherName(e.target.value)}
-                            placeholder="Enter your name"
-                        />
-                    </div>
-                    <button onClick={createSession} disabled={loading}>
-                        {loading ? 'Creating...' : 'Create Session'}
-                    </button>
+            {loading && !session ? (
+                <div className="loading-session">
+                    <h2>⏳ Đang tạo session...</h2>
+                    <p>Vui lòng đợi trong giây lát</p>
+                </div>
+            ) : !session ? (
+                <div className="error-session">
+                    <h2>❌ Không thể tạo session</h2>
+                    <p>Vui lòng kiểm tra lại thông tin và thử lại</p>
                 </div>
             ) : (
                 <div className="session-active">

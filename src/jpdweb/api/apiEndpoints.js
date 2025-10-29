@@ -101,5 +101,34 @@ export const API_ENDPOINTS = {
          * Xóa 1 ModuleContent theo ID
          */
         DELETE_ONE: '/api/creator/kahootModuleContent/:kahootId/:moduleContentId'
+    },
+    ADMIN: {
+        // Creator Management
+        GET_CREATORS: '/api/admin/creators',
+        GET_CREATOR_DETAIL: '/api/admin/creators/:creatorId',
+        GET_PENDING_CERTIFICATES: '/api/admin/creators/pending-certificates',
+        APPROVE_CERTIFICATE: '/api/admin/creators/:creatorId/approve-certificate',
+        REJECT_CERTIFICATE: '/api/admin/creators/:creatorId/reject-certificate',
+        WARN_CREATOR: '/api/admin/creators/:creatorId/warn',
+        BAN_CREATOR: '/api/admin/creators/:creatorId/ban',
+        UNBAN_CREATOR: '/api/admin/creators/:creatorId/unban',
+        GET_CREATOR_VIOLATIONS: '/api/admin/creators/:creatorId/violations',
+        GET_CREATOR_AUDIT_LOGS: '/api/admin/creators/:creatorId/audit-logs'
+
+        
+    },
+    ADMIN_TRANSACTION :{
+        GET_TRANSACTIONS: '/api/admin/transactions',
+        GET_TRANSACTION_DETAIL: '/api/admin/transactions/:transactionId',
+        GET_REVENUE_REPORT: '/api/admin/transactions/revenue-report',
+        GET_FAILED_TRANSACTIONS: '/api/admin/transactions/failed',
+        FREEZE_CREATOR_REVENUE: '/api/admin/transactions/freeze-creator-revenue',
+        UNFREEZE_CREATOR_REVENUE: '/api/admin/transactions/unfreeze-creator-revenue',
+
+        // 📊 Xuất Excel
+        EXPORT_EXCEL_MONTHLY: '/api/admin/transactions/export/excel',
+        EXPORT_EXCEL_QUARTERLY: '/api/admin/transactions/export/excel/quarterly',
+        EXPORT_EXCEL_YEARLY: '/api/admin/transactions/export/excel/yearly',
     }
+    
 };
