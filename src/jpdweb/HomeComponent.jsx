@@ -367,7 +367,7 @@ export default function HomepageComponent() {
 
   const scrollToCourses = () => {
     const coursesSection = document.getElementById("courses-section");
-    
+
     if (coursesSection) {
       const targetPosition = coursesSection.offsetTop - 100;
       const startPosition = window.pageYOffset;
@@ -377,8 +377,8 @@ export default function HomepageComponent() {
 
       // Hàm easing để tạo hiệu ứng mượt
       const easeInOutCubic = (t) => {
-        return t < 0.5 
-          ? 4 * t * t * t 
+        return t < 0.5
+          ? 4 * t * t * t
           : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
       };
 
@@ -387,9 +387,9 @@ export default function HomepageComponent() {
         const timeElapsed = currentTime - start;
         const progress = Math.min(timeElapsed / duration, 1);
         const ease = easeInOutCubic(progress);
-        
+
         window.scrollTo(0, startPosition + distance * ease);
-        
+
         if (timeElapsed < duration) {
           requestAnimationFrame(animation);
         }
@@ -400,7 +400,7 @@ export default function HomepageComponent() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-white to-cyan-50 min-h-screen">
+    <div className="bg-gradient-to-br from-slate-50 via-white to-cyan-50 min-h-screen" style={{ marginTop: '-90px' }}>
       <style>{`
         html {
           scroll-behavior: smooth;
@@ -446,7 +446,7 @@ export default function HomepageComponent() {
       {/* Hero Section with Dynamic Parallax Effect */}
       <section
         id="home-section"
-        className="relative w-full p-17 mt-8 bg-cover bg-center bg-no-repeat min-h-[510px] overflow-hidden"
+        className="relative w-full pt-32 pb-20 px-17 bg-cover bg-center bg-no-repeat min-h-[calc(100vh-400px)] overflow-hidden -mt-0"
         style={{ backgroundImage: `url(${home1})` }}
       >
         {/* Animated gradient overlay */}
@@ -470,7 +470,7 @@ export default function HomepageComponent() {
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-7">
             {/* TEXT SECTION */}
             <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left gap-7">
-              <div className="space-y-5 animate-fade-in-up">
+              <div className="space-y-2 animate-fade-in-up mb-[50px]">
                 <div className="inline-block py-2">
                   <span className="bg-white/20 backdrop-blur-md text-white px-5 py-1.5 rounded-full text-xs font-bold border border-white/30 shadow-lg">
                     🚀 Nền tảng học ngôn ngữ #1

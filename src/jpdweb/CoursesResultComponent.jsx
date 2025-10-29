@@ -32,6 +32,8 @@ export default function CoursesResultComponent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState(3);
   const [loading, setLoading] = useState(false);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [isManualSearch, setIsManualSearch] = useState(false);
 
   // ========== PAGINATION STATE (TỪ SERVER) ==========
   // Các state này sẽ được cập nhật từ response của API
@@ -130,6 +132,32 @@ export default function CoursesResultComponent() {
     [name]
   );
 
+  // ========== DEBOUNCE SEARCH TERM ==========
+  /**
+   * Debounce search term để tránh gọi API quá nhiều lần khi người dùng đang gõ
+   */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // Đợi 500ms sau khi người dùng ngừng gõ
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // ========== AUTO SEARCH ON DEBOUNCED TERM CHANGE ==========
+  /**
+   * Tự động navigate đến trang tìm kiếm mới khi debouncedSearchTerm thay đổi
+   */
+  useEffect(() => {
+    if (debouncedSearchTerm.trim().length >= 2) {
+      // Reset trang và sort khi tìm kiếm mới
+      setCurrentPage(0);
+      setSortOption(3);
+      setIsManualSearch(false); // Đánh dấu là tìm kiếm tự động
+      nav(`/course_result/${encodeURIComponent(debouncedSearchTerm.trim())}`);
+    }
+  }, [debouncedSearchTerm, nav]);
+
   // ========== SEARCH COURSES EFFECT (SERVER-SIDE) ==========
   /**
    * Tự động tìm kiếm khi `name`, `currentPage`, `pageSize`, hoặc `sortOption` thay đổi
@@ -225,6 +253,7 @@ export default function CoursesResultComponent() {
     // Khi tìm kiếm mới, reset trang và sort
     setCurrentPage(0);
     setSortOption(3);
+    setIsManualSearch(true); // Đánh dấu là tìm kiếm thủ công
     nav(`/course_result/${encodeURIComponent(trimmed)}`);
   };
 
@@ -272,47 +301,161 @@ export default function CoursesResultComponent() {
   if (targetCourses.length === 0 && !loading) {
     const isExploreAll = !name || name.toLowerCase() === "all";
 
+    // Chỉ hiển thị empty state khi:
+    // 1. Đang xem tất cả khóa học (isExploreAll = true)
+    // 2. Hoặc người dùng đã nhấn nút tìm kiếm thủ công (isManualSearch = true)
+    const shouldShowEmptyState = isExploreAll || isManualSearch;
+
     return (
-      <div className="min-h-screen bg-gray-100 py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center">
-            <div className="bg-white rounded-2xl shadow-xl p-12 max-w-2xl mx-auto">
-              <div className="w-24 h-24 bg-[#e53935] rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  className="w-12 h-12 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9.172 16.172a4 4 0 015.656 0M9 12h.01M15 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  ></path>
-                </svg>
+      <div className="min-h-screen bg-gray-100">
+        {/* Header với thanh tìm kiếm - Luôn hiển thị */}
+        <div className="bg-white shadow-lg border-b-4 border-[#F97316]">
+          <div className="max-w-8xl mx-auto px-4 py-6">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-[#243864] mb-2">
+                📁{" "}
+                {name && name.toLowerCase() === "all"
+                  ? "Khám phá khóa học"
+                  : "Thư viện khóa học"}
+              </h1>
+            </div>
+
+            {/* Thanh tìm kiếm */}
+            <div className="max-w-3xl mx-auto mb-6">
+              <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border-4 border-white/50 p-1.5 hover:shadow-[#F97316]/30 transition-shadow duration-300">
+                <div className="flex items-center gap-2.5">
+                  <div className="pl-3 text-[#F97316]">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Tìm kiếm khóa học, mô tả hoặc giảng viên..."
+                    className="flex-grow px-1.5 py-2 text-base text-gray-700 bg-transparent focus:outline-none placeholder-gray-400"
+                  />
+                  <button
+                    onClick={handleSearch}
+                    className="bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold px-4 py-2.5 rounded-xl hover:from-[#EA580C] hover:to-[#F97316] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-1.5 text-sm"
+                  >
+                    <span>Tìm kiếm</span>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <h2 className="text-3xl font-bold text-[#243864] mb-4">
-                {isExploreAll ? "Chưa có khóa học" : "Không tìm thấy kết quả"}
-              </h2>
-              <p className="text-xl text-gray-600 mb-8">
-                {isExploreAll ? (
-                  "Hiện tại chưa có khóa học nào trong hệ thống"
-                ) : (
+            </div>
+
+            {/* Bộ lọc */}
+            <div className="flex justify-end">
+              <select
+                value={sortOption}
+                onChange={(e) => handleFilterChange(Number(e.target.value))}
+                className="bg-[#243864] text-white px-4 py-2 rounded-lg border-0 shadow-md font-medium text-sm focus:outline-none cursor-pointer hover:bg-[#1e3a5f] transition-colors"
+              >
+                <option value={3}>📁 Sắp xếp khóa học</option>
+                <option value={0}>⭐ Đánh giá cao nhất</option>
+                <option value={1}>👥 Nhiều học viên nhất</option>
+                <option value={2}>💰 Giá cao nhất</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Nội dung empty state */}
+        <div className="py-12">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center">
+              <div className="bg-white rounded-2xl shadow-xl p-12 max-w-2xl mx-auto">
+                {shouldShowEmptyState ? (
+                  // Hiển thị thông báo không tìm thấy kết quả
                   <>
-                    Không có khóa học nào phù hợp với từ khóa{" "}
-                    <span className="font-semibold text-[#F97316]">
-                      "{name}"
-                    </span>
+                    <div className="w-24 h-24 bg-[#e53935] rounded-full flex items-center justify-center mx-auto mb-6">
+                      <svg
+                        className="w-12 h-12 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M9.172 16.172a4 4 0 015.656 0M9 12h.01M15 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <h2 className="text-3xl font-bold text-[#243864] mb-4">
+                      {isExploreAll ? "Chưa có khóa học" : "Không tìm thấy kết quả"}
+                    </h2>
+                    <p className="text-xl text-gray-600 mb-8">
+                      {isExploreAll ? (
+                        "Hiện tại chưa có khóa học nào trong hệ thống"
+                      ) : (
+                        <>
+                          Không có khóa học nào phù hợp với từ khóa{" "}
+                          <span className="font-semibold text-[#F97316]">
+                            "{name}"
+                          </span>
+                        </>
+                      )}
+                    </p>
+                    <button
+                      onClick={() => nav("/")}
+                      className="px-8 py-4 bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold text-lg rounded-xl hover:from-[#EA580C] hover:to-[#F97316] transition-all duration-300 shadow-lg"
+                    >
+                      {isExploreAll ? "Về trang chủ" : "Xem tất cả khóa học"}
+                    </button>
+                  </>
+                ) : (
+                  // Hiển thị loading khi đang gõ tự động
+                  <>
+                    <div className="w-24 h-24 bg-[#1e88e5] rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+                      <svg
+                        className="w-12 h-12 text-white animate-spin"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        ></path>
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-[#243864] mb-2">
+                      Đang tìm kiếm...
+                    </h2>
+                    <p className="text-gray-600">Vui lòng chờ trong giây lát</p>
                   </>
                 )}
-              </p>
-              <button
-                onClick={() => nav("/")}
-                className="px-8 py-4 bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold text-lg rounded-xl hover:from-[#EA580C] hover:to-[#F97316] transition-all duration-300 shadow-lg"
-              >
-                {isExploreAll ? "Về trang chủ" : "Xem tất cả khóa học"}
-              </button>
+              </div>
             </div>
           </div>
         </div>
@@ -325,7 +468,7 @@ export default function CoursesResultComponent() {
     <div className="min-h-screen bg-gray-100">
       {/* Header với thanh tìm kiếm */}
       <div className="bg-white shadow-lg border-b-4 border-[#F97316]">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-8xl mx-auto px-4 py-6">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-[#243864] mb-2">
               📁{" "}
@@ -333,26 +476,6 @@ export default function CoursesResultComponent() {
                 ? "Khám phá khóa học"
                 : "Thư viện khóa học"}
             </h1>
-            <p className="text-lg text-gray-600">
-              {/* Sử dụng totalElements từ state */}
-              {name && name.toLowerCase() === "all" ? (
-                <>
-                  Tổng cộng{" "}
-                  <span className="font-semibold text-[#F97316]">
-                    {totalElements}
-                  </span>{" "}
-                  khóa học có sẵn
-                </>
-              ) : (
-                <>
-                  Tìm thấy{" "}
-                  <span className="font-semibold text-[#F97316]">
-                    {totalElements}
-                  </span>{" "}
-                  khóa học cho "{name}"
-                </>
-              )}
-            </p>
           </div>
 
           {/* Thanh tìm kiếm */}
