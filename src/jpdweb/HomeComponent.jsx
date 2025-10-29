@@ -8,12 +8,11 @@ import qiuz from "../images/qiuz.png";
 import { Search } from "lucide-react";
 import { courseApi } from "./api/courseApi";
 import { showWarningNotification } from "./api/apiClient";
+import ReactCountryFlag from "react-country-flag";
 
 //addToWishlist,enrollCourse
 //createOrder
 //getCourseDetail
-import { customerApi } from "./api/customerApi";
-import { paymentApi } from "./api/paymentApi";
 
 // Component để hiển thị course card
 const CourseCard = ({ course, type }) => {
@@ -181,6 +180,7 @@ const CourseCard = ({ course, type }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      window.scrollTo(0, 0);
                       nav(`/course/specific/${course.id}`);
                     }}
                     className="bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white font-bold py-2 px-3 rounded-lg hover:from-[#F97316] hover:to-[#EA580C] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center gap-1"
@@ -271,6 +271,7 @@ const CourseCard = ({ course, type }) => {
 
         <button
           onClick={() => {
+            window.scrollTo(0, 0);
             nav(`/course/specific/${course.id}`);
           }}
           className="w-full bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white font-bold py-2.5 px-5 rounded-xl hover:from-[#F97316] hover:to-[#EA580C] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-1.5 text-sm"
@@ -560,7 +561,7 @@ export default function HomepageComponent() {
       </div>
 
       {/* Dynamic Language Carousel */}
-      <div className="pt-14 pb-10 overflow-hidden relative">
+      <div className="pt-14 pb-10 overflow-hidden relative bg-gradient-to-r from-slate-50 to-cyan-50">
         <div className="text-center mb-10">
           <h2 className="font-special text-3xl md:text-4xl font-black mb-3 bg-gradient-to-r from-[#06B6D4] to-[#F97316] bg-clip-text text-transparent">
             Ngôn ngữ nào bạn muốn học?
@@ -570,158 +571,71 @@ export default function HomepageComponent() {
           </p>
         </div>
 
-        <div className="relative">
-          <div className="language-track flex">
-            <div className="flex animate-scroll gap-8 px-4">
-              {/* First set of languages */}
-              <div className="flex gap-8">
-                {[
-                  {
-                    flag: "🇬🇧",
-                    name: "English",
-                    color: "from-blue-500 to-indigo-600",
-                  },
-                  {
-                    flag: "🇫🇷",
-                    name: "French",
-                    color: "from-indigo-500 to-purple-600",
-                  },
-                  {
-                    flag: "🇪🇸",
-                    name: "Spanish",
-                    color: "from-yellow-500 to-orange-600",
-                  },
-                  {
-                    flag: "🇯🇵",
-                    name: "Japanese",
-                    color: "from-red-500 to-pink-600",
-                  },
-                  {
-                    flag: "🇮🇹",
-                    name: "Italian",
-                    color: "from-green-500 to-emerald-600",
-                  },
-                  {
-                    flag: "🇩🇪",
-                    name: "German",
-                    color: "from-gray-700 to-gray-900",
-                  },
-                  {
-                    flag: "🇷🇺",
-                    name: "Russian",
-                    color: "from-blue-600 to-indigo-700",
-                  },
-                  {
-                    flag: "🇨🇳",
-                    name: "Chinese",
-                    color: "from-red-600 to-yellow-600",
-                  },
-                  {
-                    flag: "🇵🇹",
-                    name: "Portuguese",
-                    color: "from-green-600 to-teal-600",
-                  },
-                ].map((lang, idx) => (
-                  <div key={idx} className="group relative flex-shrink-0">
-                    <div
-                      className={`w-40 h-36 bg-gradient-to-br ${lang.color} rounded-3xl shadow-2xl hover:shadow-[#F97316]/50 transition-all duration-500 cursor-pointer transform hover:scale-105 overflow-hidden`}
-                    >
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all"></div>
-                      <div className="relative h-full flex flex-col items-center justify-center p-3 text-white">
-                        <div className="text-5xl mb-2 transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-500">
-                          {lang.flag}
-                        </div>
-                        <p className="font-bold text-base tracking-wide">
-                          {lang.name}
-                        </p>
-                        <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="text-xs bg-white/30 backdrop-blur-sm px-3 py-1 rounded-full">
-                            Khám phá →
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Glow effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity blur-xl -z-10"></div>
+        <div className="relative w-full">
+          <div className="flex gap-6 animate-scroll" style={{ width: 'max-content' }}>
+            {/* First set of languages */}
+            {[
+              { code: "FR", name: "French", bgColor: "bg-indigo-600" },
+              { code: "ES", name: "Spanish", bgColor: "bg-orange-500" },
+              { code: "JP", name: "Japanese", bgColor: "bg-red-500" },
+              { code: "IT", name: "Italian", bgColor: "bg-green-600" },
+              { code: "DE", name: "German", bgColor: "bg-gray-800" },
+              { code: "RU", name: "Russian", bgColor: "bg-blue-700" },
+              { code: "CN", name: "Chinese", bgColor: "bg-red-600" },
+              { code: "PT", name: "Portuguese", bgColor: "bg-teal-600" },
+            ].map((lang, idx) => (
+              <div key={idx} className="flex-shrink-0">
+                <div className={`w-44 h-40 ${lang.bgColor} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 flex flex-col items-center justify-center p-4 border-4 border-white`}>
+                  {/* Country Flag */}
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3 overflow-hidden">
+                    <ReactCountryFlag
+                      countryCode={lang.code}
+                      svg
+                      style={{
+                        fontSize: '3rem',
+                        lineHeight: '3rem',
+                      }}
+                      title={lang.name}
+                    />
                   </div>
-                ))}
+                  <p className="font-bold text-white text-lg tracking-wide">
+                    {lang.name}
+                  </p>
+                </div>
               </div>
+            ))}
 
-              {/* Duplicate set for seamless loop */}
-              <div className="flex gap-8">
-                {[
-                  {
-                    flag: "🇬🇧",
-                    name: "English",
-                    color: "from-blue-500 to-indigo-600",
-                  },
-                  {
-                    flag: "🇫🇷",
-                    name: "French",
-                    color: "from-indigo-500 to-purple-600",
-                  },
-                  {
-                    flag: "🇪🇸",
-                    name: "Spanish",
-                    color: "from-yellow-500 to-orange-600",
-                  },
-                  {
-                    flag: "🇯🇵",
-                    name: "Japanese",
-                    color: "from-red-500 to-pink-600",
-                  },
-                  {
-                    flag: "🇮🇹",
-                    name: "Italian",
-                    color: "from-green-500 to-emerald-600",
-                  },
-                  {
-                    flag: "🇩🇪",
-                    name: "German",
-                    color: "from-gray-700 to-gray-900",
-                  },
-                  {
-                    flag: "🇷🇺",
-                    name: "Russian",
-                    color: "from-blue-600 to-indigo-700",
-                  },
-                  {
-                    flag: "🇨🇳",
-                    name: "Chinese",
-                    color: "from-red-600 to-yellow-600",
-                  },
-                  {
-                    flag: "🇵🇹",
-                    name: "Portuguese",
-                    color: "from-green-600 to-teal-600",
-                  },
-                ].map((lang, idx) => (
-                  <div
-                    key={`dup-${idx}`}
-                    className="group relative flex-shrink-0"
-                  >
-                    <div
-                      className={`w-40 h-36 bg-gradient-to-br ${lang.color} rounded-3xl shadow-2xl hover:shadow-[#F97316]/50 transition-all duration-500 cursor-pointer transform hover:scale-105 overflow-hidden`}
-                    >
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all"></div>
-                      <div className="relative h-full flex flex-col items-center justify-center p-3 text-white">
-                        <div className="text-5xl mb-2 transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-500">
-                          {lang.flag}
-                        </div>
-                        <p className="font-bold text-base tracking-wide">
-                          {lang.name}
-                        </p>
-                        <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="text-xs bg-white/30 backdrop-blur-sm px-3 py-1 rounded-full">
-                            Khám phá →
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+            {/* Duplicate set for seamless loop */}
+            {[
+              { code: "FR", name: "French", bgColor: "bg-indigo-600" },
+              { code: "ES", name: "Spanish", bgColor: "bg-orange-500" },
+              { code: "JP", name: "Japanese", bgColor: "bg-red-500" },
+              { code: "IT", name: "Italian", bgColor: "bg-green-600" },
+              { code: "DE", name: "German", bgColor: "bg-gray-800" },
+              { code: "RU", name: "Russian", bgColor: "bg-blue-700" },
+              { code: "CN", name: "Chinese", bgColor: "bg-red-600" },
+              { code: "PT", name: "Portuguese", bgColor: "bg-teal-600" },
+            ].map((lang, idx) => (
+              <div key={`dup-${idx}`} className="flex-shrink-0">
+                <div className={`w-44 h-40 ${lang.bgColor} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 flex flex-col items-center justify-center p-4 border-4 border-white`}>
+                  {/* Country Flag */}
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3 overflow-hidden">
+                    <ReactCountryFlag
+                      countryCode={lang.code}
+                      svg
+                      style={{
+                        fontSize: '3rem',
+                        lineHeight: '3rem',
+                      }}
+                      title={lang.name}
+                    />
                   </div>
-                ))}
+                  <p className="font-bold text-white text-lg tracking-wide">
+                    {lang.name}
+                  </p>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

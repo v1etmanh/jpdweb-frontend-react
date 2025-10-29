@@ -1,16 +1,26 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Menu, User, X, BookOpen, BarChart3, LayoutDashboard, CreditCard, ChevronDown, Trophy } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Menu,
+  User,
+  X,
+  BookOpen,
+  BarChart3,
+  LayoutDashboard,
+  CreditCard,
+  ChevronDown,
+  Trophy,
+} from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 // Component Sidebar với dropdown và draggable button
 const Sidebar = ({ isOpen, onToggle }) => {
   const location = useLocation();
   const [isCommercialOpen, setIsCommercialOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 15, y: 750 });
+  const [position, setPosition] = useState({ x: 15, y: 720 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [dropdownDirection, setDropdownDirection] = useState('down');
-  const [dropdownAlign, setDropdownAlign] = useState('left');
+  const [dropdownDirection, setDropdownDirection] = useState("down");
+  const [dropdownAlign, setDropdownAlign] = useState("left");
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
 
@@ -20,7 +30,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
       const rect = buttonRef.current.getBoundingClientRect();
       setDragOffset({
         x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        y: e.clientY - rect.top,
       });
       setIsDragging(true);
     }
@@ -32,24 +42,24 @@ const Sidebar = ({ isOpen, onToggle }) => {
       const buttonRect = buttonRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       const windowWidth = window.innerWidth;
-      const dropdownHeight = 600;
-      const dropdownWidth = 320;
-      
+      const dropdownHeight = 450;
+      const dropdownWidth = 260;
+
       const spaceBelow = windowHeight - buttonRect.bottom;
       const spaceAbove = buttonRect.top;
       const spaceRight = windowWidth - buttonRect.right;
       const spaceLeft = buttonRect.left;
-      
+
       if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
-        setDropdownDirection('up');
+        setDropdownDirection("up");
       } else {
-        setDropdownDirection('down');
+        setDropdownDirection("down");
       }
-      
+
       if (spaceRight < dropdownWidth && spaceLeft > dropdownWidth) {
-        setDropdownAlign('right');
+        setDropdownAlign("right");
       } else {
-        setDropdownAlign('left');
+        setDropdownAlign("left");
       }
     }
   };
@@ -60,7 +70,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
       if (isDragging) {
         setPosition({
           x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y
+          y: e.clientY - dragOffset.y,
         });
       }
     };
@@ -71,13 +81,13 @@ const Sidebar = ({ isOpen, onToggle }) => {
     };
 
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isDragging, dragOffset]);
 
@@ -91,21 +101,23 @@ const Sidebar = ({ isOpen, onToggle }) => {
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isOpen && 
-          dropdownRef.current && 
-          !dropdownRef.current.contains(event.target) &&
-          buttonRef.current &&
-          !buttonRef.current.contains(event.target)) {
+      if (
+        isOpen &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
         onToggle();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onToggle]);
 
@@ -124,39 +136,41 @@ const Sidebar = ({ isOpen, onToggle }) => {
         onMouseDown={handleMouseDown}
         onClick={!isDragging ? handleMenuClick : undefined}
         style={{
-          position: 'fixed',
+          position: "fixed",
           left: `${position.x}px`,
           top: `${position.y}px`,
           zIndex: 1100,
-          cursor: isDragging ? 'grabbing' : 'grab',
-          background: isOpen 
-            ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)'
-            : 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-          border: 'none',
-          borderRadius: '50%',
-          width: '56px',
-          height: '56px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 8px 24px rgba(6, 182, 212, 0.4)',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          color: 'white',
+          cursor: isDragging ? "grabbing" : "grab",
+          background: isOpen
+            ? "linear-gradient(135deg, #f97316 0%, #ea580c 100%)"
+            : "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
+          border: "none",
+          borderRadius: "50%",
+          width: "40px",
+          height: "40px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 16px rgba(6, 182, 212, 0.4)",
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          color: "white",
         }}
         onMouseEnter={(e) => {
           if (!isDragging) {
-            e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)';
-            e.currentTarget.style.boxShadow = '0 12px 32px rgba(249, 115, 22, 0.5)';
+            e.currentTarget.style.transform = "scale(1.05) rotate(2deg)";
+            e.currentTarget.style.boxShadow =
+              "0 6px 20px rgba(249, 115, 22, 0.5)";
           }
         }}
         onMouseLeave={(e) => {
           if (!isDragging) {
-            e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
-            e.currentTarget.style.boxShadow = '0 8px 24px rgba(6, 182, 212, 0.4)';
+            e.currentTarget.style.transform = "scale(1) rotate(0deg)";
+            e.currentTarget.style.boxShadow =
+              "0 4px 16px rgba(6, 182, 212, 0.4)";
           }
         }}
       >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
+        {isOpen ? <X size={18} /> : <Menu size={18} />}
       </button>
 
       {/* Dropdown Menu */}
@@ -164,108 +178,125 @@ const Sidebar = ({ isOpen, onToggle }) => {
         <div
           ref={dropdownRef}
           style={{
-            position: 'fixed',
-            ...(dropdownAlign === 'right' 
-              ? { right: `${window.innerWidth - position.x - 56}px` }
-              : { left: `${position.x}px` }
-            ),
-            ...(dropdownDirection === 'up' 
+            position: "fixed",
+            ...(dropdownAlign === "right"
+              ? { right: `${window.innerWidth - position.x - 40}px` }
+              : { left: `${position.x}px` }),
+            ...(dropdownDirection === "up"
               ? { bottom: `${window.innerHeight - position.y}px` }
-              : { top: `${position.y + 70}px` }
-            ),
+              : { top: `${position.y + 50}px` }),
             zIndex: 1099,
-            minWidth: '320px',
-            maxWidth: '360px',
-            backgroundColor: 'white',
-            borderRadius: '20px',
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(6, 182, 212, 0.3), 0 10px 30px rgba(249, 115, 22, 0.2)',
-            border: '2px solid rgba(6, 182, 212, 0.2)',
-            animation: dropdownDirection === 'up' ? 'slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'slideDown 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            minWidth: "260px",
+            maxWidth: "280px",
+            backgroundColor: "white",
+            borderRadius: "16px",
+            overflow: "hidden",
+            boxShadow:
+              "0 16px 48px rgba(6, 182, 212, 0.3), 0 8px 24px rgba(249, 115, 22, 0.2)",
+            border: "2px solid rgba(6, 182, 212, 0.2)",
+            animation:
+              dropdownDirection === "up"
+                ? "slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                : "slideDown 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
           }}
         >
           {/* Header */}
           <div
             style={{
-              background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-              color: 'white',
-              padding: '24px',
+              background: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
+              color: "white",
+              padding: "18px",
             }}
           >
             <h3
               style={{
-                fontWeight: '900',
-                fontSize: '20px',
+                fontWeight: "900",
+                fontSize: "18px",
                 margin: 0,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
               }}
             >
               <div
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  backdropFilter: 'blur(10px)',
-                  padding: '10px',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  backdropFilter: "blur(10px)",
+                  padding: "8px",
+                  borderRadius: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                <BookOpen size={24} />
+                <BookOpen size={20} />
               </div>
               Creator Menu
             </h3>
           </div>
 
           {/* Menu Items */}
-          <nav style={{ padding: '12px 0' }}>
+          <nav style={{ padding: "8px 0" }}>
             <Link
               to="/creator/create_course"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '14px 20px',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-                color: location.pathname === '/creator/create_course' ? 'white' : '#374151',
-                background: location.pathname === '/creator/create_course' 
-                  ? 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' 
-                  : 'transparent',
-                borderLeft: location.pathname === '/creator/create_course' ? '4px solid #f97316' : 'none',
-                fontWeight: location.pathname === '/creator/create_course' ? '700' : '600',
-                boxShadow: location.pathname === '/creator/create_course' ? '0 4px 12px rgba(6, 182, 212, 0.3)' : 'none',
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "12px 16px",
+                textDecoration: "none",
+                transition: "all 0.3s ease",
+                color:
+                  location.pathname === "/creator/create_course"
+                    ? "white"
+                    : "#374151",
+                background:
+                  location.pathname === "/creator/create_course"
+                    ? "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
+                    : "transparent",
+                borderLeft:
+                  location.pathname === "/creator/create_course"
+                    ? "4px solid #f97316"
+                    : "none",
+                fontWeight:
+                  location.pathname === "/creator/create_course"
+                    ? "700"
+                    : "600",
+                boxShadow:
+                  location.pathname === "/creator/create_course"
+                    ? "0 4px 12px rgba(6, 182, 212, 0.3)"
+                    : "none",
               }}
               onClick={onToggle}
               onMouseEnter={(e) => {
-                if (location.pathname !== '/creator/create_course') {
-                  e.currentTarget.style.background = 'linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1))';
-                  e.currentTarget.style.color = '#06b6d4';
+                if (location.pathname !== "/creator/create_course") {
+                  e.currentTarget.style.background =
+                    "linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1))";
+                  e.currentTarget.style.color = "#06b6d4";
                 }
               }}
               onMouseLeave={(e) => {
-                if (location.pathname !== '/creator/create_course') {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#374151';
+                if (location.pathname !== "/creator/create_course") {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "#374151";
                 }
               }}
             >
               <div
                 style={{
-                  padding: '8px',
-                  borderRadius: '10px',
-                  backgroundColor: location.pathname === '/creator/create_course' 
-                    ? 'rgba(255, 255, 255, 0.2)' 
-                    : '#f3f4f6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.3s ease',
+                  padding: "6px",
+                  borderRadius: "8px",
+                  backgroundColor:
+                    location.pathname === "/creator/create_course"
+                      ? "rgba(255, 255, 255, 0.2)"
+                      : "#f3f4f6",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.3s ease",
                 }}
               >
-                <BookOpen size={20} />
+                <BookOpen size={18} />
               </div>
               <span>Create Your Course</span>
             </Link>
@@ -273,45 +304,58 @@ const Sidebar = ({ isOpen, onToggle }) => {
             <Link
               to="/creator/courseList"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '14px 20px',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-                color: location.pathname === '/creator/courseList' ? 'white' : '#374151',
-                background: location.pathname === '/creator/courseList' 
-                  ? 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' 
-                  : 'transparent',
-                borderLeft: location.pathname === '/creator/courseList' ? '4px solid #f97316' : 'none',
-                fontWeight: location.pathname === '/creator/courseList' ? '700' : '600',
-                boxShadow: location.pathname === '/creator/courseList' ? '0 4px 12px rgba(6, 182, 212, 0.3)' : 'none',
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "12px 16px",
+                textDecoration: "none",
+                transition: "all 0.3s ease",
+                color:
+                  location.pathname === "/creator/courseList"
+                    ? "white"
+                    : "#374151",
+                background:
+                  location.pathname === "/creator/courseList"
+                    ? "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
+                    : "transparent",
+                borderLeft:
+                  location.pathname === "/creator/courseList"
+                    ? "4px solid #f97316"
+                    : "none",
+                fontWeight:
+                  location.pathname === "/creator/courseList" ? "700" : "600",
+                boxShadow:
+                  location.pathname === "/creator/courseList"
+                    ? "0 4px 12px rgba(6, 182, 212, 0.3)"
+                    : "none",
               }}
               onClick={onToggle}
               onMouseEnter={(e) => {
-                if (location.pathname !== '/creator/courseList') {
-                  e.currentTarget.style.background = 'linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1))';
-                  e.currentTarget.style.color = '#06b6d4';
+                if (location.pathname !== "/creator/courseList") {
+                  e.currentTarget.style.background =
+                    "linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1))";
+                  e.currentTarget.style.color = "#06b6d4";
                 }
               }}
               onMouseLeave={(e) => {
-                if (location.pathname !== '/creator/courseList') {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#374151';
+                if (location.pathname !== "/creator/courseList") {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "#374151";
                 }
               }}
             >
               <div
                 style={{
-                  padding: '8px',
-                  borderRadius: '10px',
-                  backgroundColor: location.pathname === '/creator/courseList' 
-                    ? 'rgba(255, 255, 255, 0.2)' 
-                    : '#f3f4f6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.3s ease',
+                  padding: "8px",
+                  borderRadius: "10px",
+                  backgroundColor:
+                    location.pathname === "/creator/courseList"
+                      ? "rgba(255, 255, 255, 0.2)"
+                      : "#f3f4f6",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.3s ease",
                 }}
               >
                 <BarChart3 size={20} />
@@ -322,48 +366,61 @@ const Sidebar = ({ isOpen, onToggle }) => {
             <Link
               to="/creator/class/kahoot"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '14px 20px',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-                color: location.pathname === '/creator/class/kahoot' ? 'white' : '#374151',
-                background: location.pathname === '/creator/class/kahoot' 
-                  ? 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' 
-                  : 'transparent',
-                borderLeft: location.pathname === '/creator/class/kahoot' ? '4px solid #f97316' : 'none',
-                fontWeight: location.pathname === '/creator/class/kahoot' ? '700' : '600',
-                boxShadow: location.pathname === '/creator/class/kahoot' ? '0 4px 12px rgba(6, 182, 212, 0.3)' : 'none',
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "12px 16px",
+                textDecoration: "none",
+                transition: "all 0.3s ease",
+                color:
+                  location.pathname === "/creator/class/kahoot"
+                    ? "white"
+                    : "#374151",
+                background:
+                  location.pathname === "/creator/class/kahoot"
+                    ? "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
+                    : "transparent",
+                borderLeft:
+                  location.pathname === "/creator/class/kahoot"
+                    ? "4px solid #f97316"
+                    : "none",
+                fontWeight:
+                  location.pathname === "/creator/class/kahoot" ? "700" : "600",
+                boxShadow:
+                  location.pathname === "/creator/class/kahoot"
+                    ? "0 4px 12px rgba(6, 182, 212, 0.3)"
+                    : "none",
               }}
               onClick={onToggle}
               onMouseEnter={(e) => {
-                if (location.pathname !== '/creator/class/kahoot') {
-                  e.currentTarget.style.background = 'linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1))';
-                  e.currentTarget.style.color = '#06b6d4';
+                if (location.pathname !== "/creator/class/kahoot") {
+                  e.currentTarget.style.background =
+                    "linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1))";
+                  e.currentTarget.style.color = "#06b6d4";
                 }
               }}
               onMouseLeave={(e) => {
-                if (location.pathname !== '/creator/class/kahoot') {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#374151';
+                if (location.pathname !== "/creator/class/kahoot") {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "#374151";
                 }
               }}
             >
               <div
                 style={{
-                  padding: '8px',
-                  borderRadius: '10px',
-                  backgroundColor: location.pathname === '/creator/class/kahoot' 
-                    ? 'rgba(255, 255, 255, 0.2)' 
-                    : '#f3f4f6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.3s ease',
+                  padding: "6px",
+                  borderRadius: "8px",
+                  backgroundColor:
+                    location.pathname === "/creator/class/kahoot"
+                      ? "rgba(255, 255, 255, 0.2)"
+                      : "#f3f4f6",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.3s ease",
                 }}
               >
-                <Trophy size={20} />
+                <Trophy size={18} />
               </div>
               <span>Kahoot</span>
             </Link>
@@ -371,48 +428,61 @@ const Sidebar = ({ isOpen, onToggle }) => {
             <Link
               to="/creator/profile"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '14px 20px',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-                color: location.pathname === '/creator/profile' ? 'white' : '#374151',
-                background: location.pathname === '/creator/profile' 
-                  ? 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' 
-                  : 'transparent',
-                borderLeft: location.pathname === '/creator/profile' ? '4px solid #f97316' : 'none',
-                fontWeight: location.pathname === '/creator/profile' ? '700' : '600',
-                boxShadow: location.pathname === '/creator/profile' ? '0 4px 12px rgba(6, 182, 212, 0.3)' : 'none',
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "12px 16px",
+                textDecoration: "none",
+                transition: "all 0.3s ease",
+                color:
+                  location.pathname === "/creator/profile"
+                    ? "white"
+                    : "#374151",
+                background:
+                  location.pathname === "/creator/profile"
+                    ? "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
+                    : "transparent",
+                borderLeft:
+                  location.pathname === "/creator/profile"
+                    ? "4px solid #f97316"
+                    : "none",
+                fontWeight:
+                  location.pathname === "/creator/profile" ? "700" : "600",
+                boxShadow:
+                  location.pathname === "/creator/profile"
+                    ? "0 4px 12px rgba(6, 182, 212, 0.3)"
+                    : "none",
               }}
               onClick={onToggle}
               onMouseEnter={(e) => {
-                if (location.pathname !== '/creator/profile') {
-                  e.currentTarget.style.background = 'linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1))';
-                  e.currentTarget.style.color = '#06b6d4';
+                if (location.pathname !== "/creator/profile") {
+                  e.currentTarget.style.background =
+                    "linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1))";
+                  e.currentTarget.style.color = "#06b6d4";
                 }
               }}
               onMouseLeave={(e) => {
-                if (location.pathname !== '/creator/profile') {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#374151';
+                if (location.pathname !== "/creator/profile") {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "#374151";
                 }
               }}
             >
               <div
                 style={{
-                  padding: '8px',
-                  borderRadius: '10px',
-                  backgroundColor: location.pathname === '/creator/profile' 
-                    ? 'rgba(255, 255, 255, 0.2)' 
-                    : '#f3f4f6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.3s ease',
+                  padding: "6px",
+                  borderRadius: "8px",
+                  backgroundColor:
+                    location.pathname === "/creator/profile"
+                      ? "rgba(255, 255, 255, 0.2)"
+                      : "#f3f4f6",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.3s ease",
                 }}
               >
-                <User size={20} />
+                <User size={18} />
               </div>
               <span>Creator Account</span>
             </Link>
@@ -420,67 +490,84 @@ const Sidebar = ({ isOpen, onToggle }) => {
             {/* Commercial Dropdown */}
             <div
               style={{
-                borderTop: '2px solid rgba(6, 182, 212, 0.15)',
-                marginTop: '12px',
-                paddingTop: '12px',
+                borderTop: "1px solid rgba(6, 182, 212, 0.15)",
+                marginTop: "8px",
+                paddingTop: "8px",
               }}
             >
               <button
                 onClick={() => setIsCommercialOpen(!isCommercialOpen)}
                 style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                  padding: '14px 20px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  color: location.pathname.startsWith('/creator/commercial') ? 'white' : '#374151',
-                  background: location.pathname.startsWith('/creator/commercial') 
-                    ? 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' 
-                    : 'transparent',
-                  borderRadius: '12px',
-                  fontWeight: location.pathname.startsWith('/creator/commercial') ? '700' : '600',
-                  boxShadow: location.pathname.startsWith('/creator/commercial') ? '0 4px 12px rgba(6, 182, 212, 0.3)' : 'none',
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                  padding: "12px 16px",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  color: location.pathname.startsWith("/creator/commercial")
+                    ? "white"
+                    : "#374151",
+                  background: location.pathname.startsWith(
+                    "/creator/commercial"
+                  )
+                    ? "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
+                    : "transparent",
+                  borderRadius: "12px",
+                  fontWeight: location.pathname.startsWith(
+                    "/creator/commercial"
+                  )
+                    ? "700"
+                    : "600",
+                  boxShadow: location.pathname.startsWith("/creator/commercial")
+                    ? "0 4px 12px rgba(6, 182, 212, 0.3)"
+                    : "none",
                 }}
                 onMouseEnter={(e) => {
-                  if (!location.pathname.startsWith('/creator/commercial')) {
-                    e.currentTarget.style.background = 'linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1))';
-                    e.currentTarget.style.color = '#06b6d4';
+                  if (!location.pathname.startsWith("/creator/commercial")) {
+                    e.currentTarget.style.background =
+                      "linear-gradient(to right, rgba(6, 182, 212, 0.1), rgba(8, 145, 178, 0.1))";
+                    e.currentTarget.style.color = "#06b6d4";
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!location.pathname.startsWith('/creator/commercial')) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#374151';
+                  if (!location.pathname.startsWith("/creator/commercial")) {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "#374151";
                   }
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
                   <div
                     style={{
-                      padding: '8px',
-                      borderRadius: '10px',
-                      backgroundColor: location.pathname.startsWith('/creator/commercial') 
-                        ? 'rgba(255, 255, 255, 0.2)' 
-                        : '#f3f4f6',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.3s ease',
+                      padding: "6px",
+                      borderRadius: "8px",
+                      backgroundColor: location.pathname.startsWith(
+                        "/creator/commercial"
+                      )
+                        ? "rgba(255, 255, 255, 0.2)"
+                        : "#f3f4f6",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.3s ease",
                     }}
                   >
-                    <BarChart3 size={20} />
+                    <BarChart3 size={18} />
                   </div>
                   <span>Commercial</span>
                 </div>
-                <ChevronDown 
-                  size={20}
+                <ChevronDown
+                  size={18}
                   style={{
-                    transition: 'transform 0.3s ease',
-                    transform: isCommercialOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: "transform 0.3s ease",
+                    transform: isCommercialOpen
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
                   }}
                 />
               </button>
@@ -489,216 +576,310 @@ const Sidebar = ({ isOpen, onToggle }) => {
               {isCommercialOpen && (
                 <div
                   style={{
-                    background: 'linear-gradient(to bottom right, rgba(6, 182, 212, 0.05), rgba(8, 145, 178, 0.05))',
-                    padding: '8px 0',
-                    marginTop: '8px',
-                    borderRadius: '12px',
-                    marginLeft: '8px',
-                    marginRight: '8px',
+                    background:
+                      "linear-gradient(to bottom right, rgba(6, 182, 212, 0.05), rgba(8, 145, 178, 0.05))",
+                    padding: "8px",
+                    marginTop: "6px",
+                    borderRadius: "10px",
+                    marginLeft: "6px",
+                    marginRight: "6px",
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "6px",
                   }}
                 >
                   <Link
                     to="/creator/commercial/dashboard"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 20px',
-                      margin: '4px 8px',
-                      borderRadius: '10px',
-                      textDecoration: 'none',
-                      transition: 'all 0.3s ease',
-                      color: location.pathname === '/creator/commercial/dashboard' ? 'white' : '#374151',
-                      background: location.pathname === '/creator/commercial/dashboard' 
-                        ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' 
-                        : 'transparent',
-                      fontWeight: location.pathname === '/creator/commercial/dashboard' ? '700' : '600',
-                      boxShadow: location.pathname === '/creator/commercial/dashboard' ? '0 4px 12px rgba(249, 115, 22, 0.4)' : 'none',
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "8px 6px",
+                      margin: "0",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      transition: "all 0.3s ease",
+                      color:
+                        location.pathname === "/creator/commercial/dashboard"
+                          ? "white"
+                          : "#374151",
+                      background:
+                        location.pathname === "/creator/commercial/dashboard"
+                          ? "linear-gradient(135deg, #f97316 0%, #ea580c 100%)"
+                          : "transparent",
+                      fontWeight:
+                        location.pathname === "/creator/commercial/dashboard"
+                          ? "700"
+                          : "600",
+                      boxShadow:
+                        location.pathname === "/creator/commercial/dashboard"
+                          ? "0 4px 12px rgba(249, 115, 22, 0.4)"
+                          : "none",
                     }}
                     onClick={onToggle}
                     onMouseEnter={(e) => {
-                      if (location.pathname !== '/creator/commercial/dashboard') {
-                        e.currentTarget.style.background = 'white';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-                        e.currentTarget.style.color = '#06b6d4';
+                      if (
+                        location.pathname !== "/creator/commercial/dashboard"
+                      ) {
+                        e.currentTarget.style.background = "white";
+                        e.currentTarget.style.boxShadow =
+                          "0 2px 8px rgba(0, 0, 0, 0.1)";
+                        e.currentTarget.style.color = "#06b6d4";
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (location.pathname !== '/creator/commercial/dashboard') {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.boxShadow = 'none';
-                        e.currentTarget.style.color = '#374151';
+                      if (
+                        location.pathname !== "/creator/commercial/dashboard"
+                      ) {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.boxShadow = "none";
+                        e.currentTarget.style.color = "#374151";
                       }
                     }}
                   >
                     <div
                       style={{
-                        padding: '6px',
-                        borderRadius: '8px',
-                        backgroundColor: location.pathname === '/creator/commercial/dashboard' 
-                          ? 'rgba(255, 255, 255, 0.2)' 
-                          : 'rgba(6, 182, 212, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        padding: "6px",
+                        borderRadius: "8px",
+                        backgroundColor:
+                          location.pathname === "/creator/commercial/dashboard"
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(6, 182, 212, 0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      <LayoutDashboard size={18} />
+                      <LayoutDashboard size={16} />
                     </div>
-                    <span>Dashboard</span>
+                    <span style={{ fontSize: "11px", textAlign: "center" }}>
+                      Dashboard
+                    </span>
                   </Link>
 
                   <Link
                     to="/creator/commercial/courseDetail"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 20px',
-                      margin: '4px 8px',
-                      borderRadius: '10px',
-                      textDecoration: 'none',
-                      transition: 'all 0.3s ease',
-                      color: location.pathname === '/creator/commercial/courseDetail' ? 'white' : '#374151',
-                      background: location.pathname === '/creator/commercial/courseDetail' 
-                        ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' 
-                        : 'transparent',
-                      fontWeight: location.pathname === '/creator/commercial/courseDetail' ? '700' : '600',
-                      boxShadow: location.pathname === '/creator/commercial/courseDetail' ? '0 4px 12px rgba(249, 115, 22, 0.4)' : 'none',
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "8px 6px",
+                      margin: "0",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      transition: "all 0.3s ease",
+                      color:
+                        location.pathname === "/creator/commercial/courseDetail"
+                          ? "white"
+                          : "#374151",
+                      background:
+                        location.pathname === "/creator/commercial/courseDetail"
+                          ? "linear-gradient(135deg, #f97316 0%, #ea580c 100%)"
+                          : "transparent",
+                      fontWeight:
+                        location.pathname === "/creator/commercial/courseDetail"
+                          ? "700"
+                          : "600",
+                      boxShadow:
+                        location.pathname === "/creator/commercial/courseDetail"
+                          ? "0 4px 12px rgba(249, 115, 22, 0.4)"
+                          : "none",
                     }}
                     onClick={onToggle}
                     onMouseEnter={(e) => {
-                      if (location.pathname !== '/creator/commercial/courseDetail') {
-                        e.currentTarget.style.background = 'white';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-                        e.currentTarget.style.color = '#06b6d4';
+                      if (
+                        location.pathname !== "/creator/commercial/courseDetail"
+                      ) {
+                        e.currentTarget.style.background = "white";
+                        e.currentTarget.style.boxShadow =
+                          "0 2px 8px rgba(0, 0, 0, 0.1)";
+                        e.currentTarget.style.color = "#06b6d4";
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (location.pathname !== '/creator/commercial/courseDetail') {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.boxShadow = 'none';
-                        e.currentTarget.style.color = '#374151';
+                      if (
+                        location.pathname !== "/creator/commercial/courseDetail"
+                      ) {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.boxShadow = "none";
+                        e.currentTarget.style.color = "#374151";
                       }
                     }}
                   >
                     <div
                       style={{
-                        padding: '6px',
-                        borderRadius: '8px',
-                        backgroundColor: location.pathname === '/creator/commercial/courseDetail' 
-                          ? 'rgba(255, 255, 255, 0.2)' 
-                          : 'rgba(6, 182, 212, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        padding: "6px",
+                        borderRadius: "8px",
+                        backgroundColor:
+                          location.pathname ===
+                          "/creator/commercial/courseDetail"
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(6, 182, 212, 0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      <CreditCard size={18} />
+                      <CreditCard size={16} />
                     </div>
-                    <span>Course Detail</span>
+                    <span style={{ fontSize: "11px", textAlign: "center" }}>
+                      Course Detail
+                    </span>
                   </Link>
 
                   <Link
                     to="/creator/commercial/history_transaction"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 20px',
-                      margin: '4px 8px',
-                      borderRadius: '10px',
-                      textDecoration: 'none',
-                      transition: 'all 0.3s ease',
-                      color: location.pathname === '/creator/commercial/history_transaction' ? 'white' : '#374151',
-                      background: location.pathname === '/creator/commercial/history_transaction' 
-                        ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' 
-                        : 'transparent',
-                      fontWeight: location.pathname === '/creator/commercial/history_transaction' ? '700' : '600',
-                      boxShadow: location.pathname === '/creator/commercial/history_transaction' ? '0 4px 12px rgba(249, 115, 22, 0.4)' : 'none',
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "8px 6px",
+                      margin: "0",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      transition: "all 0.3s ease",
+                      color:
+                        location.pathname ===
+                        "/creator/commercial/history_transaction"
+                          ? "white"
+                          : "#374151",
+                      background:
+                        location.pathname ===
+                        "/creator/commercial/history_transaction"
+                          ? "linear-gradient(135deg, #f97316 0%, #ea580c 100%)"
+                          : "transparent",
+                      fontWeight:
+                        location.pathname ===
+                        "/creator/commercial/history_transaction"
+                          ? "700"
+                          : "600",
+                      boxShadow:
+                        location.pathname ===
+                        "/creator/commercial/history_transaction"
+                          ? "0 4px 12px rgba(249, 115, 22, 0.4)"
+                          : "none",
                     }}
                     onClick={onToggle}
                     onMouseEnter={(e) => {
-                      if (location.pathname !== '/creator/commercial/history_transaction') {
-                        e.currentTarget.style.background = 'white';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-                        e.currentTarget.style.color = '#06b6d4';
+                      if (
+                        location.pathname !==
+                        "/creator/commercial/history_transaction"
+                      ) {
+                        e.currentTarget.style.background = "white";
+                        e.currentTarget.style.boxShadow =
+                          "0 2px 8px rgba(0, 0, 0, 0.1)";
+                        e.currentTarget.style.color = "#06b6d4";
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (location.pathname !== '/creator/commercial/history_transaction') {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.boxShadow = 'none';
-                        e.currentTarget.style.color = '#374151';
+                      if (
+                        location.pathname !==
+                        "/creator/commercial/history_transaction"
+                      ) {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.boxShadow = "none";
+                        e.currentTarget.style.color = "#374151";
                       }
                     }}
                   >
                     <div
                       style={{
-                        padding: '6px',
-                        borderRadius: '8px',
-                        backgroundColor: location.pathname === '/creator/commercial/history_transaction' 
-                          ? 'rgba(255, 255, 255, 0.2)' 
-                          : 'rgba(6, 182, 212, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        padding: "6px",
+                        borderRadius: "8px",
+                        backgroundColor:
+                          location.pathname ===
+                          "/creator/commercial/history_transaction"
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(6, 182, 212, 0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      <CreditCard size={18} />
+                      <CreditCard size={16} />
                     </div>
-                    <span>Transaction History</span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Transaction History
+                    </span>
                   </Link>
 
                   <Link
                     to="/creator/commercial/balance"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '12px 20px',
-                      margin: '4px 8px',
-                      borderRadius: '10px',
-                      textDecoration: 'none',
-                      transition: 'all 0.3s ease',
-                      color: location.pathname === '/creator/commercial/balance' ? 'white' : '#374151',
-                      background: location.pathname === '/creator/commercial/balance' 
-                        ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' 
-                        : 'transparent',
-                      fontWeight: location.pathname === '/creator/commercial/balance' ? '700' : '600',
-                      boxShadow: location.pathname === '/creator/commercial/balance' ? '0 4px 12px rgba(249, 115, 22, 0.4)' : 'none',
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "8px 6px",
+                      margin: "0",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      transition: "all 0.3s ease",
+                      color:
+                        location.pathname === "/creator/commercial/balance"
+                          ? "white"
+                          : "#374151",
+                      background:
+                        location.pathname === "/creator/commercial/balance"
+                          ? "linear-gradient(135deg, #f97316 0%, #ea580c 100%)"
+                          : "transparent",
+                      fontWeight:
+                        location.pathname === "/creator/commercial/balance"
+                          ? "700"
+                          : "600",
+                      boxShadow:
+                        location.pathname === "/creator/commercial/balance"
+                          ? "0 4px 12px rgba(249, 115, 22, 0.4)"
+                          : "none",
                     }}
                     onClick={onToggle}
                     onMouseEnter={(e) => {
-                      if (location.pathname !== '/creator/commercial/balance') {
-                        e.currentTarget.style.background = 'white';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-                        e.currentTarget.style.color = '#06b6d4';
+                      if (location.pathname !== "/creator/commercial/balance") {
+                        e.currentTarget.style.background = "white";
+                        e.currentTarget.style.boxShadow =
+                          "0 2px 8px rgba(0, 0, 0, 0.1)";
+                        e.currentTarget.style.color = "#06b6d4";
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (location.pathname !== '/creator/commercial/balance') {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.boxShadow = 'none';
-                        e.currentTarget.style.color = '#374151';
+                      if (location.pathname !== "/creator/commercial/balance") {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.boxShadow = "none";
+                        e.currentTarget.style.color = "#374151";
                       }
                     }}
                   >
                     <div
                       style={{
-                        padding: '6px',
-                        borderRadius: '8px',
-                        backgroundColor: location.pathname === '/creator/commercial/balance' 
-                          ? 'rgba(255, 255, 255, 0.2)' 
-                          : 'rgba(6, 182, 212, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        padding: "6px",
+                        borderRadius: "8px",
+                        backgroundColor:
+                          location.pathname === "/creator/commercial/balance"
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(6, 182, 212, 0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      <CreditCard size={18} />
+                      <CreditCard size={16} />
                     </div>
-                    <span>Your Budget</span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Your Budget
+                    </span>
                   </Link>
                 </div>
               )}
@@ -708,51 +889,51 @@ const Sidebar = ({ isOpen, onToggle }) => {
           {/* Footer */}
           <div
             style={{
-              background: 'linear-gradient(to right, #f8fafc, #e0f2fe)',
-              padding: '20px',
-              borderTop: '2px solid rgba(6, 182, 212, 0.2)',
+              background: "linear-gradient(to right, #f8fafc, #e0f2fe)",
+              padding: "14px",
+              borderTop: "2px solid rgba(6, 182, 212, 0.2)",
             }}
           >
             <p
               style={{
-                fontSize: '12px',
-                color: '#64748b',
-                textAlign: 'center',
-                fontWeight: '600',
-                margin: '0 0 8px 0',
+                fontSize: "11px",
+                color: "#64748b",
+                textAlign: "center",
+                fontWeight: "600",
+                margin: "0 0 6px 0",
               }}
             >
               © 2024 JPD Learning Platform
             </p>
             <div
               style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '8px',
+                display: "flex",
+                justifyContent: "center",
+                gap: "8px",
               }}
             >
               <div
                 style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: '#06b6d4',
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "#06b6d4",
                 }}
               ></div>
               <div
                 style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: '#f97316',
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "#f97316",
                 }}
               ></div>
               <div
                 style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: '#06b6d4',
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "#06b6d4",
                 }}
               ></div>
             </div>
