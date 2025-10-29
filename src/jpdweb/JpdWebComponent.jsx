@@ -36,6 +36,13 @@ import KahootList from "./KahootManagement";
 import TeacherDashboard from "./kahoot/TeacherDashboard";
 import StudentJoin from "./kahoot/StudentJoin";
 import KahootSpecificContent from "./KahootSpecificContent";
+import AdminCreatorManagement from "./adminPages/AdminCreatorPages";
+import AdminCreatorDetail from "./adminPages/AdminCreatorDetail";
+import AdminPendingCertificates from "./adminPages/AdminPendingCertificates";
+import CreatorViolationsHistory from "./adminPages/CreatorViolationsHistory";
+import CreatorAuditLogs from "./adminPages/CreatorAuditLogs";
+import TransactionsListPage from "./adminPages/TransactionsListPage";
+import RevenueReportPage from "./adminPages/RevenueReportPage";
 export default function JpdWebComponent(){
   const [isCreator, setCreator] = useState(false);
   const [showDirect, setShowDirect] = useState(false);
@@ -215,7 +222,7 @@ const location = useLocation();
   
 
       {/* Main Content */}
-      <div className="main-content bg-white">
+     <div className="main-content bg-white" style={{ paddingTop: '70px' }}>
         <Routes>
           <Route path="/" element={<HomepageComponent />} />
           <Route path="/login" element={<LoginComponent />} />
@@ -250,7 +257,63 @@ const location = useLocation();
 
          
          
-          
+          {/*admin*/}
+           <Route 
+            path="/admin/creator-page" 
+            element={
+              <ProtectedRoute>
+                <AdminCreatorManagement />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/creatorDetail/:id" 
+            element={
+              <ProtectedRoute>
+                <AdminCreatorDetail />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/pending-certificate" 
+            element={
+              <ProtectedRoute>
+                <AdminPendingCertificates />
+              </ProtectedRoute>
+            } 
+          />
+           <Route 
+            path="/admin/violent-history/:creatorId" 
+            element={
+              <ProtectedRoute>
+                <CreatorViolationsHistory />
+              </ProtectedRoute>
+            } 
+          />
+            <Route 
+            path="/admin/auditlog-history/:creatorId" 
+            element={
+              <ProtectedRoute>
+                <CreatorAuditLogs />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/transaction-page" 
+            element={
+              <ProtectedRoute>
+                <TransactionsListPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/statistic-revenue" 
+            element={
+              <ProtectedRoute>
+                <RevenueReportPage />
+              </ProtectedRoute>
+            } 
+          />
           {/* Upload Profile - Chỉ cần authentication */}
           <Route 
             path="/upload_profile" 
