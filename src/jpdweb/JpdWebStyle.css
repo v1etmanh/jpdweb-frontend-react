@@ -13,7 +13,13 @@
     background-color: #F1F5F9; /* 60% background */
   }
 }
+:root {
+  --header-height: 80px;
+}
 
+.main-content {
+  margin-top: var(--header-height);
+}
 @layer components {
   .line-clamp-2 {
     display: -webkit-box;

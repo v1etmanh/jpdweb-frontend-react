@@ -34,6 +34,15 @@ export default function HeaderComponent() {
             </li>
             <li>
               <Link
+                to="/course_result/all"
+                className="relative inline-block text-black text-xl font-semibold no-underline group"
+              >
+                Explore
+                <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-[#06B6D4] transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/about"
                 className="relative inline-block text-black text-xl font-semibold no-underline group"
               >

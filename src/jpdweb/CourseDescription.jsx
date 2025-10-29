@@ -8,6 +8,25 @@ import {
   showSuccessNotification,
   showWarningNotification,
 } from "./api/apiClient";
+import { 
+  FaStar, 
+  FaUsers, 
+  FaSync, 
+  FaBook, 
+  FaChalkboardTeacher, 
+  FaComments,
+  FaPlayCircle,
+  FaShoppingCart,
+  FaHeart,
+  FaCheckCircle,
+  FaFileAlt,
+  FaMobileAlt,
+  FaInfinity,
+  FaBullseye,
+  FaClipboardList,
+  FaUserGraduate
+} from 'react-icons/fa';
+import { MdKeyboardArrowDown } from 'react-icons/md';
 
 const ACCESS_MODE = {
   PAID: "PAID",
@@ -52,6 +71,7 @@ export default function CourseDescription() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchData = async () => {
@@ -180,30 +200,30 @@ export default function CourseDescription() {
                 </div>
 
                 {/* Course Basic Info */}
-                <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2 break-words">
                     {course.name}
                   </h1>
-                  <p className="text-gray-600 mb-4 text-left">
+                  <p className="text-gray-600 mb-4 text-left break-words">
                     {course.description}
                   </p>
 
                   <div className="flex flex-wrap gap-12 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
-                      <span>⭐</span>
+                      <FaStar className="text-yellow-500" />
                       <span className="font-semibold">
                         {course.averageRating.toFixed(1)}
                       </span>
                       <span>({course.totalFeedbacks})</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span>👥</span>
+                      <FaUsers className="text-blue-500" />
                       <span>
                         {course.totalStudents.toLocaleString()} học viên
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span>🔄</span>
+                      <FaSync className="text-green-500" />
                       <span>{course.lastUpdate}</span>
                     </div>
                   </div>
@@ -215,10 +235,10 @@ export default function CourseDescription() {
             <div className="bg-white rounded-2xl shadow-lg">
               <div className="flex overflow-x-auto border-b">
                 {[
-                  { id: "overview", label: "📋 Tổng quan", icon: "" },
-                  { id: "curriculum", label: "📖 Nội dung", icon: "" },
-                  { id: "instructor", label: "👨‍🏫 Giảng viên", icon: "" },
-                  { id: "reviews", label: "💬 Đánh giá", icon: "" },
+                  { id: "overview", label: "Tổng quan", icon: <FaClipboardList /> },
+                  { id: "curriculum", label: "Nội dung", icon: <FaBook /> },
+                  { id: "instructor", label: "Giảng viên", icon: <FaChalkboardTeacher /> },
+                  { id: "reviews", label: "Đánh giá", icon: <FaComments /> },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -241,11 +261,12 @@ export default function CourseDescription() {
                   <div className="space-y-6">
                     {course.learningObject && (
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-3">
-                          🎯 Bạn sẽ học được gì
+                        <h3 className="text-lg font-bold text-gray-900 mb-3 text-left flex items-center gap-2">
+                          <FaBullseye className="text-blue-500" />
+                          Bạn sẽ học được gì
                         </h3>
                         <div className="bg-blue-50 p-4 rounded-lg">
-                          <p className="text-gray-700">
+                          <p className="text-gray-700 text-left">
                             {course.learningObject}
                           </p>
                         </div>
@@ -254,22 +275,24 @@ export default function CourseDescription() {
 
                     {course.requirements && (
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-3">
-                          📋 Yêu cầu
+                        <h3 className="text-lg font-bold text-gray-900 mb-3 text-left flex items-center gap-2">
+                          <FaClipboardList className="text-orange-500" />
+                          Yêu cầu
                         </h3>
                         <div className="bg-orange-50 p-4 rounded-lg">
-                          <p className="text-gray-700">{course.requirements}</p>
+                          <p className="text-gray-700 text-left">{course.requirements}</p>
                         </div>
                       </div>
                     )}
 
                     {course.targetAudience && (
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-3">
-                          👥 Đối tượng phù hợp
+                        <h3 className="text-lg font-bold text-gray-900 mb-3 text-left flex items-center gap-2">
+                          <FaUserGraduate className="text-purple-500" />
+                          Đối tượng phù hợp
                         </h3>
                         <div className="bg-purple-50 p-4 rounded-lg">
-                          <p className="text-gray-700">
+                          <p className="text-gray-700 text-left">
                             {course.targetAudience}
                           </p>
                         </div>
@@ -280,11 +303,11 @@ export default function CourseDescription() {
 
                 {activeTab === "curriculum" && course.chapters && (
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-bold text-gray-900">
+                    <div className="flex justify-between items-center mb-4 gap-4">
+                      <h3 className="text-lg font-bold text-gray-900 break-words text-left">
                         Nội dung khóa học
                       </h3>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 whitespace-nowrap flex-shrink-0">
                         {course.chapters.length} chương • {course.totalModules}{" "}
                         bài học
                       </div>
@@ -295,47 +318,45 @@ export default function CourseDescription() {
                         className="border border-gray-200 rounded-lg"
                       >
                         <div
-                          className="p-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100"
+                          className="p-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100 gap-3"
                           onClick={() => toggleChapter(chapter.chapterId)}
                         >
-                          <div className="flex items-center gap-3">
-                            <span className="text-lg font-bold text-[#06B6D4]">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <span className="text-lg font-bold text-[#06B6D4] flex-shrink-0">
                               {index + 1}
                             </span>
-                            <div>
-                              <h4 className="font-semibold text-gray-900">
+                            <div className="min-w-0 flex-1">
+                              <h4 className="font-semibold text-gray-900 break-words text-left">
                                 {chapter.chapterName}
                               </h4>
-                              <p className="text-sm text-gray-600">
+                              <p className="text-sm text-gray-600 text-left">
                                 {chapter.modules?.length || 0} bài học
                               </p>
                             </div>
                           </div>
-                          <span
-                            className={`transform transition-transform ${
+                          <MdKeyboardArrowDown
+                            className={`transform transition-transform flex-shrink-0 text-xl ${
                               expandedChapters[chapter.chapterId]
                                 ? "rotate-180"
                                 : ""
                             }`}
-                          >
-                            ▼
-                          </span>
+                          />
                         </div>
                         {expandedChapters[chapter.chapterId] && (
                           <div className="p-4 bg-white space-y-2">
                             {chapter.modules?.map((module, idx) => (
                               <div
                                 key={module.moduleId}
-                                className="flex justify-between items-center py-2 px-3 hover:bg-blue-50 rounded"
+                                className="flex justify-between items-center py-2 px-3 hover:bg-blue-50 rounded gap-3"
                               >
-                                <span className="text-gray-700">
+                                <span className="text-gray-700 break-words flex-1 min-w-0 text-left">
                                   {idx + 1}. {module.titleOfModule}
                                 </span>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 flex-shrink-0">
                                   {module.contentTypes?.map((type, typeIdx) => (
                                     <span
                                       key={typeIdx}
-                                      className="text-xs bg-[#F97316] text-white px-2 py-1 rounded"
+                                      className="text-xs bg-[#F97316] text-white px-2 py-1 rounded whitespace-nowrap"
                                     >
                                       {type}
                                     </span>
@@ -355,33 +376,33 @@ export default function CourseDescription() {
                     <img
                       src={
                         course.creator.imageUrl ||
-                        "https://via.placeholder.com/150"
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23CBD5E1'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E"
                       }
                       alt={course.creator.fullName}
-                      className="w-32 h-32 rounded-full object-cover"
+                      className="w-32 h-32 rounded-full object-cover flex-shrink-0 bg-gray-200"
                     />
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 break-words text-left">
                         {course.creator.fullName}
                       </h3>
-                      <p className="text-[#06B6D4] font-semibold mb-4">
+                      <p className="text-[#06B6D4] font-semibold mb-4 break-words text-left">
                         {course.creator.titleSelf}
                       </p>
                       <div className="grid grid-cols-3 gap-4 mb-4">
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-gray-900">
+                          <div className="text-2xl font-bold text-gray-900 break-words">
                             {course.creator.averageRating.toFixed(1)}
                           </div>
                           <div className="text-sm text-gray-600">Đánh giá</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-gray-900">
+                          <div className="text-2xl font-bold text-gray-900 break-words">
                             {course.creator.totalStudents.toLocaleString()}
                           </div>
                           <div className="text-sm text-gray-600">Học viên</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold text-gray-900">
+                          <div className="text-2xl font-bold text-gray-900 break-words">
                             {course.creator.totalCourses}
                           </div>
                           <div className="text-sm text-gray-600">Khóa học</div>
@@ -398,31 +419,31 @@ export default function CourseDescription() {
                         key={feedback.feedbackId}
                         className="border-b border-gray-200 pb-3 last:border-b-0"
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
+                          <div className="flex items-center gap-2 min-w-0">
                             <img
                               src={
                                 feedback.customer.imageUrl ||
-                                "https://via.placeholder.com/40"
+                                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23CBD5E1'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E"
                               }
                               alt={feedback.customer.fullName}
-                              className="w-8 h-8 rounded-full"
+                              className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0"
                             />
-                            <span className="font-medium text-gray-900 text-sm">
+                            <span className="font-medium text-gray-900 text-sm break-words">
                               {feedback.customer.fullName}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <div className="text-yellow-400 text-sm">
                               {"★".repeat(feedback.rate)}
                               {"☆".repeat(5 - feedback.rate)}
                             </div>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 whitespace-nowrap">
                               {feedback.createDate}
                             </span>
                           </div>
                         </div>
-                        <p className="text-gray-700 text-sm text-left pl-10">
+                        <p className="text-gray-700 text-sm text-left pl-10 break-words">
                           {feedback.content}
                         </p>
                       </div>
@@ -439,87 +460,99 @@ export default function CourseDescription() {
               {/* Price Card */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <div className="text-center mb-4">
-                  {discount > 0 && (
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <span className="text-sm text-gray-500 line-through">
-                        ₫{course.originalPrice?.toLocaleString()}
-                      </span>
-                      <span className="bg-green-500 text-white px-2 py-1 text-xs rounded-full font-bold">
-                        -{discount}%
-                      </span>
+                  {course.price === 0 ? (
+                    <div className="text-3xl font-bold text-green-500 mb-4">
+                      Miễn phí
                     </div>
+                  ) : (
+                    <>
+                      {discount > 0 && (
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <span className="text-sm text-gray-500 line-through">
+                            ₫{course.originalPrice?.toLocaleString()}
+                          </span>
+                          <span className="bg-green-500 text-white px-2 py-1 text-xs rounded-full font-bold">
+                            -{discount}%
+                          </span>
+                        </div>
+                      )}
+                      <div className="text-3xl font-bold text-[#F97316] mb-4">
+                        ₫{course.price.toLocaleString()}
+                      </div>
+                    </>
                   )}
-                  <div className="text-3xl font-bold text-[#F97316] mb-4">
-                    ₫{course.price.toLocaleString()}
-                  </div>
                 </div>
 
                 <div className="space-y-3">
                   <button
-                    className="w-full bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white py-3 rounded-xl font-bold hover:from-[#F97316] hover:to-[#EA580C] transition-all shadow-lg"
+                    className="w-full bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white py-3 rounded-xl font-bold hover:from-[#F97316] hover:to-[#EA580C] transition-all shadow-lg flex items-center justify-center gap-2"
                     onClick={handleBuyNow}
                     disabled={isProcessing}
                   >
-                    {isProcessing ? "⏳ Đang xử lý..." : "🛒 Mua ngay"}
+                    {isProcessing 
+                      ? <><FaSync className="animate-spin" /> Đang xử lý...</>
+                      : course.price === 0 
+                        ? <><FaPlayCircle /> Tham gia ngay</>
+                        : <><FaShoppingCart /> Mua ngay</>}
                   </button>
                   <button
-                    className="w-full border-2 border-[#06B6D4] text-[#06B6D4] py-3 rounded-xl font-bold hover:bg-[#06B6D4] hover:text-white transition-all"
+                    className="w-full border-2 border-[#06B6D4] text-[#06B6D4] py-3 rounded-xl font-bold hover:bg-[#06B6D4] hover:text-white transition-all flex items-center justify-center gap-2"
                     onClick={addWishlist}
                     disabled={isProcessing}
                   >
-                    💝 Thêm vào yêu thích
+                    <FaHeart /> Thêm vào yêu thích
                   </button>
                 </div>
 
-                <div className="mt-4 text-center text-sm text-gray-600 bg-gray-100 py-2 rounded-lg">
-                  ✅ Hoàn tiền trong 30 ngày
+                <div className="mt-4 text-center text-sm text-gray-600 bg-gray-100 py-2 rounded-lg flex items-center justify-center gap-2">
+                  <FaCheckCircle className="text-green-500" /> Hoàn tiền trong 30 ngày
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-gray-700">
                   <div className="flex items-center gap-2">
-                    <span>📚</span>
-                    <span>{course.chapters?.length || 0} chương</span>
+                    <FaBook className="flex-shrink-0 text-[#06B6D4]" />
+                    <span className="break-words">{course.chapters?.length || 0} chương</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>📄</span>
-                    <span>{course.totalModules} bài học</span>
+                    <FaFileAlt className="flex-shrink-0 text-[#06B6D4]" />
+                    <span className="break-words">{course.totalModules} bài học</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>📱</span>
-                    <span>Mọi thiết bị</span>
+                    <FaMobileAlt className="flex-shrink-0 text-[#06B6D4]" />
+                    <span className="break-words">Mọi thiết bị</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>♾️</span>
-                    <span>Trọn đời</span>
+                    <FaInfinity className="flex-shrink-0 text-[#06B6D4]" />
+                    <span className="break-words">Trọn đời</span>
                   </div>
                 </div>
               </div>
 
               {/* Course Stats */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="font-bold text-gray-900 mb-4">
+                <h3 className="font-bold text-gray-900 mb-4 break-words">
                   Thông tin khóa học
                 </h3>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-gray-600">Đánh giá</span>
-                    <span className="font-semibold">
+                  <div className="flex justify-between items-center py-2 border-b gap-2">
+                    <span className="text-gray-600 flex-shrink-0">Đánh giá</span>
+                    <span className="font-semibold break-words text-right">
                       {course.averageRating.toFixed(1)}/5
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-gray-600">Học viên</span>
-                    <span className="font-semibold">
+                  <div className="flex justify-between items-center py-2 border-b gap-2">
+                    <span className="text-gray-600 flex-shrink-0">Học viên</span>
+                    <span className="font-semibold break-words text-right">
                       {course.totalStudents.toLocaleString()}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-gray-600">Bài học</span>
-                    <span className="font-semibold">{course.totalModules}</span>
+                  <div className="flex justify-between items-center py-2 border-b gap-2">
+                    <span className="text-gray-600 flex-shrink-0">Bài học</span>
+                    <span className="font-semibold break-words text-right">{course.totalModules}</span>
                   </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600">Ngôn ngữ</span>
-                    <span className="font-semibold">{course.language}</span>
+                  <div className="flex justify-between items-center py-2 gap-2">
+                    <span className="text-gray-600 flex-shrink-0">Ngôn ngữ</span>
+                    <span className="font-semibold break-words text-right">{course.language}</span>
                   </div>
                 </div>
               </div>

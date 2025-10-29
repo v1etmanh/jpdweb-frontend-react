@@ -5,9 +5,10 @@ import { showErrorNotification } from './api/apiClient';
 
 const CoursesTable = () => {
   const nav = useNavigate();
-  const [coursesData, setCourseData] = useState(null);
+  const [coursesData, setCourseData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hoveredRow, setHoveredRow] = useState(null);
+  const [sortOption, setSortOption] = useState('id'); // Mặc định sắp xếp theo ID
   
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -31,6 +32,35 @@ const CoursesTable = () => {
       setIsLoading(false);
     }
   };
+
+  // Hàm sắp xếp dữ liệu
+  const getSortedCourses = () => {
+    if (!coursesData.length) return [];
+    
+    const sorted = [...coursesData];
+    
+    switch (sortOption) {
+      case 'id':
+        return sorted.sort((a, b) => a.courseId - b.courseId);
+      
+      case 'students_desc':
+        return sorted.sort((a, b) => b.students - a.students);
+      
+      case 'revenue_desc':
+        return sorted.sort((a, b) => b.revenue - a.revenue);
+      
+      case 'students_asc':
+        return sorted.sort((a, b) => a.students - b.students);
+      
+      case 'revenue_asc':
+        return sorted.sort((a, b) => a.revenue - b.revenue);
+      
+      default:
+        return sorted;
+    }
+  };
+
+  const sortedCourses = getSortedCourses();
   
   useEffect(() => {
     fetchData();
@@ -107,10 +137,31 @@ const CoursesTable = () => {
         {/* Courses Table */}
         <div className="bg-white rounded-2xl shadow-card overflow-hidden animate-slideUp" style={{animationDelay: '0.3s'}}>
           <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-[#06B6D4] to-cyan-500">
-            <h2 className="text-xl font-semibold text-white flex items-center">
-              <span className="animate-pulse-soft mr-3">📊</span>
-              Danh Sách Khóa Học
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-white flex items-center">
+                <span className="animate-pulse-soft mr-3">📊</span>
+                Danh Sách Khóa Học
+              </h2>
+              
+              {/* Dropdown Sắp xếp */}
+              <div className="flex items-center space-x-3">
+                <label htmlFor="sort" className="text-white text-sm font-medium">
+                  Sắp xếp theo:
+                </label>
+                <select
+                  id="sort"
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  className="bg-white text-gray-800 px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent transition-all duration-300 shadow-sm hover:shadow-md"
+                >
+                  <option value="id">ID </option>
+                  <option value="students_desc">Số học viên (Cao → Thấp)</option>
+                  <option value="students_asc">Số học viên (Thấp → Cao)</option>
+                  <option value="revenue_desc">Doanh thu (Cao → Thấp)</option>
+                  <option value="revenue_asc">Doanh thu (Thấp → Cao)</option>
+                </select>
+              </div>
+            </div>
           </div>
           
           <div className="overflow-x-auto">
@@ -135,7 +186,7 @@ const CoursesTable = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {coursesData.map((course, index) => (
+                {sortedCourses.map((course, index) => (
                   <tr 
                     key={course.courseId}
                     onMouseEnter={() => setHoveredRow(course.courseId)}
@@ -226,7 +277,12 @@ const CoursesTable = () => {
           <div className="px-6 py-4 border-t border-gray-100 bg-gradient-to-r from-gray-50 to-cyan-50">
             <div className="flex items-center justify-between animate-fadeIn">
               <p className="text-gray-600 text-sm">
-                Hiển thị <span className="font-semibold text-[#06B6D4]">{coursesData.length}</span> khóa học
+                Hiển thị <span className="font-semibold text-[#06B6D4]">{sortedCourses.length}</span> khóa học
+                {sortOption !== 'id' && (
+                  <span className="ml-2 text-amber-600">
+                    (Đã sắp xếp {sortOption.includes('desc') ? 'giảm dần' : 'tăng dần'})
+                  </span>
+                )}
               </p>
               <button className="bg-gradient-to-r from-[#06B6D4] to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95">
                 📥 Xuất Báo Cáo
