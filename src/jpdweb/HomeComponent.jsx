@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import home1 from "../images/main-home.jpg";
+import home1 from "../images/bird.png";
 import BlurFadeText from "../jpdweb/BlurFadeText";
 import flashcard from "../images/flashcard.png";
 import AIvoice from "../images/AIvoice.png";
