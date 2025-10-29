@@ -138,7 +138,10 @@ export default function CoursesResultComponent() {
     let isCancelled = false;
 
     const findCourses = async () => {
-      if (!name || name.trim().length < 2) {
+      // Kiểm tra nếu name là "all" hoặc không có name, lấy tất cả khóa học
+      const isExploreAll = !name || name.toLowerCase() === "all";
+
+      if (!isExploreAll && name.trim().length < 2) {
         setTargetCourses([]);
         setTotalPages(0);
         setTotalElements(0);
@@ -152,8 +155,10 @@ export default function CoursesResultComponent() {
         const sortParam = getSortParam(sortOption);
 
         // **GỌI API VỚI PAGINATION VÀ SORT**
+        // Nếu là "all", tìm kiếm với empty string hoặc wildcard
+        const searchKeyword = isExploreAll ? "" : name;
         const response = await courseApi.searchCourse(
-          name,
+          searchKeyword,
           currentPage,
           pageSize,
           sortParam
@@ -265,6 +270,8 @@ export default function CoursesResultComponent() {
 
   // ========== EMPTY STATE ==========
   if (targetCourses.length === 0 && !loading) {
+    const isExploreAll = !name || name.toLowerCase() === "all";
+
     return (
       <div className="min-h-screen bg-gray-100 py-12">
         <div className="max-w-7xl mx-auto px-4">
@@ -286,17 +293,25 @@ export default function CoursesResultComponent() {
                 </svg>
               </div>
               <h2 className="text-3xl font-bold text-[#243864] mb-4">
-                Không tìm thấy kết quả
+                {isExploreAll ? "Chưa có khóa học" : "Không tìm thấy kết quả"}
               </h2>
               <p className="text-xl text-gray-600 mb-8">
-                Không có khóa học nào phù hợp với từ khóa{" "}
-                <span className="font-semibold text-[#F97316]">"{name}"</span>
+                {isExploreAll ? (
+                  "Hiện tại chưa có khóa học nào trong hệ thống"
+                ) : (
+                  <>
+                    Không có khóa học nào phù hợp với từ khóa{" "}
+                    <span className="font-semibold text-[#F97316]">
+                      "{name}"
+                    </span>
+                  </>
+                )}
               </p>
               <button
                 onClick={() => nav("/")}
                 className="px-8 py-4 bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold text-lg rounded-xl hover:from-[#EA580C] hover:to-[#F97316] transition-all duration-300 shadow-lg"
               >
-                Xem tất cả khóa học
+                {isExploreAll ? "Về trang chủ" : "Xem tất cả khóa học"}
               </button>
             </div>
           </div>
@@ -313,15 +328,30 @@ export default function CoursesResultComponent() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-[#243864] mb-2">
-              📁 Thư viện khóa học
+              📁{" "}
+              {name && name.toLowerCase() === "all"
+                ? "Khám phá khóa học"
+                : "Thư viện khóa học"}
             </h1>
             <p className="text-lg text-gray-600">
               {/* Sử dụng totalElements từ state */}
-              Tìm thấy{" "}
-              <span className="font-semibold text-[#F97316]">
-                {totalElements}
-              </span>{" "}
-              khóa học cho "{name}"
+              {name && name.toLowerCase() === "all" ? (
+                <>
+                  Tổng cộng{" "}
+                  <span className="font-semibold text-[#F97316]">
+                    {totalElements}
+                  </span>{" "}
+                  khóa học có sẵn
+                </>
+              ) : (
+                <>
+                  Tìm thấy{" "}
+                  <span className="font-semibold text-[#F97316]">
+                    {totalElements}
+                  </span>{" "}
+                  khóa học cho "{name}"
+                </>
+              )}
             </p>
           </div>
 
