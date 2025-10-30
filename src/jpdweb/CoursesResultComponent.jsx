@@ -598,14 +598,14 @@ export default function CoursesResultComponent() {
                   </p>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-yellow-600 font-bold text-sm">
-                      {course.rating ? course.rating.toFixed(1) : "4.5"}
+                      {course.rating ? course.rating.toFixed(1) : "0"}
                     </span>
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
                         <span
                           key={i}
                           className={`text-xs ${
-                            i < Math.floor(course.rating || 4.5)
+                            i < Math.floor(course.rating || 0)
                               ? "text-yellow-400"
                               : "text-gray-300"
                           }`}
