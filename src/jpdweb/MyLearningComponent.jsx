@@ -101,7 +101,7 @@ export default function MyLearningComponent() {
             onClick={()=>{nav(`/course/specific/${course.courseId}`)}}
             className="flex items-center gap-2 bg-[#F97316] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-[#EA580C] transition-colors">
               <BookOpen size={14} />
-              Thêm vào giỏ
+              Tham gia ngay
             </button>
           )}
           <button className="p-2 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded transition-colors">

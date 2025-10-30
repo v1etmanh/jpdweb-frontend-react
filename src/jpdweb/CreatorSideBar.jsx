@@ -9,6 +9,8 @@ import {
   CreditCard,
   ChevronDown,
   Trophy,
+  History,
+  Wallet,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -799,7 +801,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
                         justifyContent: "center",
                       }}
                     >
-                      <CreditCard size={16} />
+                      <History size={16} />
                     </div>
                     <span
                       style={{
@@ -870,7 +872,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
                         justifyContent: "center",
                       }}
                     >
-                      <CreditCard size={16} />
+                      <Wallet size={16} />
                     </div>
                     <span
                       style={{

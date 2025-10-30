@@ -13,7 +13,7 @@ import {
   Award,
   Layout,
 } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "./security/Authentication";
 import {
@@ -22,6 +22,7 @@ import {
   showWarningNotification,
 } from "./api/apiClient";
 import { creatorApi } from "./api/creatorApi";
+import ConfirmDialog from "./ConfirmDialog";
 
 // Component InputField tách riêng để tối ưu performance
 const InputField = React.memo(
@@ -79,7 +80,6 @@ const InputField = React.memo(
 
 const CreateCourseForm = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [courseData, setCourseData] = useState(() => {
@@ -103,9 +103,10 @@ const CreateCourseForm = () => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isUpdateCertificate, setIsUpdateCertificate] = useState(() => {
+  const [isUpdateCertificate] = useState(() => {
     return localStorage.getItem("certificateUploaded") === "true";
   });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const auth = useAuth();
 
   const languages = useMemo(
@@ -482,14 +483,17 @@ const CreateCourseForm = () => {
   );
 
   const handleBack = useCallback(() => {
-    if (
-      window.confirm(
-        "Bạn có chắc muốn rời khỏi trang? Dữ liệu đã nhập sẽ được lưu tạm thời."
-      )
-    ) {
-      navigate(-1);
-    }
+    setShowConfirmDialog(true);
+  }, []);
+
+  const handleConfirmBack = useCallback(() => {
+    setShowConfirmDialog(false);
+    navigate(-1);
   }, [navigate]);
+
+  const handleCancelBack = useCallback(() => {
+    setShowConfirmDialog(false);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 font-sans" style={{ backgroundColor: '#F1F5F9' }}>
@@ -912,6 +916,18 @@ const CreateCourseForm = () => {
             ))}
           </div>
         </div>
+
+        {/* Custom Confirm Dialog */}
+        <ConfirmDialog
+          isOpen={showConfirmDialog}
+          onClose={handleCancelBack}
+          onConfirm={handleConfirmBack}
+          title="Xác nhận rời khỏi"
+          message="Bạn có chắc muốn rời khỏi trang? Dữ liệu đã nhập sẽ được lưu tạm thời."
+          confirmText="Rời khỏi"
+          cancelText="Ở lại"
+          type="warning"
+        />
       </div>
     </div>
   );

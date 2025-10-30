@@ -24,16 +24,27 @@ export default function HeaderComponent() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <header
       className={`font-grotesk fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
-        isScrolled ? "bg-white shadow-md" : (isHomePage ? "bg-transparent" : "bg-white shadow-md")
+        isScrolled
+          ? "bg-white shadow-md"
+          : isHomePage
+          ? "bg-transparent"
+          : "bg-white shadow-md"
       }`}
     >
       <div className="flex justify-between items-center px-8">
         {/* Logo bên trái */}
         <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center" onClick={scrollToTop}>
             <img
               src={logo}
               alt="Logo"
@@ -49,7 +60,9 @@ export default function HeaderComponent() {
               <Link
                 to="/"
                 className={`relative inline-block text-xl font-semibold no-underline group transition-colors duration-300 ${
-                  !isScrolled && isHomePage ? "text-white hover:text-white/80" : "text-gray-800 hover:text-[#06B6D4]"
+                  !isScrolled && isHomePage
+                    ? "text-white hover:text-white/80"
+                    : "text-gray-800 hover:text-[#06B6D4]"
                 }`}
               >
                 Home
@@ -60,7 +73,9 @@ export default function HeaderComponent() {
               <Link
                 to="/course_result/all"
                 className={`relative inline-block text-xl font-semibold no-underline group transition-colors duration-300 ${
-                  !isScrolled && isHomePage ? "text-white hover:text-white/80" : "text-gray-800 hover:text-[#06B6D4]"
+                  !isScrolled && isHomePage
+                    ? "text-white hover:text-white/80"
+                    : "text-gray-800 hover:text-[#06B6D4]"
                 }`}
               >
                 Explore
@@ -71,7 +86,9 @@ export default function HeaderComponent() {
               <Link
                 to="/about"
                 className={`relative inline-block text-xl font-semibold no-underline group transition-colors duration-300 ${
-                  !isScrolled && isHomePage ? "text-white hover:text-white/80" : "text-gray-800 hover:text-[#06B6D4]"
+                  !isScrolled && isHomePage
+                    ? "text-white hover:text-white/80"
+                    : "text-gray-800 hover:text-[#06B6D4]"
                 }`}
               >
                 About
@@ -82,7 +99,9 @@ export default function HeaderComponent() {
               <Link
                 to="/contact"
                 className={`relative inline-block text-xl font-semibold no-underline group transition-colors duration-300 ${
-                  !isScrolled && isHomePage ? "text-white hover:text-white/80" : "text-gray-800 hover:text-[#06B6D4]"
+                  !isScrolled && isHomePage
+                    ? "text-white hover:text-white/80"
+                    : "text-gray-800 hover:text-[#06B6D4]"
                 }`}
               >
                 Contact
@@ -94,7 +113,9 @@ export default function HeaderComponent() {
                 <Link
                   to="/myLearning"
                   className={`relative inline-block text-xl font-semibold no-underline group transition-colors duration-300 ${
-                    !isScrolled && isHomePage ? "text-white hover:text-white/80" : "text-gray-800 hover:text-[#06B6D4]"
+                    !isScrolled && isHomePage
+                      ? "text-white hover:text-white/80"
+                      : "text-gray-800 hover:text-[#06B6D4]"
                   }`}
                 >
                   My Learning
@@ -112,7 +133,9 @@ export default function HeaderComponent() {
               <Link
                 to="/login"
                 className={`relative inline-block text-xl font-semibold no-underline group transition-colors duration-300 ${
-                  !isScrolled && isHomePage ? "text-white hover:text-white/80" : "text-black hover:text-[#06B6D4]"
+                  !isScrolled && isHomePage
+                    ? "text-white hover:text-white/80"
+                    : "text-black hover:text-[#06B6D4]"
                 }`}
               >
                 Login
