@@ -557,7 +557,11 @@ export default function CoursesResultComponent() {
             <div
               key={course.id || index}
               className="group cursor-pointer transform hover:scale-105 transition-transform duration-300"
-              onClick={() => nav(`/course/specific/${course.id}`)}
+              onClick={() => {
+                // Scroll về đầu trang trước khi chuyển trang
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                nav(`/course/specific/${course.id}`);
+              }}
             >
               {/* Course Card (Giữ nguyên) */}
               <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col">
@@ -652,6 +656,8 @@ export default function CoursesResultComponent() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      // Scroll về đầu trang trước khi chuyển trang
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                       nav(`/course/specific/${course.id}`);
                     }}
                     className="mt-3 w-full py-2.5 px-4 bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white font-semibold text-sm rounded-lg hover:from-[#0891B2] hover:to-[#06B6D4] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2"

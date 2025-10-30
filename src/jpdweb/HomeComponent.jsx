@@ -303,7 +303,7 @@ const CourseCard = ({ course, type }) => {
 
 const CourseSection = ({ title, courses, type, icon }) => {
   return (
-    <div className="mb-17 relative">
+    <div className="mb-20 relative">
       {/* Decorative background elements */}
       <div className="absolute -top-8 -right-8 w-34 h-34 bg-gradient-to-br from-[#06B6D4]/20 to-[#F97316]/20 rounded-full blur-3xl"></div>
       <div className="absolute -bottom-8 -left-8 w-51 h-51 bg-gradient-to-tr from-[#F97316]/10 to-[#06B6D4]/10 rounded-full blur-3xl"></div>
@@ -721,7 +721,6 @@ export default function HomepageComponent() {
         {/* Khóa học có nhiều học viên */}
         {Object.entries(courseInL).map(([lang, courses]) => (
           <div key={lang}>
-            <h2 className="text-xl font-bold mb-3">{lang}</h2>
             <CourseSection
               title={`Khóa học ${lang}`}
               courses={courses}
