@@ -412,7 +412,7 @@ export default function CourseContentOverviewComponent(){
         <div className="bg-surface border border-border-light shadow-medium rounded-xl px-8 py-6 text-center max-w-md">
           <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
             <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
           </div>
           <h3 className="text-lg font-bold text-text-primary mb-2">Đã xảy ra lỗi</h3>
@@ -443,34 +443,98 @@ export default function CourseContentOverviewComponent(){
 
   return (
     <div className="min-h-screen bg-background font-sans">
-      {/* Header */}
-      <div className="bg-surface border-b border-border-light shadow-soft px-8 py-5">
+      {/* Compact Header */}
+      <div className="bg-surface border-b border-border-light shadow-soft px-6 py-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-text-primary mb-1">
-              {courseData.name}
-            </h1>
-            <p className="text-text-secondary text-sm">Tiếp tục hành trình học tập của bạn</p>
-          </div>
           <div className="flex items-center space-x-6">
-            <div className="text-right">
-              <div className="text-sm text-text-secondary mb-1">Tiến độ tổng thể</div>
-              <div className="flex items-center space-x-3">
-                <div className="w-32 bg-gray-200 rounded-full h-2.5">
+            <div>
+              <h1 className="text-xl font-bold text-text-primary leading-tight">
+                {courseData.name}
+              </h1>
+              <p className="text-text-secondary text-xs mt-0.5">Tiếp tục hành trình học tập của bạn</p>
+            </div>
+            
+            {/* Current Module Info - Moved from bottom bar */}
+            {currentModule && (
+              <div className="hidden md:flex items-center space-x-4 pl-4 border-l border-border-light">
+                <div className="text-right">
+                  <div className="text-sm font-semibold text-text-primary leading-tight max-w-xs truncate">
+                    {currentModule.titleOfModule}
+                  </div>
+                  {currentContentType && (
+                    <div className="text-text-secondary text-xs mt-0.5 flex items-center space-x-1">
+                      <span className="bg-background px-2 py-0.5 rounded-full border border-border-light">
+                        {formatContentType(currentContentType)}
+                      </span>
+                      {isFinish && (
+                        <span className="bg-status-completed text-white px-2 py-0.5 rounded-full">
+                          Đã hoàn thành
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-4">
+            {/* Action Buttons - Moved from bottom bar */}
+            <div className="flex items-center space-x-2">
+              <button 
+                className="flex items-center space-x-2 px-3 py-2 bg-primary-30 text-white rounded-lg hover:bg-primary-dark transition-all duration-300 shadow-medium hover:shadow-card font-medium text-sm group"
+                onClick={() => setShowFeedbackPopup(true)}
+              >
+                <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                </svg>
+                <span className="hidden sm:inline">Phản hồi</span>
+              </button>
+
+              <button 
+                className="flex items-center space-x-2 px-3 py-2 bg-accent-10 text-white rounded-lg hover:bg-accent-dark transition-all duration-300 shadow-medium hover:shadow-card font-medium text-sm group"
+                onClick={() => setShowReportPopup(true)}
+              >
+                <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span className="hidden sm:inline">Báo cáo</span>
+              </button>
+            </div>
+
+            {/* Progress Display */}
+            <div className="text-right hidden lg:block">
+              <div className="text-xs text-text-secondary mb-1">Tiến độ tổng thể</div>
+              <div className="flex items-center space-x-2">
+                <div className="w-20 bg-gray-200 rounded-full h-1.5">
                   <div 
-                    className="bg-gradient-to-r from-primary-30 to-accent-10 h-2.5 rounded-full transition-all duration-500"
+                    className="bg-gradient-to-r from-primary-30 to-accent-10 h-1.5 rounded-full transition-all duration-500"
                     style={{ width: `${overallProgress}%` }}
                   ></div>
                 </div>
-                <span className="text-lg font-bold text-text-primary min-w-12">{overallProgress}%</span>
+                <span className="text-sm font-bold text-text-primary min-w-8">{overallProgress}%</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Mobile Progress Bar */}
+        <div className="lg:hidden mt-3">
+          <div className="flex items-center justify-between text-xs text-text-secondary mb-1">
+            <span>Tiến độ tổng thể</span>
+            <span className="font-bold text-text-primary">{overallProgress}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-1.5">
+            <div 
+              className="bg-gradient-to-r from-primary-30 to-accent-10 h-1.5 rounded-full transition-all duration-500"
+              style={{ width: `${overallProgress}%` }}
+            ></div>
           </div>
         </div>
       </div>
 
       {/* Main Layout */}
-      <div className="flex" style={{ height: 'calc(100vh - 105px)' }}>
+      <div className="flex" style={{ height: 'calc(100vh - 88px)' }}>
         {/* Left Side - Content Area */}
         <div className="flex-1 flex flex-col bg-surface rounded-tr-2xl shadow-card min-h-0">
           {/* Content Display */}
@@ -502,85 +566,38 @@ export default function CourseContentOverviewComponent(){
               </div>
             )}
           </div>
-
-          {/* Bottom Action Bar */}
-          <div className="bg-surface border-t border-border-light p-4 flex-shrink-0">
-            <div className="flex items-center justify-between max-w-6xl mx-auto">
-              <div className="flex items-center space-x-3">
-                <button 
-                  className="flex items-center space-x-2 px-4 py-2.5 bg-primary-30 text-white rounded-xl hover:bg-primary-dark transition-all duration-300 shadow-medium hover:shadow-card font-medium group text-sm"
-                  onClick={() => setShowFeedbackPopup(true)}
-                >
-                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                  </svg>
-                  <span>Gửi phản hồi</span>
-                </button>
-
-                <button 
-                  className="flex items-center space-x-2 px-4 py-2.5 bg-accent-10 text-white rounded-xl hover:bg-accent-dark transition-all duration-300 shadow-medium hover:shadow-card font-medium group text-sm"
-                  onClick={() => setShowReportPopup(true)}
-                >
-                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                  </svg>
-                  <span>Báo cáo vấn đề</span>
-                </button>
-              </div>
-
-              {currentModule && (
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-text-primary leading-tight max-w-xs truncate">
-                    {currentModule.titleOfModule}
-                  </div>
-                  {currentContentType && (
-                    <div className="text-text-secondary text-xs mt-1 flex items-center justify-end space-x-1">
-                      <span className="bg-background px-2 py-0.5 rounded-full border border-border-light text-xs">
-                        {formatContentType(currentContentType)}
-                      </span>
-                      {isFinish && (
-                        <span className="bg-status-completed text-white px-2 py-0.5 rounded-full text-xs">
-                          Đã hoàn thành
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* Right Side - Course Structure */}
-        <div className="w-96 bg-surface border-l border-border-light shadow-card overflow-y-auto flex-shrink-0">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-text-primary">Nội dung khóa học</h2>
-              <div className="text-sm text-text-secondary bg-background px-3 py-1.5 rounded-full border border-border-light">
+        <div className="w-80 bg-surface border-l border-border-light shadow-card overflow-y-auto flex-shrink-0">
+          <div className="p-5">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-text-primary">Nội dung khóa học</h2>
+              <div className="text-xs text-text-secondary bg-background px-2.5 py-1 rounded-full border border-border-light">
                 {totalModules} bài học
               </div>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               {chapters.map((chapter, chapterIndex) => {
                 const isChapterExpanded = expandedChapters.has(chapterIndex);
                 const chapterModules = chapter.modules || [];
 
                 return (
-                  <div key={chapterIndex} className="bg-background rounded-xl border border-border-light overflow-hidden shadow-soft">
+                  <div key={chapterIndex} className="bg-background rounded-lg border border-border-light overflow-hidden shadow-soft">
                     <div
-                      className={`flex items-center space-x-4 px-5 py-4 cursor-pointer transition-all duration-300 ${
+                      className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200 ${
                         isChapterExpanded 
                           ? 'bg-primary-30/5 border-b border-border-light' 
                           : 'hover:bg-primary-30/3'
                       }`}
                       onClick={() => toggleChapter(chapterIndex)}
                     >
-                      <div className={`p-2 rounded-lg transition-colors ${
+                      <div className={`p-1.5 rounded-lg transition-colors ${
                         isChapterExpanded ? 'bg-primary-30 text-white' : 'bg-primary-30/10 text-primary-30'
                       }`}>
                         <svg
-                          className={`w-4 h-4 transition-transform duration-300 ${
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${
                             isChapterExpanded ? 'rotate-90' : ''
                           }`}
                           fill="currentColor"
@@ -594,7 +611,7 @@ export default function CourseContentOverviewComponent(){
                         <div className="font-semibold text-text-primary text-sm leading-tight">
                           {chapterIndex + 1}. {chapter.chapterName}
                         </div>
-                        <div className="text-text-secondary text-xs mt-1 flex items-center space-x-2">
+                        <div className="text-text-secondary text-xs mt-0.5 flex items-center space-x-1">
                           <span>{chapterModules.length} bài học</span>
                           <span>•</span>
                           <span className="text-status-completed font-medium">
@@ -607,7 +624,7 @@ export default function CourseContentOverviewComponent(){
                     </div>
 
                     {isChapterExpanded && (
-                      <div className="p-3 space-y-2 animate-slide-up">
+                      <div className="p-2 space-y-1.5 animate-slide-up">
                         {chapterModules.map((module) => {
                           const moduleKey = `ch${chapterIndex}-mod${module.moduleId}`;
                           const isModuleExpanded = expandedModules.has(moduleKey);
@@ -620,7 +637,7 @@ export default function CourseContentOverviewComponent(){
                           return (
                             <div key={module.moduleId} className="bg-white rounded-lg border border-border-light overflow-hidden shadow-soft">
                               <div
-                                className={`flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all ${
+                                className={`flex items-center space-x-2 px-3 py-2.5 cursor-pointer transition-all ${
                                   isModuleExpanded
                                     ? 'bg-background border-b border-border-light'
                                     : isCurrentModule
@@ -630,7 +647,7 @@ export default function CourseContentOverviewComponent(){
                                 onClick={() => toggleModule(moduleKey)}
                               >
                                 <svg
-                                  className={`w-4 h-4 text-text-secondary transition-transform duration-300 ${
+                                  className={`w-3.5 h-3.5 text-text-secondary transition-transform duration-200 ${
                                     isModuleExpanded ? 'rotate-90' : ''
                                   }`}
                                   fill="currentColor"
@@ -645,7 +662,7 @@ export default function CourseContentOverviewComponent(){
                                   }`}>
                                     {module.titleOfModule}
                                   </div>
-                                  <div className="text-text-secondary text-xs mt-0.5 flex items-center space-x-2">
+                                  <div className="text-text-secondary text-xs mt-0.5 flex items-center space-x-1">
                                     <span>{contentTypes.length} nội dung</span>
                                     <span>•</span>
                                     <span className="text-status-completed font-medium">
@@ -655,8 +672,8 @@ export default function CourseContentOverviewComponent(){
                                 </div>
 
                                 {completedContents === contentTypes.length && contentTypes.length > 0 && (
-                                  <div className="p-1 bg-status-completed rounded-full">
-                                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <div className="p-0.5 bg-status-completed rounded-full">
+                                    <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                                     </svg>
                                   </div>
@@ -664,7 +681,7 @@ export default function CourseContentOverviewComponent(){
                               </div>
 
                               {isModuleExpanded && (
-                                <div className="p-2 space-y-1 animate-scale-in">
+                                <div className="p-1.5 space-y-1 animate-scale-in">
                                   {contentTypes.map((contentType, contentIndex) => {
                                     const isLoadingThis = loadingContent === `${module.moduleId}-${contentType}`;
                                     const isActive = 
@@ -678,7 +695,7 @@ export default function CourseContentOverviewComponent(){
                                     return (
                                       <div
                                         key={contentIndex}
-                                        className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 group ${
+                                        className={`flex items-center space-x-2 px-2.5 py-2 rounded-lg cursor-pointer transition-all duration-200 group ${
                                           isActive
                                             ? 'bg-primary-30 text-white shadow-medium'
                                             : isCompleted
@@ -694,7 +711,7 @@ export default function CourseContentOverviewComponent(){
                                         <div className="flex-shrink-0">
                                           {isLoadingThis ? (
                                             <div className="animate-spin text-primary-30">
-                                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m1.364 6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1M3.636 5.636l.707.707"/>
                                               </svg>
                                             </div>
@@ -708,13 +725,13 @@ export default function CourseContentOverviewComponent(){
                                         </span>
 
                                         {isCompleted && !isActive && (
-                                          <svg className="w-4 h-4 flex-shrink-0 text-status-completed" fill="currentColor" viewBox="0 0 20 20">
+                                          <svg className="w-3.5 h-3.5 flex-shrink-0 text-status-completed" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                                           </svg>
                                         )}
 
                                         {isActive && (
-                                          <svg className="w-4 h-4 flex-shrink-0 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                          <svg className="w-3.5 h-3.5 flex-shrink-0 text-white" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                                           </svg>
                                         )}
@@ -734,24 +751,24 @@ export default function CourseContentOverviewComponent(){
             </div>
 
             {/* Progress Summary */}
-            <div className="mt-8 p-5 bg-gradient-to-br from-primary-30/5 to-accent-10/5 rounded-2xl border border-border-light shadow-soft">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-text-primary">Tiến độ học tập</h3>
-                <span className="text-2xl font-bold text-primary-30">{overallProgress}%</span>
+            <div className="mt-6 p-4 bg-gradient-to-br from-primary-30/5 to-accent-10/5 rounded-xl border border-border-light shadow-soft">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-bold text-text-primary text-sm">Tiến độ học tập</h3>
+                <span className="text-lg font-bold text-primary-30">{overallProgress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
                 <div
-                  className="bg-gradient-to-r from-primary-30 to-accent-10 h-3 rounded-full transition-all duration-1000 ease-out"
+                  className="bg-gradient-to-r from-primary-30 to-accent-10 h-2 rounded-full transition-all duration-1000 ease-out"
                   style={{ width: `${overallProgress}%` }}
                 ></div>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="text-center p-3 bg-white rounded-xl border border-border-light">
-                  <div className="text-2xl font-bold text-status-completed mb-1">{completedModules}</div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="text-center p-2 bg-white rounded-lg border border-border-light">
+                  <div className="text-lg font-bold text-status-completed mb-0.5">{completedModules}</div>
                   <div className="text-text-secondary">Đã hoàn thành</div>
                 </div>
-                <div className="text-center p-3 bg-white rounded-xl border border-border-light">
-                  <div className="text-2xl font-bold text-primary-30 mb-1">{totalModules - completedModules}</div>
+                <div className="text-center p-2 bg-white rounded-lg border border-border-light">
+                  <div className="text-lg font-bold text-primary-30 mb-0.5">{totalModules - completedModules}</div>
                   <div className="text-text-secondary">Bài còn lại</div>
                 </div>
               </div>

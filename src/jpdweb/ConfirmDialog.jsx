@@ -51,7 +51,7 @@ const ConfirmDialog = ({
     >
       <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full transform animate-scale-in">
         {/* Header */}
-        <div className="p-6 pb-4">
+        <div className="p-4 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className={`p-3 rounded-2xl ${typeStyles.iconBg} mr-4`}>
@@ -71,14 +71,14 @@ const ConfirmDialog = ({
         </div>
 
         {/* Body */}
-        <div className="px-6 pb-6">
+        <div className="px-4 pb-4">
           <p className="text-gray-600 leading-relaxed text-base">
             {message}
           </p>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-4 p-6 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-end space-x-4 p-4 pt-4 border-t border-gray-200">
           <button
             onClick={onClose}
             className="px-6 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-2xl font-semibold transition-all duration-300 flex items-center"

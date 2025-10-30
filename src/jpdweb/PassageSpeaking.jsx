@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-
 import { useReactMediaRecorder } from 'react-media-recorder';
 import { evaluateAnswer } from './api/ApiConnect';
 import { useSearchParams } from 'react-router-dom';
 
-
-const ReadPractice = ({ paragraph, increNum,language }) => {
+const ReadPractice = ({ paragraph, increNum, language }) => {
   // Split paragraph into sentences
   const sentences = paragraph.split(/[。.！？]/).filter(Boolean);
   const halfCount = Math.ceil(sentences.length / 2);
@@ -21,6 +19,9 @@ const ReadPractice = ({ paragraph, increNum,language }) => {
   const [pendingApiCalls, setPendingApiCalls] = useState(0);
   const [hasCalledIncreNum, setHasCalledIncreNum] = useState(false);
   const [isOutOfRequests, setIsOutOfRequests] = useState(false);
+  const [matchedCount, setMatchedCount] = useState(0);
+  const [requiredMatches, setRequiredMatches] = useState(0);
+  
   // Prevent concurrent operations
   const isBusyRef = useRef(false);
   
@@ -29,33 +30,36 @@ const ReadPractice = ({ paragraph, increNum,language }) => {
   const countdownTimerRef = useRef(null);
   const recordingTimerRef = useRef(null);
   const phaseChangeTimerRef = useRef(null);
+  
   const languageMap = {
-        'ENGLISH': 'en-US',
-        'VIETNAMESE': 'vi-VN',
-        'CHINESE': 'zh-CN',
-        'JAPANESE': 'ja-JP',
-        'KOREAN': 'ko-KR',
-        'FRENCH': 'fr-FR',
-        'GERMAN': 'de-DE',
-        'SPANISH': 'es-ES',
-        'ITALIAN': 'it-IT',
-        'RUSSIAN': 'ru-RU',
-      };
-const handleOutOfRequests = () => {
-  console.log("Xử lý hết lượt request");
-  
-  // Dừng tất cả hoạt động
-  cleanupResources();
-  
-  // Set trạng thái hết lượt
-  setIsOutOfRequests(true);
-  
-  // Reset các state khác
-  setPhase('idle');
-  setError(null);
-  isBusyRef.current = false;
-  setPendingApiCalls(0);
-};
+    'ENGLISH': 'en-US',
+    'VIETNAMESE': 'vi-VN',
+    'CHINESE': 'zh-CN',
+    'JAPANESE': 'ja-JP',
+    'KOREAN': 'ko-KR',
+    'FRENCH': 'fr-FR',
+    'GERMAN': 'de-DE',
+    'SPANISH': 'es-ES',
+    'ITALIAN': 'it-IT',
+    'RUSSIAN': 'ru-RU',
+  };
+
+  const handleOutOfRequests = () => {
+    console.log("Xử lý hết lượt request");
+    
+    // Dừng tất cả hoạt động
+    cleanupResources();
+    
+    // Set trạng thái hết lượt
+    setIsOutOfRequests(true);
+    
+    // Reset các state khác
+    setPhase('idle');
+    setError(null);
+    isBusyRef.current = false;
+    setPendingApiCalls(0);
+  };
+
   // Media recorder setup
   const { status, startRecording, stopRecording, clearBlobUrl } = useReactMediaRecorder({
     audio: true,
@@ -91,21 +95,20 @@ const handleOutOfRequests = () => {
   const processAudioAsync = async (blob, sentence) => {
     try {
       // Increment pending API calls counter
-      
       setPendingApiCalls(prev => prev + 1);
       
       // Send audio to server
       const formData = new FormData();
       formData.append('audio', blob, `audio_${currentIdx}.webm`);
       formData.append('sentence', sentence);
-      formData.append('language',languageMap[language].substring(0,2))
+      formData.append('language', languageMap[language].substring(0, 2));
+      
       // Make API call without waiting for response
       console.log("Đang gửi audio lên server...");
       
       // Call API asynchronously
       evaluateAnswer(formData)
         .then(response => {
-          
           console.log("Đã nhận kết quả từ API:", response.data);
           
           // Add result when it arrives
@@ -113,11 +116,11 @@ const handleOutOfRequests = () => {
         })
         .catch(error => {
           console.error('Lỗi gửi audio:', error);
-            if (error.response && error.response.status === 400) {
-          console.log("Đã hết lượt request hôm nay");
-          handleOutOfRequests();
-          return;
-        }
+          if (error.response && error.response.status === 400) {
+            console.log("Đã hết lượt request hôm nay");
+            handleOutOfRequests();
+            return;
+          }
           // Add error result
           setResults(prevResults => [
             ...prevResults, 
@@ -224,10 +227,6 @@ const handleOutOfRequests = () => {
       increNum();
     }
   };
-
-  // Thêm state để hiển thị kết quả
-  const [matchedCount, setMatchedCount] = useState(0);
-  const [requiredMatches, setRequiredMatches] = useState(0);
 
   // Clean up all resources
   const cleanupResources = () => {
@@ -337,7 +336,7 @@ const handleOutOfRequests = () => {
     try {
       // Calculate recording duration based on sentence length
       const charCount = sentence.trim().length;
-      const durationMs = Math.max(4000, charCount * 80)+3000
+      const durationMs = Math.max(4000, charCount * 80) + 3000;
       console.log(`Sẽ ghi âm trong ${durationMs/1000} giây`);
       
       // Clear any existing recording timer
@@ -417,7 +416,7 @@ const handleOutOfRequests = () => {
       }
       
       // Otherwise use local TTS API
-      audio.src = `http://localhost:9090/api/tts?text=${encodeURIComponent(text)}&lang=${languageMap[language].substring(0,2)}`;
+      audio.src = `http://localhost:9090/api/tts?text=${encodeURIComponent(text)}&lang=${languageMap[language].substring(0, 2)}`;
       
       audio.onended = () => {
         console.log("Phát âm hoàn tất");
@@ -524,7 +523,8 @@ const handleOutOfRequests = () => {
     setHasCalledIncreNum(false);
     setMatchedCount(0);
     setRequiredMatches(0);
-     setIsOutOfRequests(false)
+    setIsOutOfRequests(false);
+    
     // Reset state
     setCurrentIdx(0);
     setPhase('idle');
@@ -537,108 +537,93 @@ const handleOutOfRequests = () => {
       .slice(0, halfCount);
     setSelectedIndexes(indexes);
   };
-//
-// Thêm vào đầu hàm render, trước các điều kiện khác
-if (isOutOfRequests) {
-  return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '300px',
-      backgroundColor: '#fff3cd',
-      border: '1px solid #ffeaa7',
-      borderRadius: '8px',
-      padding: '30px',
-      margin: '20px 0'
-    }}>
-      <div style={{fontSize: '48px', marginBottom: '20px'}}>⚠️</div>
-      <h2 style={{color: '#856404', marginBottom: '15px'}}>
-        Bạn đã hết lượt hôm nay!
-      </h2>
-      <p style={{color: '#856404', textAlign: 'center', fontSize: '16px', marginBottom: '20px'}}>
-        Số lượt luyện tập của bạn đã được sử dụng hết. <br/>
-        Vui lòng quay lại vào ngày mai để tiếp tục luyện tập.
-      </p>
-      <button 
-        onClick={() => {
-          // Reset để có thể bắt đầu lại (nếu cần)
-          setIsOutOfRequests(false);
-          restartPractice();
-        }}
-        style={{
-          padding: '12px 24px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          fontSize: '16px'
-        }}
-      >
-        Thử lại
-      </button>
-    </div>
-  );
-}
+
+  // Thêm vào đầu hàm render, trước các điều kiện khác
+  if (isOutOfRequests) {
+    return (
+      <div className="request-limit-container">
+        <div className="warning-icon">⚠️</div>
+        <h2 className="warning-title">Bạn đã hết lượt hôm nay!</h2>
+        <p className="warning-message">
+          Số lượt luyện tập của bạn đã được sử dụng hết. <br/>
+          Vui lòng quay lại vào ngày mai để tiếp tục luyện tập.
+        </p>
+        <button 
+          onClick={() => {
+            // Reset để có thể bắt đầu lại (nếu cần)
+            setIsOutOfRequests(false);
+            restartPractice();
+          }}
+          className="retry-button"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
+
   // Render completion screen
   if (currentIdx >= sentences.length) {
     return (
-      <div>
-        <h2>Đã hoàn thành!</h2>
-        <p>Bạn đã luyện tập xong tất cả các câu.</p>
+      <div className="completion-container">
+        <div className="completion-header">
+          <h2 className="completion-title">Đã hoàn thành!</h2>
+          <p className="completion-subtitle">Bạn đã luyện tập xong tất cả các câu.</p>
+        </div>
         
         {pendingApiCalls > 0 && (
-          <div style={{margin: '15px 0', padding: '10px', backgroundColor: '#fff3cd', borderRadius: '5px'}}>
-            <p>⏳ Đang xử lý {pendingApiCalls} kết quả... Vui lòng chờ.</p>
+          <div className="processing-indicator">
+            <div className="loading-spinner"></div>
+            <p>Đang xử lý {pendingApiCalls} kết quả... Vui lòng chờ.</p>
           </div>
         )}
         
         {pendingApiCalls === 0 && (
-          <div style={{margin: '15px 0', padding: '10px', backgroundColor: '#d4edda', borderRadius: '5px', border: '1px solid #c3e6cb'}}>
-            <h4>Kết quả:</h4>
-            <p>Số câu đúng: <strong>{matchedCount}</strong>/{requiredMatches} cần thiết</p>
-            <p>{matchedCount >= requiredMatches ? 
-              '✅ Bạn đã đạt đủ điểm!' : 
-              '❌ Bạn chưa đạt đủ điểm. Hãy thử lại!'}
-            </p>
+          <div className="results-summary">
+            <h4 className="results-title">Kết quả:</h4>
+            <div className="score-display">
+              <span className="score-text">Số câu đúng:</span>
+              <span className="score-value">{matchedCount}/{requiredMatches} cần thiết</span>
+            </div>
+            <div className={`result-status ${matchedCount >= requiredMatches ? 'success' : 'failure'}`}>
+              {matchedCount >= requiredMatches ? 
+                '✅ Bạn đã đạt đủ điểm!' : 
+                '❌ Bạn chưa đạt đủ điểm. Hãy thử lại!'}
+            </div>
           </div>
         )}
         
-        {results.length > 0 ? (
-          <div>
-            <h3>Chi tiết đánh giá:</h3>
-            {results.map((r, i) => (
-              <div key={i} style={{margin: '15px 0', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '5px', border: '1px solid #dee2e6'}}>
-                {r.error ? (
-                  <p style={{color: 'red'}}><strong>❌ Lỗi:</strong> {r.message}</p>
-                ) : (
-                  <>
-                    <p><strong>{r.match ? '✅ Đúng' : '❌ Sai'}</strong></p>
-                    <p><strong>🎯 Tỉ lệ:</strong> {r.similarity_score}</p>
-                    <p><strong>📊 Nhận dạng:</strong> {r.user_answer}</p>
-                    <p><strong>🗣️ Câu đúng:</strong> {r.expected_answer}</p>
-                  </>
-                )}
-              </div>
-            ))}
+        {results.length > 0 && (
+          <div className="detailed-results">
+            <h3 className="detailed-title">Chi tiết đánh giá:</h3>
+            <div className="results-list">
+              {results.map((r, i) => (
+                <div key={i} className="result-item">
+                  {r.error ? (
+                    <div className="error-result">
+                      <p className="error-message"><strong>❌ Lỗi:</strong> {r.message}</p>
+                    </div>
+                  ) : (
+                    <div className="success-result">
+                      <div className="result-status-indicator">
+                        {r.match ? '✅ Đúng' : '❌ Sai'}
+                      </div>
+                      <div className="result-details">
+                        <p><span className="detail-label">🎯 Tỉ lệ:</span> {r.similarity_score}</p>
+                        <p><span className="detail-label">📊 Nhận dạng:</span> {r.user_answer}</p>
+                        <p><span className="detail-label">🗣️ Câu đúng:</span> {r.expected_answer}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        ) : (
-          <p>Chưa có kết quả nào được ghi nhận.</p>
         )}
         
         <button 
           onClick={restartPractice}
-          style={{
-            padding: '10px 15px',
-            backgroundColor: '#4285f4',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            marginTop: '10px'
-          }}
+          className="restart-button"
         >
           Luyện tập lại
         </button>
@@ -648,48 +633,112 @@ if (isOutOfRequests) {
 
   // Main render
   return (
-    <div>
-      <h1>{paragraph}</h1>
-      <h2>Câu {currentIdx + 1}/{sentences.length}</h2>
-      
-      <div style={{fontSize: '24px', margin: '20px 0', padding: '15px', backgroundColor: '#f5f5f5', borderRadius: '5px'}}>
-        {sentences[currentIdx]}
+    <div className="reading-practice-container">
+      <div className="practice-header">
+        <h1 className="paragraph-text">{paragraph}</h1>
+        <div className="progress-indicator">
+          <span className="progress-text">Câu {currentIdx + 1}/{sentences.length}</span>
+          <div className="progress-bar">
+            <div 
+              className="progress-fill" 
+              style={{width: `${((currentIdx + 1) / sentences.length) * 100}%`}}
+            ></div>
+          </div>
+        </div>
       </div>
 
-      {phase === 'countdown' && <h3>Chuẩn bị đọc: {countdown}</h3>}
-      {phase === 'recording' && <h3>⏺ Đang ghi âm... Hãy đọc ngay!</h3>}
-      {phase === 'playing' && <h3>🔊 Đang phát audio...</h3>}
-      
-      {error && (
-        <div style={{color: 'red', margin: '10px 0'}}>
-          Lỗi: {error}
-        </div>
-      )}
-      
-      <div style={{marginTop: '20px', fontSize: '14px', color: '#666'}}>
-        <p>Trạng thái: {phase}</p>
-        <p>Microphone: {status}</p>
-        <p>Đã thu thập: {results.length} kết quả</p>
-        <p>Đang xử lý: {pendingApiCalls} API calls</p>
+      <div className="current-sentence-card">
+        <div className="sentence-text">{sentences[currentIdx]}</div>
+      </div>
+
+      <div className="practice-status">
+        {phase === 'countdown' && (
+          <div className="countdown-display">
+            <div className="countdown-circle">
+              <span className="countdown-number">{countdown}</span>
+            </div>
+            <h3 className="countdown-text">Chuẩn bị đọc</h3>
+          </div>
+        )}
+        
+        {phase === 'recording' && (
+          <div className="recording-status">
+            <div className="recording-indicator">
+              <div className="pulsing-dot"></div>
+              <span className="recording-text">Đang ghi âm... Hãy đọc ngay!</span>
+            </div>
+          </div>
+        )}
+        
+        {phase === 'playing' && (
+          <div className="playing-status">
+            <div className="sound-waves">
+              <div className="wave"></div>
+              <div className="wave"></div>
+              <div className="wave"></div>
+            </div>
+            <h3 className="playing-text">Đang phát audio...</h3>
+          </div>
+        )}
+        
+        {error && (
+          <div className="error-message-container">
+            <div className="error-icon">⚠️</div>
+            <span className="error-text">Lỗi: {error}</span>
+          </div>
+        )}
       </div>
       
-      <button
-        onClick={skipSentence}
-        disabled={phase !== 'idle' && phase !== 'countdown'}
-        style={{
-          padding: '8px 12px',
-          backgroundColor: phase !== 'idle' && phase !== 'countdown' ? '#ccc' : '#999',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: phase !== 'idle' && phase !== 'countdown' ? 'not-allowed' : 'pointer',
-          marginTop: '10px'
-        }}
-      >
-        Bỏ qua
-      </button>
+      <div className="status-info">
+        <div className="status-item">
+          <span className="status-label">Trạng thái:</span>
+          <span className="status-value">{getPhaseText(phase)}</span>
+        </div>
+        <div className="status-item">
+          <span className="status-label">Microphone:</span>
+          <span className="status-value">{getStatusText(status)}</span>
+        </div>
+        <div className="status-item">
+          <span className="status-label">Đã thu thập:</span>
+          <span className="status-value">{results.length} kết quả</span>
+        </div>
+        <div className="status-item">
+          <span className="status-label">Đang xử lý:</span>
+          <span className="status-value">{pendingApiCalls} API calls</span>
+        </div>
+      </div>
+      
+      <div className="action-buttons">
+        <button
+          onClick={skipSentence}
+          disabled={phase !== 'idle' && phase !== 'countdown'}
+          className={`skip-button ${phase !== 'idle' && phase !== 'countdown' ? 'disabled' : ''}`}
+        >
+          Bỏ qua câu này
+        </button>
+      </div>
     </div>
   );
+};
+
+// Helper functions for text display
+const getPhaseText = (phase) => {
+  switch (phase) {
+    case 'idle': return 'Đang chờ';
+    case 'countdown': return 'Đang đếm ngược';
+    case 'recording': return 'Đang ghi âm';
+    case 'playing': return 'Đang phát âm thanh';
+    default: return phase;
+  }
+};
+
+const getStatusText = (status) => {
+  switch (status) {
+    case 'idle': return 'Chưa kích hoạt';
+    case 'recording': return 'Đang ghi âm';
+    case 'stopped': return 'Đã dừng';
+    default: return status;
+  }
 };
 
 export default ReadPractice;

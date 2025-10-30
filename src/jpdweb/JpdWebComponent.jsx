@@ -230,7 +230,8 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
       <div
         className="main-content"
         style={{
-          paddingTop: isHomePage ? "0" : "50px",
+          // paddingTop: isHomePage || isCreatorPage ? "0" : "50px",
+          paddingTop: isCreatorPage ? "15px" : "0",
           minHeight: "100vh",
           backgroundColor: isHomePage ? "transparent" : "#f8f9fa",
           transition: "all 0.3s ease",

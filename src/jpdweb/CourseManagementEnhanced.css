@@ -1,0 +1,272 @@
+/* CourseManagement Enhanced Styles */
+
+/* Animation classes */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced shadows */
+.shadow-soft {
+  box-shadow: 0 2px 12px rgba(6, 182, 212, 0.06);
+}
+
+.shadow-medium {
+  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.08);
+}
+
+.shadow-card {
+  box-shadow: 0 8px 30px rgba(6, 182, 212, 0.1);
+}
+
+/* Resize cursor */
+.cursor-col-resize {
+  cursor: col-resize;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Content type icons color mapping */
+.icon-blue {
+  color: #2563eb;
+}
+
+.icon-green {
+  color: #059669;
+}
+
+.icon-purple {
+  color: #7c3aed;
+}
+
+.icon-orange {
+  color: #ea580c;
+}
+
+.icon-indigo {
+  color: #4f46e5;
+}
+
+.icon-teal {
+  color: #0d9488;
+}
+
+.icon-pink {
+  color: #db2777;
+}
+
+.icon-rose {
+  color: #e11d48;
+}
+
+.icon-amber {
+  color: #d97706;
+}
+
+/* Background gradients */
+.bg-gradient-soft {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.bg-gradient-blue {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.bg-gradient-green {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+}
+
+.bg-gradient-purple {
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+}
+
+/* Improved form inputs */
+.form-input-enhanced {
+  transition: all 0.2s ease-out;
+}
+
+.form-input-enhanced:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+}
+
+/* Button enhancements */
+.btn-enhanced {
+  transition: all 0.2s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-enhanced:hover {
+  transform: translateY(-1px);
+}
+
+.btn-enhanced:active {
+  transform: translateY(0);
+}
+
+/* Loading state */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .course-management-container {
+    padding: 1rem;
+  }
+  
+  .sidebar-mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-out;
+  }
+  
+  .sidebar-mobile.open {
+    transform: translateX(0);
+  }
+}
+
+/* Status indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-active {
+  background-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.status-inactive {
+  background-color: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+/* Enhanced dropdowns */
+.dropdown-enhanced {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* Content area improvements */
+.content-area {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+/* Improved spacing */
+.space-y-enhanced > * + * {
+  margin-top: 0.75rem;
+}
+
+/* Enhanced borders */
+.border-enhanced {
+  border: 1px solid #e2e8f0;
+  transition: border-color 0.2s ease-out;
+}
+
+.border-enhanced:hover {
+  border-color: #cbd5e1;
+}
+
+/* Typography enhancements */
+.text-enhanced {
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+/* Interactive elements */
+.interactive-element {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Focus improvements */
+.focus-enhanced:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #3b82f6;
+  ring-opacity: 0.5;
+}

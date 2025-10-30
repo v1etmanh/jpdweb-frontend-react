@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-
 export default function GapFillQuestionComponent({ questionData, inCreNum }) {
   const [inputs, setInputs] = useState({});
   const [suggestions, setSuggestions] = useState({});
@@ -13,10 +12,11 @@ export default function GapFillQuestionComponent({ questionData, inCreNum }) {
   }, [questionData]);
 
   const parseQuestion = () => {
-  const parts = questionData.questionText.split(/_{3,}/);
-  const blanksCount = parts.length - 1;
-  return { parts, blanksCount };
-};
+    const parts = questionData.questionText.split(/_{3,}/);
+    const blanksCount = parts.length - 1;
+    return { parts, blanksCount };
+  };
+
   const { parts, blanksCount } = parseQuestion();
 
   const handleInputChange = (blankIndex, value) => {
@@ -24,8 +24,6 @@ export default function GapFillQuestionComponent({ questionData, inCreNum }) {
       ...prev,
       [blankIndex]: value
     }));
-
-  
   };
 
   const checkAnswers = () => {
@@ -67,30 +65,26 @@ export default function GapFillQuestionComponent({ questionData, inCreNum }) {
 
   const renderQuestionWithInputs = () => {
     return parts.map((part, index) => (
-      <span key={index}>
+      <span key={index} className="text-sm">
         {part}
         {index < blanksCount && (
-          <span className="relative inline-block pointer-events-auto">
+          <span className="relative inline-block pointer-events-auto mx-1">
             <input
               type="text"
               value={inputs[index] || ""}
               onChange={(e) => handleInputChange(index, e.target.value)}
-              disabled={false}
+              disabled={submitted}
               autoFocus={index === 0}
-              className={`inline-block w-40 mx-2 px-4 py-3 text-lg border-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 transition ${
+              className={`inline-block w-20 mx-0.5 px-2 py-1 text-xs font-medium transition-all duration-200 rounded-lg border ${
                 submitted
                   ? correctAnswers[index]
-                    ? "border-green-500 bg-green-50"
-                    : "border-red-500 bg-red-50"
-                  : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-              }`}
-              placeholder={`Answer ${index + 1}`}
+                    ? "border-status-completed bg-green-50 text-green-800"
+                    : "border-accent-10 bg-orange-50 text-orange-800"
+                  : "border-border-main bg-surface text-text-primary placeholder-text-muted focus:border-primary-30 focus:ring-1 focus:ring-primary-30/20"
+              } ${!submitted ? "hover:border-primary-30/50" : ""}`}
+              placeholder="..."
+              size="8"
             />
-            {suggestions[index] && !submitted && (
-              <div className="absolute top-full left-2 mt-1 text-sm text-gray-500 bg-white px-2 py-1 rounded shadow-sm border z-10">
-                👉 Gợi ý: <strong>{suggestions[index]}</strong>
-              </div>
-            )}
           </span>
         )}
       </span>
@@ -98,74 +92,88 @@ export default function GapFillQuestionComponent({ questionData, inCreNum }) {
   };
 
   return (
-    <div className="max-w-2xl w-full mx-auto mt-6 bg-white shadow-lg rounded-xl p-6 pointer-events-auto">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-        Fill in the blanks ({blanksCount} {blanksCount === 1 ? 'blank' : 'blanks'}):
+    <div className="w-full mx-auto bg-white rounded-lg pointer-events-auto">
+      <h2 className="text-sm font-semibold text-text-primary mb-2">
+        Điền vào chỗ trống ({blanksCount} chỗ):
       </h2>
 
-      <div className="text-lg leading-relaxed mb-6 min-h-[80px] pointer-events-auto">
+      <div className="text-sm leading-relaxed mb-3 pointer-events-auto p-2 bg-background/30 rounded-lg min-h-[60px]">
         {renderQuestionWithInputs()}
       </div>
 
       <button
         onClick={handleSubmit}
         disabled={submitted || !canSubmit}
-        className={`mt-4 w-full py-3 text-lg rounded-lg font-semibold text-white transition-all ${
+        className={`w-full py-2 px-3 text-xs font-semibold rounded-lg transition-all duration-200 ${
           submitted
             ? allCorrect
-              ? "bg-green-500 hover:bg-green-600"
-              : "bg-red-500 hover:bg-red-600"
-            : "bg-indigo-500 hover:bg-indigo-600"
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
+              ? "bg-status-completed text-white"
+              : "bg-accent-10 text-white"
+            : "bg-primary-30 text-white hover:bg-primary-dark"
+        } ${!canSubmit ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
         {submitted 
-          ? (allCorrect ? "✅ All Correct!" : "❌ Some Incorrect") 
-          : "Submit"
+          ? (allCorrect ? "✅ Đúng" : "❌ Sai") 
+          : "Kiểm tra"
         }
       </button>
 
       {submitted && (
-        <div className="mt-4 space-y-2">
+        <div className="mt-2 space-y-2 animate-slide-up">
           <div
-            className={`p-4 rounded-lg font-bold ${
-              allCorrect ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+            className={`p-2 rounded-lg font-semibold text-center text-xs ${
+              allCorrect 
+                ? "bg-green-50 text-status-completed border border-status-completed/20" 
+                : "bg-orange-50 text-accent-10 border border-accent-10/20"
             }`}
           >
             {allCorrect 
-              ? "Perfect! All answers are correct!" 
-              : "Some answers need correction. Check the details below:"
+              ? "✅ Tất cả đều chính xác!" 
+              : "📝 Cần điều chỉnh:"
             }
           </div>
 
           {!allCorrect && (
-            <div className="space-y-2">
+            <div className="space-y-1 max-h-40 overflow-y-auto">
               {Array.from({ length: blanksCount }, (_, i) => {
                 const isCorrect = correctAnswers[i];
                 const userAnswer = inputs[i] || "";
                 const correctAnswer = questionData.answers[i]?.answer || "";
                 
-                return (
-                  <div
-                    key={i}
-                    className={`p-3 rounded-lg text-sm ${
-                      isCorrect ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
-                    }`}
-                  >
-                    <div className="font-semibold mb-1">Blank {i + 1}:</div>
-                    <div>Your answer: <span className="font-mono">{userAnswer}</span></div>
-                    {!isCorrect && (
-                      <div>Correct answer: <span className="font-mono font-bold">{correctAnswer}</span></div>
-                    )}
-                  </div>
-                );
+                if (!isCorrect) {
+                  return (
+                    <div
+                      key={i}
+                      className="p-2 rounded bg-orange-50 border border-orange-100 text-orange-800 text-xs"
+                    >
+                      <div className="font-semibold mb-1 flex items-center gap-1">
+                        <span className="w-4 h-4 bg-accent-10 text-white rounded-full flex items-center justify-center text-xs">
+                          {i + 1}
+                        </span>
+                        Chỗ trống {i + 1}
+                      </div>
+                      <div className="flex justify-between gap-2 text-xs">
+                        <div className="flex-1 bg-white p-1 rounded border">
+                          <div className="text-text-secondary">Bạn trả lời:</div>
+                          <div className="font-mono truncate">{userAnswer || "(trống)"}</div>
+                        </div>
+                        <div className="flex-1 bg-white p-1 rounded border border-status-completed/30">
+                          <div className="text-text-secondary">Đáp án:</div>
+                          <div className="font-mono text-status-completed font-semibold truncate">{correctAnswer}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
               })}
             </div>
           )}
 
           {questionData.feedBack && (
-            <div className="p-3 bg-blue-50 text-blue-800 rounded-lg text-sm">
-              <div className="font-semibold mb-1">Additional Notes:</div>
-              <div>{questionData.feedBack}</div>
+            <div className="p-2 bg-blue-50 text-blue-800 rounded-lg border border-blue-200 text-xs">
+              <div className="font-semibold mb-1">💡 Ghi chú:</div>
+              <div className="text-text-secondary">{questionData.feedBack}</div>
             </div>
           )}
         </div>
