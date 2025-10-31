@@ -58,58 +58,58 @@ const CreatorAuditLogs = () => {
       APPROVE_CERT: {
         label: 'Duyệt chứng chỉ',
         icon: CheckCircle,
-        color: 'text-green-600',
-        bg: 'bg-green-100',
-        borderColor: 'border-green-200'
+        color: 'text-[#06B6D4]',
+        bg: 'bg-[#06B6D4]/10',
+        borderColor: 'border-[#06B6D4]/20'
       },
       REJECT_CERT: {
         label: 'Từ chối chứng chỉ',
         icon: XCircle,
-        color: 'text-red-600',
-        bg: 'bg-red-100',
-        borderColor: 'border-red-200'
+        color: 'text-[#F97316]',
+        bg: 'bg-[#F97316]/10',
+        borderColor: 'border-[#F97316]/20'
       },
       BAN_CREATOR: {
         label: 'Cấm Creator',
         icon: Ban,
-        color: 'text-red-700',
-        bg: 'bg-red-100',
-        borderColor: 'border-red-200'
+        color: 'text-[#F97316]',
+        bg: 'bg-[#F97316]/10',
+        borderColor: 'border-[#F97316]/20'
       },
       WARN_CREATOR: {
         label: 'Cảnh cáo Creator',
         icon: AlertTriangle,
-        color: 'text-yellow-600',
-        bg: 'bg-yellow-100',
-        borderColor: 'border-yellow-200'
+        color: 'text-[#F97316]',
+        bg: 'bg-[#F97316]/10',
+        borderColor: 'border-[#F97316]/20'
       },
       UNBAN_CREATOR: {
         label: 'Gỡ cấm Creator',
         icon: CheckCircle,
-        color: 'text-green-600',
-        bg: 'bg-green-100',
-        borderColor: 'border-green-200'
+        color: 'text-[#06B6D4]',
+        bg: 'bg-[#06B6D4]/10',
+        borderColor: 'border-[#06B6D4]/20'
       },
       CREATE_COURSE: {
         label: 'Tạo khóa học',
         icon: Activity,
-        color: 'text-blue-600',
-        bg: 'bg-blue-100',
-        borderColor: 'border-blue-200'
+        color: 'text-[#06B6D4]',
+        bg: 'bg-[#06B6D4]/10',
+        borderColor: 'border-[#06B6D4]/20'
       },
       UPDATE_COURSE: {
         label: 'Cập nhật khóa học',
         icon: Activity,
-        color: 'text-indigo-600',
-        bg: 'bg-indigo-100',
-        borderColor: 'border-indigo-200'
+        color: 'text-[#06B6D4]',
+        bg: 'bg-[#06B6D4]/10',
+        borderColor: 'border-[#06B6D4]/20'
       },
       DELETE_COURSE: {
         label: 'Xóa khóa học',
         icon: XCircle,
-        color: 'text-red-600',
-        bg: 'bg-red-100',
-        borderColor: 'border-red-200'
+        color: 'text-[#F97316]',
+        bg: 'bg-[#F97316]/10',
+        borderColor: 'border-[#F97316]/20'
       }
     };
 
@@ -117,8 +117,8 @@ const CreatorAuditLogs = () => {
       label: actionType,
       icon: Activity,
       color: 'text-gray-600',
-      bg: 'bg-gray-100',
-      borderColor: 'border-gray-200'
+      bg: 'bg-[#F1F5F9]',
+      borderColor: 'border-[#F1F5F9]'
     };
   };
 
@@ -228,9 +228,9 @@ const CreatorAuditLogs = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F1F5F9] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 animate-spin text-[#06B6D4] mx-auto mb-4" />
           <p className="text-gray-600">Đang tải nhật ký hoạt động...</p>
         </div>
       </div>
@@ -239,14 +239,14 @@ const CreatorAuditLogs = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F1F5F9] flex items-center justify-center">
         <div className="text-center">
-          <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <AlertTriangle className="w-16 h-16 text-[#F97316] mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Có lỗi xảy ra</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={loadAuditLogs}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-[#06B6D4] text-white rounded-lg hover:bg-[#06B6D4]/90"
           >
             Thử lại
           </button>
@@ -256,13 +256,13 @@ const CreatorAuditLogs = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F1F5F9]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-[#F1F5F9] border-b border-[#F1F5F9]">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center gap-2 text-gray-600 hover:text-[#06B6D4] mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Quay lại</span>
@@ -270,9 +270,9 @@ const CreatorAuditLogs = () => {
 
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <FileText className="w-8 h-8 text-blue-600" />
+              <FileText className="w-8 h-8 text-[#F97316]" />
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Nhật ký hoạt động</h1>
+                <h1 className="text-3xl font-bold text-[#06B6D4]">Nhật ký hoạt động</h1>
                 <p className="text-gray-600">Creator ID: #{creatorId}</p>
               </div>
             </div>
@@ -280,7 +280,7 @@ const CreatorAuditLogs = () => {
             <button
               onClick={exportToCSV}
               disabled={filteredLogs.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-[#06B6D4] text-white rounded-lg hover:bg-[#06B6D4]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="w-4 h-4" />
               Xuất CSV
@@ -289,21 +289,21 @@ const CreatorAuditLogs = () => {
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="bg-[#F1F5F9] rounded-lg p-4 border border-[#F1F5F9]">
               <p className="text-sm text-gray-600 mb-1">Tổng số</p>
               <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
             </div>
-            <div className="bg-blue-50 rounded-lg p-4">
-              <p className="text-sm text-blue-600 mb-1">Hôm nay</p>
-              <p className="text-2xl font-bold text-blue-900">{stats.today}</p>
+            <div className="bg-[#06B6D4]/10 rounded-lg p-4">
+              <p className="text-sm text-[#06B6D4] mb-1">Hôm nay</p>
+              <p className="text-2xl font-bold text-[#06B6D4]">{stats.today}</p>
             </div>
-            <div className="bg-indigo-50 rounded-lg p-4">
-              <p className="text-sm text-indigo-600 mb-1">7 ngày qua</p>
-              <p className="text-2xl font-bold text-indigo-900">{stats.thisWeek}</p>
+            <div className="bg-[#06B6D4]/20 rounded-lg p-4">
+              <p className="text-sm text-[#06B6D4] mb-1">7 ngày qua</p>
+              <p className="text-2xl font-bold text-[#06B6D4]">{stats.thisWeek}</p>
             </div>
-            <div className="bg-purple-50 rounded-lg p-4">
-              <p className="text-sm text-purple-600 mb-1">30 ngày qua</p>
-              <p className="text-2xl font-bold text-purple-900">{stats.thisMonth}</p>
+            <div className="bg-[#F97316]/10 rounded-lg p-4">
+              <p className="text-sm text-[#F97316] mb-1">30 ngày qua</p>
+              <p className="text-2xl font-bold text-[#F97316]">{stats.thisMonth}</p>
             </div>
           </div>
         </div>
@@ -311,27 +311,27 @@ const CreatorAuditLogs = () => {
 
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="bg-[#F1F5F9] rounded-lg shadow-sm p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#F97316]" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Tìm kiếm..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-[#F1F5F9] rounded-lg focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent"
               />
             </div>
 
             {/* Action Type Filter */}
             <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-400" />
+              <Filter className="w-5 h-5 text-[#F97316]" />
               <select
                 value={filterAction}
                 onChange={(e) => setFilterAction(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-[#F1F5F9] rounded-lg focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent"
               >
                 <option value="ALL">Tất cả hành động</option>
                 {actionTypes.map(type => (
@@ -344,24 +344,24 @@ const CreatorAuditLogs = () => {
 
             {/* Date From */}
             <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-gray-400" />
+              <Calendar className="w-5 h-5 text-[#F97316]" />
               <input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-[#F1F5F9] rounded-lg focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent"
                 placeholder="Từ ngày"
               />
             </div>
 
             {/* Date To */}
             <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-gray-400" />
+              <Calendar className="w-5 h-5 text-[#F97316]" />
               <input
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-[#F1F5F9] rounded-lg focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent"
                 placeholder="Đến ngày"
               />
             </div>
@@ -380,7 +380,7 @@ const CreatorAuditLogs = () => {
                   setDateFrom('');
                   setDateTo('');
                 }}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className="text-sm text-[#06B6D4] hover:text-[#06B6D4]/80"
               >
                 Xóa bộ lọc
               </button>
@@ -390,9 +390,9 @@ const CreatorAuditLogs = () => {
 
         {/* Audit Logs Table */}
         {filteredLogs.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+          <div className="bg-[#F1F5F9] rounded-lg shadow-sm p-12 text-center">
             <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-[#06B6D4] mb-2">
               {searchTerm || filterAction !== 'ALL' || dateFrom || dateTo
                 ? 'Không tìm thấy bản ghi nào'
                 : 'Chưa có nhật ký hoạt động'
@@ -406,10 +406,10 @@ const CreatorAuditLogs = () => {
             </p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="bg-[#F1F5F9] rounded-lg shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-[#F1F5F9] border-b border-[#F1F5F9]">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       ID
@@ -428,13 +428,13 @@ const CreatorAuditLogs = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-[#F1F5F9] divide-y divide-[#F1F5F9]">
                   {filteredLogs.map((log) => {
                     const actionInfo = getActionTypeInfo(log.actionType);
                     const ActionIcon = actionInfo.icon;
 
                     return (
-                      <tr key={log.auditLogId} className="hover:bg-gray-50 transition-colors">
+                      <tr key={log.auditLogId} className="hover:bg-[#F1F5F9]/50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="text-sm font-medium text-gray-900">
                             #{log.auditLogId}
@@ -450,7 +450,7 @@ const CreatorAuditLogs = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-gray-400" />
+                            <User className="w-4 h-4 text-[#F97316]" />
                             <span className="text-sm text-gray-900">
                               {log.adminEmail}
                             </span>
@@ -463,7 +463,7 @@ const CreatorAuditLogs = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-gray-400" />
+                            <Clock className="w-4 h-4 text-[#F97316]" />
                             <span className="text-sm text-gray-600">
                               {formatDateShort(log.timestamp)}
                             </span>
