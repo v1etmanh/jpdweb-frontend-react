@@ -69,7 +69,7 @@ export default function AuthProvider({ children }) {
     const refreshToken = useCallback(async () => {
         try {
             const keycloak = await getKeycloakInstance();
-            const refreshed = await keycloak.updateToken(30);
+const refreshed = await keycloak.updateToken(30);
             if (refreshed) {
                 console.log('✅ Token refreshed successfully');
                 await updateToken(keycloak.token, keycloak.refreshToken);
@@ -145,7 +145,7 @@ export default function AuthProvider({ children }) {
             const currentTime = Date.now() / 1000;
             const isValid = payload.exp > (currentTime + 60);
             console.log('🔍 Token valid:', isValid);
-            return isValid;
+return isValid;
         } catch (error) {
             console.error("❌ Invalid token format:", error);
             return false;
@@ -228,7 +228,7 @@ export default function AuthProvider({ children }) {
         isLoading,
         handleLogout,
         refreshToken,
-        login,
+login,
         isCreator,
         setCreator,
         setCreatorInfor,

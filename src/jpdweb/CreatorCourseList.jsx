@@ -272,7 +272,7 @@ const CoursesList = () => {
           </div>
           <p className="text-gray-600 text-lg font-medium mb-4">Bạn chưa tạo khóa học nào</p>
           <button
-            onClick={() => nav('/create-course')}
+            onClick={() => nav('/creator/create_course')}
             className="px-8 py-3 bg-[#F97316] text-white rounded-xl hover:bg-[#ea580c] font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
           >
             Tạo khóa học mới

@@ -114,7 +114,7 @@ export default function VideoContainer({ videos, onComplete }) {
                               : "text-text-primary"
                           }`}
                         >
-                          {video.title}
+                          {video.titleVideo}
                         </p>
                         {video.duration && (
                           <p

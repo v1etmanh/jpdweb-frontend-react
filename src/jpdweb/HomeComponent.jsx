@@ -572,7 +572,9 @@ export default function HomepageComponent() {
         </div>
 
         <div className="relative w-full">
-          <div className="flex gap-6 animate-scroll" style={{ width: 'max-content' }}>
+          <div className="flex gap-6 animate-scroll" style={{ width: 'max-content' }}
+       
+          >
             {/* First set of languages */}
             {[
               { code: "FR", name: "French", bgColor: "bg-indigo-600" },
@@ -585,9 +587,12 @@ export default function HomepageComponent() {
               { code: "PT", name: "Portuguese", bgColor: "bg-teal-600" },
             ].map((lang, idx) => (
               <div key={idx} className="flex-shrink-0">
-                <div className={`w-44 h-40 ${lang.bgColor} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 flex flex-col items-center justify-center p-4 border-4 border-white`}>
+                <div className={`w-44 h-40 ${lang.bgColor} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 flex flex-col items-center justify-center p-4 border-4 border-white`}
+               >
                   {/* Country Flag */}
-                  <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3 overflow-hidden">
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3 overflow-hidden"
+                  
+                  >
                     <ReactCountryFlag
                       countryCode={lang.code}
                       svg
