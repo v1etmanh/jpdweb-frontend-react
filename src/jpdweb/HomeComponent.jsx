@@ -489,6 +489,11 @@ export default function HomepageComponent() {
               onChange={(e) => setName(e.target.value)}
               placeholder="Tìm kiếm khóa học, mô tả hoặc giảng viên..."
               className="flex-grow px-1.5 py-0 text-base text-gray-700 bg-transparent focus:outline-none placeholder-gray-400"
+              onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      nav(`/course_result/${name}`)
+    }
+  }}
             />
 
             <button
@@ -579,6 +584,8 @@ export default function HomepageComponent() {
                 ].map((lang, idx) => (
                   <div key={idx} className="group relative flex-shrink-0">
                     <div
+                    onClick={() =>nav(`/course_result/${lang.name}`)}
+
                       className={`w-40 h-36 bg-gradient-to-br ${lang.color} rounded-3xl shadow-2xl hover:shadow-[#F97316]/50 transition-all duration-500 cursor-pointer transform hover:scale-105 overflow-hidden`}
                     >
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all"></div>
@@ -589,6 +596,7 @@ export default function HomepageComponent() {
                         <p className="font-bold text-base tracking-wide">
                           {lang.name}
                         </p>
+                        
                         <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <span className="text-xs bg-white/30 backdrop-blur-sm px-3 py-1 rounded-full">
                             Khám phá →

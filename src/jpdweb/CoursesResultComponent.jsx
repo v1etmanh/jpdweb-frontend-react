@@ -11,29 +11,48 @@ export default function CoursesResultComponent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState(3);
   const [loading, setLoading] = useState(false);
+  
+  // ✅ Pagination states
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
+  const [pageSize] = useState(12); // Số khóa học mỗi trang
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  // ✅ Search courses with cleanup and error handling
+  // ✅ Search courses with pagination
   useEffect(() => {
     let isCancelled = false;
 
     const findCourses = async () => {
-      // Validate search term
       if (!name || name.trim().length < 2) {
         setTargetCourses([]);
+        setCurrentPage(0);
+        setTotalPages(0);
         return;
       }
 
       setLoading(true);
       
       try {
-        const response = await courseApi.searchCourse(name);
+        const response = await courseApi.searchCourse(name, 0, pageSize); // Reset về trang 0
         
         if (!isCancelled) {
           if (response.success) {
-            setTargetCourses(response.data || []);
+            const data = response.data;
+            console.log('Search response:', data);
+            
+            setTargetCourses(data.content || []);
+            setCurrentPage(data.currentPage);
+            setTotalPages(data.totalPages);
+            setTotalElements(data.totalElements);
+            setHasNext(data.hasNext);
+            setHasPrevious(data.hasPrevious);
           } else {
             handleSearchCourseError(response);
             setTargetCourses([]);
+            resetPagination();
           }
         }
       } catch (error) {
@@ -41,6 +60,7 @@ export default function CoursesResultComponent() {
           console.error('Unexpected search error:', error);
           showErrorNotification('Lỗi kết nối. Vui lòng thử lại');
           setTargetCourses([]);
+          resetPagination();
         }
       } finally {
         if (!isCancelled) {
@@ -54,9 +74,75 @@ export default function CoursesResultComponent() {
     return () => {
       isCancelled = true;
     };
-  }, [name]);
+  }, [name, pageSize]);
 
-  // ✅ Handle search errors (FIXED: Remove notification for NOT_FOUND)
+  // ✅ Reset pagination state
+  const resetPagination = () => {
+    setCurrentPage(0);
+    setTotalPages(0);
+    setTotalElements(0);
+    setHasNext(false);
+    setHasPrevious(false);
+  };
+
+  // ✅ Load more courses (append to existing)
+  const handleLoadMore = async () => {
+    if (!hasNext || loadingMore) return;
+    
+    setLoadingMore(true);
+    
+    try {
+      const nextPage = currentPage + 1;
+      const response = await courseApi.searchCourse(name, nextPage, pageSize);
+      
+      if (response.success) {
+        const data = response.data;
+        
+        // Append new courses to existing
+        setTargetCourses(prev => [...prev, ...(data.content || [])]);
+        setCurrentPage(data.currentPage);
+        setHasNext(data.hasNext);
+        setHasPrevious(data.hasPrevious);
+      } else {
+        handleSearchCourseError(response);
+      }
+    } catch (error) {
+      console.error('Load more error:', error);
+      showErrorNotification('Không thể tải thêm khóa học');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  // ✅ Go to specific page (replace courses)
+  const handleGoToPage = async (pageNumber) => {
+    if (pageNumber < 0 || pageNumber >= totalPages || loading) return;
+    
+    setLoading(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    try {
+      const response = await courseApi.searchCourse(name, pageNumber, pageSize);
+      
+      if (response.success) {
+        const data = response.data;
+        
+        setTargetCourses(data.content || []);
+        setCurrentPage(data.currentPage);
+        setHasNext(data.hasNext);
+        setHasPrevious(data.hasPrevious);
+      } else {
+        handleSearchCourseError(response);
+      }
+    } catch (error) {
+      console.error('Go to page error:', error);
+      showErrorNotification('Không thể chuyển trang');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Handle search errors
   const handleSearchCourseError = (response) => {
     const message = response.message || 'Không thể tìm kiếm khóa học';
 
@@ -66,7 +152,6 @@ export default function CoursesResultComponent() {
         break;
 
       case API_RESPONSE_TYPES.NOT_FOUND:
-        // ✅ Silent - UI sẽ tự hiển thị empty state
         console.log(`No courses found for: "${name}"`);
         break;
 
@@ -85,20 +170,20 @@ export default function CoursesResultComponent() {
     }
   };
 
-  // ✅ Handle filter/sort (FIXED: Proper immutable update)
+  // ✅ Handle filter/sort
   const handleFilter = (option) => {
-    if (option === 3) return; // Default option - no sorting
+    if (option === 3) return;
 
     let sorted;
     
     switch (option) {
-      case 0: // Sort by rating
+      case 0:
         sorted = [...targetCourses].sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
-      case 1: // Sort by students
+      case 1:
         sorted = [...targetCourses].sort((a, b) => (b.numberStudent || 0) - (a.numberStudent || 0));
         break;
-      case 2: // Sort by price
+      case 2:
         sorted = [...targetCourses].sort((a, b) => (b.price || 0) - (a.price || 0));
         break;
       default:
@@ -109,7 +194,7 @@ export default function CoursesResultComponent() {
     setSortOption(option);
   };
 
-  // ✅ Handle search with validation
+  // ✅ Handle search
   const handleSearch = () => {
     const trimmed = searchTerm.trim();
     
@@ -123,7 +208,6 @@ export default function CoursesResultComponent() {
       return;
     }
     
-    // ✅ Encode URI để xử lý ký tự đặc biệt
     nav(`/course_result/${encodeURIComponent(trimmed)}`);
   };
 
@@ -133,8 +217,30 @@ export default function CoursesResultComponent() {
     }
   };
 
+  // ✅ Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 0; i < totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage < 3) {
+        pages.push(0, 1, 2, 3, '...', totalPages - 1);
+      } else if (currentPage > totalPages - 4) {
+        pages.push(0, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1);
+      } else {
+        pages.push(0, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages - 1);
+      }
+    }
+    
+    return pages;
+  };
+
   // ✅ Loading state
-  if (loading) {
+  if (loading && targetCourses.length === 0) {
     return (
       <div className="min-h-screen bg-gray-100 py-12">
         <div className="max-w-7xl mx-auto px-4">
@@ -158,6 +264,30 @@ export default function CoursesResultComponent() {
   if (targetCourses.length === 0 && !loading) {
     return (
       <div className="min-h-screen bg-gray-100 py-12">
+        <div className="max-w-4xl mx-auto mb-6 px-4">
+          <div className="relative flex shadow-2xl rounded-2xl overflow-hidden">
+            <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+              <svg className="h-6 w-6 text-[#243864]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Tìm kiếm khóa học..."
+              className="flex-grow pl-16 pr-6 py-6 text-lg text-[#243864] bg-white focus:outline-none focus:ring-4 focus:ring-[#1e88e5]/20 placeholder-gray-500"
+            />
+            <button
+              onClick={handleSearch}
+              className="px-12 py-6 bg-gradient-to-r from-[#18afcdff] to-[#2094acff] text-white font-bold text-lg hover:from-[#243864] hover:to-[#1e88e5] transition-all duration-300"
+            >
+              Tìm kiếm
+            </button>
+          </div>
+        </div>
+        
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center">
             <div className="bg-white rounded-2xl shadow-xl p-12 max-w-2xl mx-auto">
@@ -166,7 +296,7 @@ export default function CoursesResultComponent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h.01M15 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
               </div>
-              <h2 className="text-3xl font-bold text-[#243864] mb-4">Không tìm thấy kết quả</h2>
+              <h2 className="text-3xl font-bold text-[#18afcdff]  mb-4">Không tìm thấy kết quả</h2>
               <p className="text-xl text-gray-600 mb-8">
                 Không có khóa học nào phù hợp với từ khóa <span className="font-semibold text-[#e53935]">"{name}"</span>
               </p>
@@ -192,7 +322,11 @@ export default function CoursesResultComponent() {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-[#243864] mb-2">📁 Thư viện khóa học</h1>
             <p className="text-lg text-gray-600">
-              Tìm thấy <span className="font-semibold text-[#e53935]">{targetCourses.length}</span> khóa học cho "{name}"
+              Tìm thấy <span className="font-semibold text-[#e53935]">{totalElements}</span> khóa học cho "{name}"
+            </p>
+            {/* ✅ Page indicator */}
+            <p className="text-sm text-gray-500 mt-2">
+              Đang hiển thị {targetCourses.length} khóa học • Trang {currentPage + 1}/{totalPages}
             </p>
           </div>
 
@@ -346,12 +480,102 @@ export default function CoursesResultComponent() {
             </div>
           ))}
         </div>
+
+        {/* ✅ PAGINATION CONTROLS */}
+        <div className="mt-12 space-y-6">
+          
+          {/* Load More Button - Chỉ hiện nếu còn trang tiếp theo */}
+          {hasNext && (
+            <div className="flex justify-center">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="group relative px-12 py-5 bg-gradient-to-r from-[#1e88e5] to-[#243864] text-white font-bold text-lg rounded-2xl hover:from-[#243864] hover:to-[#1e88e5] transition-all duration-300 shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+              >
+                {loadingMore ? (
+                  <span className="flex items-center gap-3">
+                    <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Đang tải...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-3">
+                    <svg className="w-6 h-6 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                    Xem thêm {pageSize} khóa học
+                    <svg className="w-6 h-6 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* ✅ PAGE NAVIGATION - Thanh phân trang */}
+          {totalPages > 1 && (
+            <div className="bg-white rounded-2xl shadow-xl p-6">
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                
+                {/* Previous Button */}
+                <button
+                  onClick={() => handleGoToPage(currentPage - 1)}
+                  disabled={!hasPrevious || loading}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-[#1e88e5] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:hover:text-gray-700"
+                >
+                  ← Trước
+                </button>
+
+                {/* Page Numbers */}
+                {getPageNumbers().map((pageNum, index) => (
+                  pageNum === '...' ? (
+                    <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-400">...</span>
+                  ) : (
+                    <button
+                      key={pageNum}
+                      onClick={() => handleGoToPage(pageNum)}
+                      disabled={loading}
+                      className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
+                        currentPage === pageNum
+                          ? 'bg-gradient-to-r from-[#1e88e5] to-[#243864] text-white shadow-lg scale-110'
+                          : 'bg-gray-100 text-gray-700 hover:bg-[#1e88e5] hover:text-white'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {pageNum + 1}
+                    </button>
+                  )
+                ))}
+
+                {/* Next Button */}
+                <button
+                  onClick={() => handleGoToPage(currentPage + 1)}
+                  disabled={!hasNext || loading}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-[#1e88e5] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:hover:text-gray-700"
+                >
+                  Sau →
+                </button>
+              </div>
+
+              {/* ✅ Page Info */}
+              <div className="text-center mt-4 text-gray-600">
+                <p className="text-sm">
+                  Trang <span className="font-bold text-[#1e88e5]">{currentPage + 1}</span> / {totalPages}
+                  <span className="mx-2">•</span>
+                  Hiển thị <span className="font-bold text-[#1e88e5]">{targetCourses.length}</span> / {totalElements} khóa học
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Footer */}
       <div className="bg-[#243864] text-white py-8">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h3 className="text-2xl font-bold mb-2">📁 {targetCourses.length} khóa học</h3>
+          <h3 className="text-2xl font-bold mb-2">📁 {totalElements} khóa học</h3>
           <p className="text-[#1e88e5] font-medium">Khám phá kiến thức mới ngay hôm nay!</p>
         </div>
       </div>

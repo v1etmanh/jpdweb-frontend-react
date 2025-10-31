@@ -58,7 +58,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
     switch (data[0].typeOfContent) {
       case 'FLASHCARD':
         return (
-          <div className="max-w-4xl mx-auto p-6">
+          <div className="w-[90%] mx-auto p-6">
             <FlashCardContainer 
               flashcards={data} 
               onComplete={onComplete} 
@@ -69,7 +69,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
 
       case 'GAPFILL':
         return (
-          <div className="max-w-4xl mx-auto p-6">
+        <div className="w-[90%] mx-auto p-6">
             <GapFillContainer 
               questions={data} 
               onComplete={onComplete} 
@@ -79,7 +79,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
 
       case 'MULTIPLE_CHOICE':
         return (
-          <div className="max-w-4xl mx-auto p-6">
+          <div className="w-[90%] mx-auto p-6">
             <MultipleChoicContainer 
               quizData={data} 
               onComplete={onComplete} 
@@ -89,7 +89,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
 
       case 'WRITING':
         return (
-          <div className="max-w-4xl mx-auto p-6">
+         <div className="w-[90%] mx-auto p-6">
             <WritingContainer 
               writingTasks={data} 
               onComplete={onComplete} 
@@ -99,7 +99,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
 
       case 'SPEAKING_PASSAGE':
         return (
-          <div className="max-w-6xl mx-auto p-6">
+          <div className="w-[90%] mx-auto p-6">
             <SpeakingPage 
               paragraphs={data}
               pictureAndQuestions={null}
@@ -112,7 +112,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
 
       case 'SPEAKING_PICTURE':
         return (
-          <div className="max-w-6xl mx-auto p-6">
+        <div className="w-[90%] mx-auto p-6">
             <SpeakingPage 
               paragraphs={null}
               pictureAndQuestions={data}
@@ -127,7 +127,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
 
       case 'LISTEN_CHOICE':
         return (
-          <div className="max-w-4xl mx-auto p-6">
+          <div className="w-[90%] mx-auto p-6">
             <ListenChoiceContainer 
               questions={data} 
               onComplete={onComplete} 
@@ -138,7 +138,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
 
       case 'READING':
         return (
-          <div className="max-w-4xl mx-auto p-6">
+          <div className="w-[90%] mx-auto p-6">
             <PassageContainer 
               passageContent={data} 
               isSave={false}
@@ -149,7 +149,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
 
       case 'VIDEO':
         return (
-          <div className="max-w-6xl mx-auto p-6">
+         <div className="w-[90%] mx-auto p-6">
             <VideoContainer videos={data} 
             onComplete={onComplete}/>
           </div>
@@ -157,7 +157,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
 
       case 'PDF':
         return (
-          <div className="max-w-6xl mx-auto p-6">
+         <div className="w-[90%] mx-auto p-6">
             <PdfContainer 
               pdfs={data}  
               onComplete={onComplete}

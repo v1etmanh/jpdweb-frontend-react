@@ -13,6 +13,7 @@ export default function AuthProvider({children}){
     const[refreshInterval,setRefreshInterval]=useState(null)
     const[isCreator,setCreator]=useState(false);
     const[creatorInfor,setCreatorInfor]=useState(null)
+    const[isAdmin,setAdmin]=useState(false)
     //cleanup and logout
     //giup logout ko bi tao lai moi lan rerender
     const handleLogout=useCallback(()=>{
@@ -131,23 +132,37 @@ const isTokenValid=useCallback((token)=>{
     }
 },[])
 
-const login=useCallback(async()=>{
-    try{
-        setIsLoading(true)
-        const keycloak=await getKeycloakInstance();
-        if(keycloak.token &&  keycloak.refreshToken){
-            await updateToken(keycloak.token, keycloak.refreshToken)
+const login = useCallback(async() => {
+    try {
+        setIsLoading(true);
+        const keycloak = await getKeycloakInstance();
+        
+        if (keycloak.token && keycloak.refreshToken) {
+            await updateToken(keycloak.token, keycloak.refreshToken);
             await authenticateUser();
+            
+            // Giải mã token và kiểm tra role ADMIN
+            try {
+                const payload = JSON.parse(atob(keycloak.token.split('.')[1]));
+                const hasAdminRole = payload.realm_access?.roles?.includes('ADMIN') || false;
+                setAdmin(hasAdminRole);
+                console.log(hasAdminRole)
+            } catch (decodeError) {
+                console.error("Failed to decode token:", decodeError);
+                setAdmin(false);
+            }
+            
             return true;
         }
         return false;
-    }catch(error){
-        console.error("login failed ",error)
+    } catch (error) {
+        console.error("login failed ", error);
         handleLogout();
         return false;
+    } finally { 
+        setIsLoading(false);
     }
-    finally{ setIsLoading(false)}
-},[updateToken,authenticateUser,handleLogout])
+}, [updateToken, authenticateUser, handleLogout]);
 //tai authenticate on app start
 useEffect(()=>{
     const initAuth=async()=>{
@@ -194,7 +209,8 @@ useEffect(()=>{
     isCreator,
     setCreator,
     setCreatorInfor,
-    creatorInfor
+    creatorInfor,
+    isAdmin
   };
 
   return (

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react'; // ✨ Thêm us
 import axios from 'axios';
 import './TeacherDashboard.css';
 import QuizWebSocketService from '../../hooks/QuizWebSocketService';
+import { useParams } from 'react-router-dom';
+import { sessionApi } from '../api/sessionApi';
 
 function TeacherDashboard() {
     const [kahootId, setKahootId] = useState('1');
@@ -17,7 +19,7 @@ function TeacherDashboard() {
     const [questionResult, setQuestionResult] = useState(null);
     const [showingResult, setShowingResult] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0);
-
+   const{id}=useParams()
     // ✨ ĐỊNH NGHĨA handleEndQuestion với useCallback
     const handleEndQuestion = useCallback(() => {
         if (session && connected && currentQuestion && !showingResult) {
@@ -81,7 +83,7 @@ function TeacherDashboard() {
     const fetchFinalResults = async (sessionCode) => {
         setLoading(true);
         try {
-            const response = await axios.get(`http://localhost:9090/api/quiz/${sessionCode}/participants`);
+            const response = await sessionApi.getFinalResults()
             console.log('🏆 Final results fetched:', response.data);
             setFinalResults(response.data);
         } catch (error) {
@@ -99,9 +101,9 @@ function TeacherDashboard() {
     const createSession = async () => {
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:9090/api/quiz/create', {
-                kahootId: parseInt(kahootId),
-                teacherId: 1,
+            const response = await sessionApi.createSession({
+                kahootId: parseInt(id),
+                
                 teacherName: teacherName
             });
 
@@ -299,15 +301,7 @@ function TeacherDashboard() {
             {!session ? (
                 <div className="create-session">
                     <h2>Create Quiz Session</h2>
-                    <div className="form-group">
-                        <label>Kahoot ID:</label>
-                        <input
-                            type="number"
-                            value={kahootId}
-                            onChange={(e) => setKahootId(e.target.value)}
-                            placeholder="Enter Kahoot ID"
-                        />
-                    </div>
+                    
                     <div className="form-group">
                         <label>Your Name:</label>
                         <input

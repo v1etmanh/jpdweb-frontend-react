@@ -21,10 +21,13 @@ export const courseApi = {
      * Tìm kiếm khóa học
      * @param {string} keyword - Từ khóa tìm kiếm
      */
-    searchCourse: (keyword) => {
+    searchCourse: (keyword,page,size) => {
         return callApi(
             () => apiclient.get(API_ENDPOINTS.COURSE.SEARCH, {
-                params: { name: keyword }
+                params: { name: keyword ,
+                    page:page,
+                    size:size
+                }
             }),
             { errorMessage: 'Không thể tìm kiếm khóa học' }
         );

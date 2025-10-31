@@ -108,21 +108,22 @@ export default function GapFillQuestionComponent({ questionData, inCreNum }) {
       </div>
 
       <button
-        onClick={handleSubmit}
-        disabled={submitted || !canSubmit}
-        className={`mt-4 w-full py-3 text-lg rounded-lg font-semibold text-white transition-all ${
-          submitted
-            ? allCorrect
-              ? "bg-green-500 hover:bg-green-600"
-              : "bg-red-500 hover:bg-red-600"
-            : "bg-indigo-500 hover:bg-indigo-600"
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
-      >
-        {submitted 
-          ? (allCorrect ? "✅ All Correct!" : "❌ Some Incorrect") 
-          : "Submit"
-        }
-      </button>
+  onClick={handleSubmit}
+  disabled={submitted || !canSubmit}
+  className={`mt-4 w-full py-3 text-lg rounded-lg font-semibold text-white transition-all ${
+    submitted
+      ? allCorrect
+        ? "bg-green-500 hover:bg-green-600"
+        : "bg-red-500 hover:bg-red-600"
+      : "bg-sky-500 hover:bg-sky-600"
+  } disabled:opacity-50 disabled:cursor-not-allowed`}
+>
+  {submitted 
+    ? (allCorrect ? "✅ All Correct!" : "❌ Some Incorrect") 
+    : "Submit"
+  }
+</button>
+
 
       {submitted && (
         <div className="mt-4 space-y-2">

@@ -129,5 +129,19 @@ export const API_ENDPOINTS = {
         EXPORT_EXCEL_MONTHLY: '/api/admin/transactions/export/excel',
         EXPORT_EXCEL_QUARTERLY: '/api/admin/transactions/export/excel/quarterly',
         EXPORT_EXCEL_YEARLY: '/api/admin/transactions/export/excel/yearly',
-    }
+    },
+      APP_OVERVIEW: {
+    GET_OVERVIEW: '/api/monitoring/overview',
+    GET_HEALTH: '/api/monitoring/health',
+  },
+  APP_DIAGNOSTICS: {
+  GET_THREAD_SUMMARY: '/api/monitoring/diagnostics/threads/summary',
+  GET_LOGGERS: '/api/monitoring/diagnostics/loggers',
+  GET_ENVIRONMENT: '/api/monitoring/diagnostics/environment',
+  GET_BEANS_SUMMARY: '/api/monitoring/diagnostics/beans/summary',
+},KAHOOT_API: {
+    CREATE_SESSION: '/api/quiz/create', // POST
+    GET_FINAL_RESULTS: '/api/quiz/:sessionCode/participants' // GET
+},
+
 };

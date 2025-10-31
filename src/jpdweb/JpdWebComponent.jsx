@@ -43,6 +43,8 @@ import CreatorViolationsHistory from "./adminPages/CreatorViolationsHistory";
 import CreatorAuditLogs from "./adminPages/CreatorAuditLogs";
 import TransactionsListPage from "./adminPages/TransactionsListPage";
 import RevenueReportPage from "./adminPages/RevenueReportPage";
+import SystemOverview from "./adminPages/SystemOverview";
+import AdminDiagnosticsPage from "./adminPages/AdminDiagnosticsPage";
 export default function JpdWebComponent(){
   const [isCreator, setCreator] = useState(false);
   const [showDirect, setShowDirect] = useState(false);
@@ -175,9 +177,9 @@ const location = useLocation();
             style={{
               position: 'fixed',
               top: '20px',
-              left: '20px',
+              left: '2px',
               zIndex: 1100,
-              backgroundColor: '#007bff',
+              backgroundColor: '#18afcdff',
               border: 'none',
               borderRadius: '50%',
               width: '45px',
@@ -312,6 +314,25 @@ const location = useLocation();
               <ProtectedRoute>
                 <RevenueReportPage />
               </ProtectedRoute>
+              
+            } 
+          />
+           <Route 
+            path="/admin/app_overview" 
+            element={
+              <ProtectedRoute>
+                <SystemOverview />
+              </ProtectedRoute>
+              
+            } 
+          />
+           <Route 
+            path="/admin/diagnosticsPage" 
+            element={
+              <ProtectedRoute>
+                <AdminDiagnosticsPage />
+              </ProtectedRoute>
+              
             } 
           />
           {/* Upload Profile - Chỉ cần authentication */}
@@ -381,7 +402,7 @@ const location = useLocation();
             } 
           />
             <Route 
-            path="/creator/class/kahoot/studentJoin" 
+            path="/creator/class/kahoot/studentJoin/:id" 
             element={
               
                 <StudentJoin></StudentJoin>

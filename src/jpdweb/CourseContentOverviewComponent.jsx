@@ -433,7 +433,7 @@ const checkFinish = (moduleId, contentType, allModules) => {
           {/* Content Display */}
           <div className="flex-1 overflow-auto">
             {currentContent ? (
-              <div className="p-6">
+            <div className="w-full max-w-[1400px] mx-auto px-8 py-6">
                 <CourseContentComponent contents={currentContent}
                 moduleid={currentModule.moduleId}
                   contentType={currentContentType}
