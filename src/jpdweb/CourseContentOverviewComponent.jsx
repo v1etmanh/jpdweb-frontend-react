@@ -661,26 +661,7 @@ const checkFinish = (moduleId, contentType, allModules) => {
             </div>
 
             {/* Progress Summary */}
-            <div className="mt-6 p-4 bg-gray-700 rounded-lg">
-              <div className="flex justify-between text-sm text-gray-300 mb-2">
-                <span>Tiến độ học tập</span>
-                <span className="font-bold">{overallProgress}%</span>
-              </div>
-              <div className="w-full bg-gray-600 rounded-full h-2">
-                <div
-                  className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${overallProgress}%` }}
-                ></div>
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-400">
-                <div>
-                  <span className="text-green-400 font-bold">{completedModules}</span> Hoàn thành
-                </div>
-                <div>
-                  <span className="text-blue-400 font-bold">{totalModules - completedModules}</span> Còn lại
-                </div>
-              </div>
-            </div>
+         
           </div>
         </div>
         </div>
