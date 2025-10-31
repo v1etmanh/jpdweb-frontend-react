@@ -47,29 +47,36 @@ useEffect(()=>{
         }
     };
     handleLogin()
-},[isAuthentication, isLoading, nav, from, login, isLoggingIn])
+},[isAuthentication, isLoading, nav, from, login, isLoggingIn, isAdmin])
   if (isLoading) {
     return (
-      <div className="login-container">
-        <div className="loading-spinner">Checking authentication...</div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="bg-white p-8 rounded-lg shadow-xl text-center">
+          <Loader className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-lg text-gray-700">Đang kiểm tra xác thực...</p>
+        </div>
       </div>
     );
   }
 
   if (isLoggingIn) {
     return (
-      <div className="login-container">
-        <div className="loading-spinner">Logging in...</div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="bg-white p-8 rounded-lg shadow-xl text-center">
+          <Loader className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-lg text-gray-700 font-semibold">Đang đăng nhập...</p>
+          <p className="text-sm text-gray-500 mt-2">Vui lòng đợi trong giây lát</p>
+        </div>
       </div>
     );
   }
 
   // Fallback UI (shouldn't normally be seen)
   return (
-    <div className="login-container">
-      <div className="login-content">
-        <h2>Login Required</h2>
-        <p>Redirecting to login...</p>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="bg-white p-8 rounded-lg shadow-xl text-center">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Yêu cầu đăng nhập</h2>
+        <p className="text-gray-600">Đang chuyển hướng đến trang đăng nhập...</p>
       </div>
     </div>
   );

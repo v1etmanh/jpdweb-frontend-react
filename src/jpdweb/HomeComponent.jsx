@@ -10,11 +10,7 @@ import { courseApi } from "./api/courseApi";
 import { showWarningNotification } from "./api/apiClient";
 import ReactCountryFlag from "react-country-flag";
 
-//addToWishlist,enrollCourse
-//createOrder
-//getCourseDetail
-
-// Component để hiển thị course card
+// ===================== CourseCard =====================
 const CourseCard = ({ course, type }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [hoverTimer, setHoverTimer] = useState(null);
@@ -22,12 +18,13 @@ const CourseCard = ({ course, type }) => {
   const formatNumber = (num) => {
     return num.toLocaleString("vi-VN");
   };
+
   const nav = useNavigate();
 
   const handleMouseEnter = () => {
     const timer = setTimeout(() => {
       setShowPopup(true);
-    }, 800); // 2 seconds delay
+    }, 800);
     setHoverTimer(timer);
   };
 
@@ -159,7 +156,7 @@ const CourseCard = ({ course, type }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Add favorite logic here
+                      // TODO: Add favorite logic
                     }}
                     className="bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold px-3 py-2 rounded-lg hover:from-pink-600 hover:to-red-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center gap-1.5"
                     title="Add to wishlist"
@@ -299,8 +296,7 @@ const CourseCard = ({ course, type }) => {
   );
 };
 
-// Component để hiển thị section khóa học
-
+// ===================== CourseSection =====================
 const CourseSection = ({ title, courses, type, icon }) => {
   return (
     <div className="mb-20 relative">
@@ -336,10 +332,23 @@ const CourseSection = ({ title, courses, type, icon }) => {
   );
 };
 
+// ===================== HomepageComponent =====================
 export default function HomepageComponent() {
   const [courseInL, setCourseInL] = useState([]);
   const [name, setName] = useState("");
   const nav = useNavigate();
+
+  // Danh sách ngôn ngữ cho carousel
+  const languages = [
+    { code: "FR", name: "French", bgColor: "bg-indigo-600" },
+    { code: "ES", name: "Spanish", bgColor: "bg-orange-500" },
+    { code: "JP", name: "Japanese", bgColor: "bg-red-500" },
+    { code: "IT", name: "Italian", bgColor: "bg-green-600" },
+    { code: "DE", name: "German", bgColor: "bg-gray-800" },
+    { code: "RU", name: "Russian", bgColor: "bg-blue-700" },
+    { code: "CN", name: "Chinese", bgColor: "bg-red-600" },
+    { code: "PT", name: "Portuguese", bgColor: "bg-teal-600" },
+  ];
 
   useEffect(() => {
     fetchdata();
@@ -347,14 +356,14 @@ export default function HomepageComponent() {
 
   const fetchdata = async () => {
     const response = await courseApi.getRecommendCourses();
-    //   const data = response.data;
 
-    // Nhóm dữ liệu theo 'language'
     if (!response.success) {
       showWarningNotification(response.message);
       return;
     }
     const data = response.data;
+
+    // Nhóm dữ liệu theo 'language'
     const grouped = data.reduce((acc, obj) => {
       const key = obj.language || "Unknown";
       if (!acc[key]) acc[key] = [];
@@ -362,7 +371,6 @@ export default function HomepageComponent() {
       return acc;
     }, {});
 
-    // Cập nhật state
     setCourseInL(grouped);
   };
 
@@ -373,10 +381,9 @@ export default function HomepageComponent() {
       const targetPosition = coursesSection.offsetTop - 100;
       const startPosition = window.pageYOffset;
       const distance = targetPosition - startPosition;
-      const duration = 1000; // 1 giây
+      const duration = 1000;
       let start = null;
 
-      // Hàm easing để tạo hiệu ứng mượt
       const easeInOutCubic = (t) => {
         return t < 0.5
           ? 4 * t * t * t
@@ -401,7 +408,10 @@ export default function HomepageComponent() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-white to-cyan-50 min-h-screen" style={{ marginTop: '-90px' }}>
+    <div
+      className="bg-gradient-to-br from-slate-50 via-white to-cyan-50 min-h-screen"
+      style={{ marginTop: "-90px" }}
+    >
       <style>{`
         html {
           scroll-behavior: smooth;
@@ -444,7 +454,7 @@ export default function HomepageComponent() {
         }
       `}</style>
 
-      {/* Hero Section with Dynamic Parallax Effect */}
+      {/* Hero Section */}
       <section
         id="home-section"
         className="relative w-full pt-32 pb-20 px-17 bg-cover bg-center bg-no-repeat min-h-[calc(100vh-400px)] overflow-hidden -mt-0"
@@ -470,10 +480,10 @@ export default function HomepageComponent() {
         <div className="container mx-auto max-w-screen-xl px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-7">
             {/* TEXT SECTION */}
-            <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left gap-7">
+            <div className="lg:col-span-7 flex flex-col items-start text-left gap-7">
               <div className="space-y-2 animate-fade-in-up mb-[50px]">
-                <div className="inline-block py-2">
-                  <span className="bg-white/20 backdrop-blur-md text-white px-5 py-1.5 rounded-full text-xs font-bold border border-white/30 shadow-lg">
+                <div className="py-2">
+                  <span className="inline-block ml-[110px] bg-white/20 backdrop-blur-md text-white px-5 py-1.5 rounded-full text-xs font-bold border border-white/30 shadow-lg">
                     🚀 Nền tảng học ngôn ngữ #1
                   </span>
                 </div>
@@ -517,11 +527,12 @@ export default function HomepageComponent() {
               </div>
             </div>
 
-            {/* Decorative 3D Card */}
+            {/* (Right column intentionally left empty for future content / hero art) */}
           </div>
         </div>
       </section>
-      {/* Modern Search Bar with Glass Effect */}
+
+      {/* Search Bar */}
       <div className="flex justify-center -mt-7 px-4 relative z-20">
         <div className="w-full max-w-4xl bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border-4 border-white/50 p-1.5 hover:shadow-[#06B6D4]/30 transition-shadow duration-300">
           <div className="flex items-center gap-2.5">
@@ -572,33 +583,26 @@ export default function HomepageComponent() {
         </div>
 
         <div className="relative w-full">
-          <div className="flex gap-6 animate-scroll" style={{ width: 'max-content' }}
-       
+          <div
+            className="flex gap-6 animate-scroll"
+            style={{ width: "max-content" }}
           >
-            {/* First set of languages */}
-            {[
-              { code: "FR", name: "French", bgColor: "bg-indigo-600" },
-              { code: "ES", name: "Spanish", bgColor: "bg-orange-500" },
-              { code: "JP", name: "Japanese", bgColor: "bg-red-500" },
-              { code: "IT", name: "Italian", bgColor: "bg-green-600" },
-              { code: "DE", name: "German", bgColor: "bg-gray-800" },
-              { code: "RU", name: "Russian", bgColor: "bg-blue-700" },
-              { code: "CN", name: "Chinese", bgColor: "bg-red-600" },
-              { code: "PT", name: "Portuguese", bgColor: "bg-teal-600" },
-            ].map((lang, idx) => (
+            {/* Lần 1 */}
+            {languages.map((lang, idx) => (
               <div key={idx} className="flex-shrink-0">
-                <div className={`w-44 h-40 ${lang.bgColor} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 flex flex-col items-center justify-center p-4 border-4 border-white`}
-               >
-                  {/* Country Flag */}
-                  <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3 overflow-hidden"
-                  
-                  >
+                <div
+                  className={`w-44 h-40 ${lang.bgColor} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 flex flex-col items-center justify-center p-4 border-4 border-white`}
+                  onClick={() =>
+                    nav(`/course_result/${encodeURIComponent(lang.name)}`)
+                  }
+                >
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3 overflow-hidden">
                     <ReactCountryFlag
                       countryCode={lang.code}
                       svg
                       style={{
-                        fontSize: '3rem',
-                        lineHeight: '3rem',
+                        fontSize: "3rem",
+                        lineHeight: "3rem",
                       }}
                       title={lang.name}
                     />
@@ -610,27 +614,22 @@ export default function HomepageComponent() {
               </div>
             ))}
 
-            {/* Duplicate set for seamless loop */}
-            {[
-              { code: "FR", name: "French", bgColor: "bg-indigo-600" },
-              { code: "ES", name: "Spanish", bgColor: "bg-orange-500" },
-              { code: "JP", name: "Japanese", bgColor: "bg-red-500" },
-              { code: "IT", name: "Italian", bgColor: "bg-green-600" },
-              { code: "DE", name: "German", bgColor: "bg-gray-800" },
-              { code: "RU", name: "Russian", bgColor: "bg-blue-700" },
-              { code: "CN", name: "Chinese", bgColor: "bg-red-600" },
-              { code: "PT", name: "Portuguese", bgColor: "bg-teal-600" },
-            ].map((lang, idx) => (
+            {/* Lần 2 (duplicate để seamless loop) */}
+            {languages.map((lang, idx) => (
               <div key={`dup-${idx}`} className="flex-shrink-0">
-                <div className={`w-44 h-40 ${lang.bgColor} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 flex flex-col items-center justify-center p-4 border-4 border-white`}>
-                  {/* Country Flag */}
+                <div
+                  className={`w-44 h-40 ${lang.bgColor} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 flex flex-col items-center justify-center p-4 border-4 border-white`}
+                  onClick={() =>
+                    nav(`/course_result/${encodeURIComponent(lang.name)}`)
+                  }
+                >
                   <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-3 overflow-hidden">
                     <ReactCountryFlag
                       countryCode={lang.code}
                       svg
                       style={{
-                        fontSize: '3rem',
-                        lineHeight: '3rem',
+                        fontSize: "3rem",
+                        lineHeight: "3rem",
                       }}
                       title={lang.name}
                     />
@@ -723,7 +722,6 @@ export default function HomepageComponent() {
         id="courses-section"
         className="py-14 px-6 md:px-17 container mx-auto"
       >
-        {/* Khóa học có nhiều học viên */}
         {Object.entries(courseInL).map(([lang, courses]) => (
           <div key={lang}>
             <CourseSection
@@ -735,7 +733,7 @@ export default function HomepageComponent() {
         ))}
       </div>
 
-      {/* Features Section with Bento Grid Layout */}
+      {/* Features Section with Bento Grid */}
       <div className="bg-gradient-to-br from-slate-100 via-cyan-50 to-orange-50 py-20 relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute top-17 right-17 w-61 h-61 bg-[#06B6D4]/20 rounded-full blur-3xl animate-pulse"></div>
@@ -759,7 +757,7 @@ export default function HomepageComponent() {
 
           {/* Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-7xl mx-auto">
-            {/* Feature 1 - Large Card */}
+            {/* Feature 1 */}
             <div className="md:col-span-2 md:row-span-2 group relative">
               <div className="absolute inset-0 bg-gradient-to-br from-[#06B6D4] to-[#0891B2] rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
               <div className="relative h-full bg-gradient-to-br from-[#06B6D4] to-[#0891B2] rounded-3xl p-8 shadow-2xl hover:shadow-[#06B6D4]/50 transition-all duration-500 transform hover:scale-[1.02] cursor-pointer overflow-hidden">
@@ -793,7 +791,7 @@ export default function HomepageComponent() {
               </div>
             </div>
 
-            {/* Feature 2 - Medium Card */}
+            {/* Feature 2 */}
             <div className="group relative">
               <div className="absolute inset-0 bg-gradient-to-br from-[#F97316] to-[#EA580C] rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
               <div className="relative h-full bg-gradient-to-br from-[#F97316] to-[#EA580C] rounded-3xl p-6 shadow-2xl hover:shadow-[#F97316]/50 transition-all duration-500 transform hover:scale-[1.02] cursor-pointer overflow-hidden">
@@ -814,7 +812,7 @@ export default function HomepageComponent() {
               </div>
             </div>
 
-            {/* Feature 3 - Medium Card */}
+            {/* Feature 3 */}
             <div className="group relative">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
               <div className="relative h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 shadow-2xl hover:shadow-purple-500/50 transition-all duration-500 transform hover:scale-[1.02] cursor-pointer overflow-hidden">
