@@ -52,6 +52,8 @@ export const API_ENDPOINTS = {
         // AI
         GENERATE_FEEDBACK: '/api/creator/AI/generateFeeback',
         ANALYZE_IMAGE: '/api/creator/AI/task1/analyze',
+        CREATE_PAYPAL_CODE: '/api/creator/code-paypal',          // POST
+        CHANGE_PAYPAL_EMAIL: '/api/creator/change-ppEmail', 
     },
 
     // Course

@@ -438,5 +438,37 @@ getCommercialCourse: () => {
             }}
           ), {
             errorMessage: 'loi khi xoa content'
-        })}
+        })},
+            /**
+     * Gửi mã xác thực PayPal đến email hiện tại của Creator
+     */
+    sendPaypalVerificationCode: () => {
+        return callApi(
+            () => apiclient.post(API_ENDPOINTS.CREATOR.CREATE_PAYPAL_CODE),
+            {
+                errorMessage: 'Không thể gửi mã xác thực PayPal',
+                showNotification: true
+            }
+        );
+    },
+
+    /**
+     * Thay đổi email PayPal sau khi nhập mã xác thực
+     * @param {string} newPaypalEmail - Email PayPal mới
+     * @param {string} code - Mã xác thực đã được gửi
+     */
+    changePaypalEmail: (newPaypalEmail, code) => {
+        return callApi(
+            () => apiclient.put(
+                API_ENDPOINTS.CREATOR.CHANGE_PAYPAL_EMAIL,
+                null,
+                { params: { newPaypal: newPaypalEmail, code } }
+            ),
+            {
+                errorMessage: 'Không thể thay đổi email PayPal',
+                showNotification: true
+            }
+        );
+    },
+
 };

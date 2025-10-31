@@ -1,17 +1,24 @@
 import React, { useMemo, useState } from 'react';
-import { CheckCircle, AlertCircle, User, Camera, FileText, Award, CreditCard, X, Edit3, Upload } from 'lucide-react';
+import { CheckCircle, AlertCircle, User, Camera, FileText, Award, CreditCard, X, Edit3, Upload, Mail } from 'lucide-react';
 import { useAuth } from './security/Authentication';
 import { PayPalVerificationForm } from './PayPalVerificationForm';
 import { CertificateUploadForm } from './CertificateUploadForm';
 import { getCreatorAccount } from './api/ApiConnect';
 import { creatorApi } from './api/creatorApi';
-import { showErrorNotification } from './api/apiClient';
+import { showErrorNotification, showSuccessNotification } from './api/apiClient';
 
 const CreatorAccountInfo = () => {
   const { setCreatorInfor, creatorInfor } = useAuth();
   const [selectedItem, setSelectedItem] = useState(null);
   const [showEditInfoPopup, setShowEditInfoPopup] = useState(false);
   const [showImageUploadPopup, setShowImageUploadPopup] = useState(false);
+  const [showChangePaypalPopup, setShowChangePaypalPopup] = useState(false);
+  const [showVerificationCodePopup, setShowVerificationCodePopup] = useState(false);
+  const [newPaypalEmail, setNewPaypalEmail] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isLoadingCode, setIsLoadingCode] = useState(false);
+  const [isChangingPaypal, setIsChangingPaypal] = useState(false);
+  
   const [editFormData, setEditFormData] = useState({
     fullName: '',
     phone: '',
@@ -58,7 +65,7 @@ const CreatorAccountInfo = () => {
         title: 'Chứng chỉ cá nhân', 
         description: 'Chứng minh trình độ học vấn của bạn', 
         required: false, 
-        completed: !!creatorInfor.certificateUrl,
+        completed: creatorInfor.certificateUrl.length>0,
         data: {
           certificateUrl: creatorInfor.certificateUrl
         }
@@ -135,6 +142,54 @@ const CreatorAccountInfo = () => {
     await reload(); // Reload to get updated data
   };
 
+  // Handle PayPal email change flow
+  const handleChangePaypalClick = () => {
+    setNewPaypalEmail('');
+    setShowChangePaypalPopup(true);
+    setSelectedItem(null);
+  };
+
+  const handleSendVerificationCode = async () => {
+    if (!newPaypalEmail || !newPaypalEmail.includes('@')) {
+      showErrorNotification('Vui lòng nhập email PayPal hợp lệ');
+      return;
+    }
+
+    setIsLoadingCode(true);
+    const response = await creatorApi.sendPaypalVerificationCode();
+    setIsLoadingCode(false);
+
+    if (response.success) {
+      showSuccessNotification('Mã xác thực đã được gửi đến email của bạn');
+      setShowChangePaypalPopup(false);
+      setShowVerificationCodePopup(true);
+      setVerificationCode('');
+    } else {
+      showErrorNotification(response.error || 'Không thể gửi mã xác thực');
+    }
+  };
+
+  const handleConfirmChangePaypal = async () => {
+    if (!verificationCode || verificationCode.trim().length === 0) {
+      showErrorNotification('Vui lòng nhập mã xác thực');
+      return;
+    }
+
+    setIsChangingPaypal(true);
+    const response = await creatorApi.changePaypalEmail(newPaypalEmail, verificationCode);
+    setIsChangingPaypal(false);
+
+    if (response.success) {
+      showSuccessNotification('Đã thay đổi email PayPal thành công');
+      setShowVerificationCodePopup(false);
+      setNewPaypalEmail('');
+      setVerificationCode('');
+      await reload();
+    } else {
+      showErrorNotification(response.error || 'Không thể thay đổi email PayPal');
+    }
+  };
+
   const getIcon = (key) => {
     const iconProps = { size: 24, className: "text-white" };
     switch (key) {
@@ -209,7 +264,8 @@ const CreatorAccountInfo = () => {
         );
       
       case 'certification':
-        return selectedItem.data.certificateUrl ? (
+       
+        return selectedItem.data.certificateUrl && selectedItem.data.certificateUrl.length > 0? (
           <div>
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
               <Award size={40} className="text-blue-600" />
@@ -371,7 +427,12 @@ const CreatorAccountInfo = () => {
                   <button
                     onClick={() => {
                       if (item.key === 'payment') {
-                        setShowPayPalForm(true);
+                        // Nếu đã có PayPal email thì mở popup đổi email, ngược lại mở form thiết lập ban đầu
+                        if (item.completed) {
+                          handleChangePaypalClick();
+                        } else {
+                          setShowPayPalForm(true);
+                        }
                       } else if (item.key === 'certification') {
                         setShowCertificateForm(true);
                       } else if (item.key === 'info') {
@@ -477,6 +538,230 @@ const CreatorAccountInfo = () => {
         </div>
       )}
 
+      {/* Change PayPal Email Popup - Step 1: Nhập email mới */}
+      {showChangePaypalPopup && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fadeIn"
+          onClick={() => setShowChangePaypalPopup(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-xl max-w-md w-full animate-slideUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Popup Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#06B6D4] shadow-sm">
+                  <Mail size={24} className="text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-[#1E293B]">
+                  Đổi email PayPal
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowChangePaypalPopup(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X size={24} className="text-gray-600" />
+              </button>
+            </div>
+
+            {/* Popup Content */}
+            <div className="p-6">
+              <div className="space-y-6">
+                {/* Current Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email PayPal hiện tại
+                  </label>
+                  <p className="text-gray-900 text-lg font-medium p-3 bg-gray-50 rounded-lg">
+                    {creatorInfor.paypalEmail}
+                  </p>
+                </div>
+
+                {/* New Email Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email PayPal mới <span className="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="email" 
+                    value={newPaypalEmail}
+                    onChange={(e) => setNewPaypalEmail(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent transition-all"
+                    placeholder="Nhập email PayPal mới"
+                  />
+                </div>
+
+                {/* Info Alert */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex gap-3">
+                    <AlertCircle size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-blue-800">
+                      <p className="font-medium mb-1">Lưu ý:</p>
+                      <p>Sau khi nhấn xác nhận, một mã xác thực sẽ được gửi đến email hiện tại của bạn. Vui lòng kiểm tra hộp thư để lấy mã.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Popup Footer */}
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
+              <button
+                onClick={() => setShowChangePaypalPopup(false)}
+                className="px-6 py-3 border-2 rounded-lg font-medium transition-colors hover:bg-gray-100 border-[#06B6D4] text-[#06B6D4]"
+                disabled={isLoadingCode}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleSendVerificationCode}
+                disabled={isLoadingCode || !newPaypalEmail}
+                className={`px-6 py-3 rounded-lg font-medium text-white transition-colors shadow-sm flex items-center gap-2 ${
+                  isLoadingCode || !newPaypalEmail
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-[#06B6D4] hover:bg-[#0891b2]'
+                }`}
+              >
+                {isLoadingCode ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Đang gửi...
+                  </>
+                ) : (
+                  <>
+                    <Mail size={18} />
+                    Gửi mã xác thực
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Verification Code Popup - Step 2: Nhập mã xác thực */}
+      {showVerificationCodePopup && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fadeIn"
+          onClick={() => setShowVerificationCodePopup(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-xl max-w-md w-full animate-slideUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Popup Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#06B6D4] shadow-sm">
+                  <Mail size={24} className="text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-[#1E293B]">
+                  Nhập mã xác thực
+                </h2>
+              </div>
+              <button 
+                onClick={() => setShowVerificationCodePopup(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X size={24} className="text-gray-600" />
+              </button>
+            </div>
+
+           {/* Popup Content */}
+            <div className="p-6">
+              <div className="space-y-6">
+                {/* Success message */}
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex gap-3">
+                    <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-green-800">
+                      <p className="font-medium mb-1">Mã đã được gửi!</p>
+                      <p>Vui lòng kiểm tra email <strong>{creatorInfor.paypalEmail}</strong> để lấy mã xác thực.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* New Email Display */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email PayPal mới
+                  </label>
+                  <p className="text-gray-900 text-lg font-medium p-3 bg-gray-50 rounded-lg">
+                    {newPaypalEmail}
+                  </p>
+                </div>
+
+                {/* Verification Code Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mã xác thực <span className="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#06B6D4] focus:border-transparent transition-all text-center text-2xl tracking-widest font-mono"
+                    placeholder="000000"
+                    maxLength={6}
+                  />
+                  <p className="text-sm text-gray-500 mt-2">
+                    Nhập mã 6 chữ số đã được gửi đến email của bạn
+                  </p>
+                </div>
+
+                {/* Resend code */}
+                <div className="text-center">
+                  <button
+                    onClick={handleSendVerificationCode}
+                    disabled={isLoadingCode}
+                    className="text-sm text-[#06B6D4] hover:text-[#0891b2] font-medium transition-colors disabled:opacity-50"
+                  >
+                    {isLoadingCode ? 'Đang gửi lại...' : 'Gửi lại mã xác thực'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Popup Footer */}
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
+              <button
+                onClick={() => {
+                  setShowVerificationCodePopup(false);
+                  setVerificationCode('');
+                }}
+                className="px-6 py-3 border-2 rounded-lg font-medium transition-colors hover:bg-gray-100 border-[#06B6D4] text-[#06B6D4]"
+                disabled={isChangingPaypal}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmChangePaypal}
+                disabled={isChangingPaypal || !verificationCode}
+                className={`px-6 py-3 rounded-lg font-medium text-white transition-colors shadow-sm flex items-center gap-2 ${
+                  isChangingPaypal || !verificationCode
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-[#06B6D4] hover:bg-[#0891b2]'
+                }`}
+              >
+                {isChangingPaypal ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Đang xử lý...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle size={18} />
+                    Xác nhận thay đổi
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Edit Info Popup */}
       {showEditInfoPopup && (
         <div 
@@ -552,9 +837,6 @@ const CreatorAccountInfo = () => {
                     Hãy viết ít nhất 100 ký tự để giới thiệu bản thân một cách chuyên nghiệp
                   </p>
                 </div>
-
-                {/* Current Info Preview */}
-                
               </div>
             </div>
 
