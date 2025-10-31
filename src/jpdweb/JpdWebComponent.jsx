@@ -45,6 +45,9 @@ import TransactionsListPage from "./adminPages/TransactionsListPage";
 import RevenueReportPage from "./adminPages/RevenueReportPage";
 import SystemOverview from "./adminPages/SystemOverview";
 import AdminDiagnosticsPage from "./adminPages/AdminDiagnosticsPage";
+import AdminRoute from "./AdminRoute";
+import AdminHeader from "./adminPages/AdminHeader";
+import Unauthorized from "./Unauthorized";
 export default function JpdWebComponent(){
   const [isCreator, setCreator] = useState(false);
   const [showDirect, setShowDirect] = useState(false);
@@ -66,19 +69,24 @@ export default function JpdWebComponent(){
 }
 
 // Tách phần content ra component riêng để có thể sử dụng useAuth
-function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
-  const auth = useAuth(); // Bây giờ mới có thể dùng useAuth
-const location = useLocation();
+function JpdWebContent() {
+  const auth = useAuth();
+  const location = useLocation();
+  const [isCreator, setCreator] = useState(false);
+  const [showDirect, setShowDirect] = useState(false);
+  
   const isCreatorPage = location.pathname.startsWith('/creator');
+  const isAdminPage = location.pathname.startsWith('/admin');
+
   return (
     <>
-      <HeaderComponent />
+      {/* ✅ LUÔN hiển thị Header (cho cả user chưa đăng nhập) */}
+      {auth.isAdmin && isAdminPage ? <AdminHeader /> : <HeaderComponent />}
       
-      {/* Chỉ hiển thị khi đã authenticated */}
-     
-      {auth.isAuthentication && (
+      {/* ✅ CHỈ hiển thị Dictionary và Creator Sidebar cho USER ĐÃ ĐĂNG NHẬP (không phải admin) */}
+      {auth.isAuthentication && !auth.isAdmin && (
         <>
-          {/* ✅ Chỉ hiển thị TỪ ĐIỂN nếu KHÔNG phải trang /creator */}
+          {/* Dictionary - Chỉ hiển thị khi KHÔNG ở trang creator */}
           {!isCreatorPage && (
             <>
               {/* Floating Dictionary Button */}
@@ -88,7 +96,7 @@ const location = useLocation();
                 onClick={() => setShowDirect(true)}
                 style={{
                   position: 'fixed',
-                  bottom: '25px', // dịch lên 1 chút
+                  bottom: '25px',
                   right: '20px',
                   zIndex: 998,
                   borderRadius: '50px',
@@ -135,13 +143,7 @@ const location = useLocation();
                 >
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <BookOpen size={24} className="text-primary me-2" />
-                    <h4
-                      style={{
-                        margin: '0',
-                        color: '#2c3e50',
-                        fontWeight: '600'
-                      }}
-                    >
+                    <h4 style={{ margin: '0', color: '#2c3e50', fontWeight: '600' }}>
                       Từ Điển Cá Nhân
                     </h4>
                   </div>
@@ -171,7 +173,7 @@ const location = useLocation();
             </>
           )}
 
-          {/* Nút mở Creator Sidebar */}
+          {/* Creator Sidebar Toggle Button - CHỈ hiển thị cho user đã đăng nhập */}
           <button
             onClick={() => setCreator((prev) => !prev)}
             style={{
@@ -209,8 +211,7 @@ const location = useLocation();
                 backgroundColor: '#fdfdfd',
                 boxShadow: '2px 0 15px rgba(0,0,0,0.1)',
                 zIndex: 999,
-                transition:
-                  'left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                transition: 'left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                 borderRight: '1px solid #e9ecef',
                 display: 'flex',
                 flexDirection: 'column'
@@ -221,15 +222,95 @@ const location = useLocation();
           )}
         </>
       )}
-  
 
       {/* Main Content */}
-     <div className="main-content bg-white" style={{ paddingTop: '70px' }}>
+      <div className="main-content bg-white" style={{ paddingTop: isAdminPage ? '0px' : '70px' }}>
         <Routes>
+          {/* ✅ PUBLIC ROUTES - Không cần đăng nhập */}
           <Route path="/" element={<HomepageComponent />} />
           <Route path="/login" element={<LoginComponent />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/course_result/:name" element={<CoursesResultComponent />} />
+          <Route path="/course/specific/:id" element={<CourseDescription />} />
           
-          {/* Regular Protected Routes */}
+          {/* ✅ PUBLIC - Student Join Kahoot (không cần đăng nhập) */}
+          <Route path="/creator/class/kahoot/studentJoin/:id" element={<StudentJoin />} />
+          
+          {/* ✅ ADMIN ROUTES - Cần đăng nhập + Admin role */}
+          <Route 
+            path="/admin/app_overview" 
+            element={
+              <AdminRoute>
+                <SystemOverview />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/creator-page" 
+            element={
+              <AdminRoute>
+                <AdminCreatorManagement />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/creatorDetail/:id" 
+            element={
+              <AdminRoute>
+                <AdminCreatorDetail />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/pending-certificate" 
+            element={
+              <AdminRoute>
+                <AdminPendingCertificates />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/violent-history/:creatorId" 
+            element={
+              <AdminRoute>
+                <CreatorViolationsHistory />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/auditlog-history/:creatorId" 
+            element={
+              <AdminRoute>
+                <CreatorAuditLogs />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/transaction-page" 
+            element={
+              <AdminRoute>
+                <TransactionsListPage />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/statistic-revenue" 
+            element={
+              <AdminRoute>
+                <RevenueReportPage />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/diagnosticsPage" 
+            element={
+              <AdminRoute>
+                <AdminDiagnosticsPage />
+              </AdminRoute>
+            } 
+          />
+
+          {/* ✅ USER PROTECTED ROUTES - Cần đăng nhập */}
           <Route 
             path="/mylearning" 
             element={
@@ -238,8 +319,6 @@ const location = useLocation();
               </ProtectedRoute>
             } 
           />
-          <Route path="/course_result/:name" element={<CoursesResultComponent />} />
-          <Route path="/course/specific/:id" element={<CourseDescription />} />
           <Route 
             path="/course/content_overview/:id" 
             element={
@@ -248,7 +327,7 @@ const location = useLocation();
               </ProtectedRoute>
             } 
           />
-           <Route 
+          <Route 
             path="/transaction-detail"
             element={
               <ProtectedRoute>
@@ -256,86 +335,6 @@ const location = useLocation();
               </ProtectedRoute>
             } 
           />
-
-         
-         
-          {/*admin*/}
-           <Route 
-            path="/admin/creator-page" 
-            element={
-              <ProtectedRoute>
-                <AdminCreatorManagement />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/creatorDetail/:id" 
-            element={
-              <ProtectedRoute>
-                <AdminCreatorDetail />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/pending-certificate" 
-            element={
-              <ProtectedRoute>
-                <AdminPendingCertificates />
-              </ProtectedRoute>
-            } 
-          />
-           <Route 
-            path="/admin/violent-history/:creatorId" 
-            element={
-              <ProtectedRoute>
-                <CreatorViolationsHistory />
-              </ProtectedRoute>
-            } 
-          />
-            <Route 
-            path="/admin/auditlog-history/:creatorId" 
-            element={
-              <ProtectedRoute>
-                <CreatorAuditLogs />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/transaction-page" 
-            element={
-              <ProtectedRoute>
-                <TransactionsListPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/statistic-revenue" 
-            element={
-              <ProtectedRoute>
-                <RevenueReportPage />
-              </ProtectedRoute>
-              
-            } 
-          />
-           <Route 
-            path="/admin/app_overview" 
-            element={
-              <ProtectedRoute>
-                <SystemOverview />
-              </ProtectedRoute>
-              
-            } 
-          />
-           <Route 
-            path="/admin/diagnosticsPage" 
-            element={
-              <ProtectedRoute>
-                <AdminDiagnosticsPage />
-              </ProtectedRoute>
-              
-            } 
-          />
-          {/* Upload Profile - Chỉ cần authentication */}
           <Route 
             path="/upload_profile" 
             element={
@@ -344,7 +343,7 @@ const location = useLocation();
               </ProtectedRoute>
             } 
           />
-           <Route 
+          <Route 
             path="/creator/commercial/history_transaction" 
             element={
               <ProtectedRoute>
@@ -360,7 +359,8 @@ const location = useLocation();
               </ProtectedRoute>
             } 
           />
-          {/* Creator Routes - Cần authentication + isCreator = true */}
+
+          {/* ✅ CREATOR PROTECTED ROUTES - Cần đăng nhập + Creator role */}
           <Route 
             path="/creator/commercial/dashboard" 
             element={
@@ -377,36 +377,28 @@ const location = useLocation();
               </CreatorProtectedRoute>
             } 
           />
-           <Route 
+          <Route 
             path="/creator/class/kahoot" 
             element={
               <CreatorProtectedRoute>
-                <KahootList></KahootList>
+                <KahootList />
               </CreatorProtectedRoute>
             } 
           />
-            <Route 
+          <Route 
             path="/creator/class/kahoot/:id" 
             element={
               <CreatorProtectedRoute>
-                <KahootSpecificContent></KahootSpecificContent>
+                <KahootSpecificContent />
               </CreatorProtectedRoute>
             } 
           />
-           <Route 
+          <Route 
             path="/creator/class/kahoot/:id/start" 
             element={
               <CreatorProtectedRoute>
-                <TeacherDashboard></TeacherDashboard>
+                <TeacherDashboard />
               </CreatorProtectedRoute>
-            } 
-          />
-            <Route 
-            path="/creator/class/kahoot/studentJoin/:id" 
-            element={
-              
-                <StudentJoin></StudentJoin>
-             
             } 
           />
           <Route 
@@ -452,7 +444,8 @@ const location = useLocation();
         </Routes>
       </div>
       
-      <FooterComponent />
+      {/* ✅ LUÔN hiển thị Footer (trừ admin pages) */}
+      {!isAdminPage && <FooterComponent />}
     </>
   );
 }
