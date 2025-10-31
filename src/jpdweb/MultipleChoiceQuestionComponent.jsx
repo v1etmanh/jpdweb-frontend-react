@@ -23,67 +23,73 @@ export default function QuestionCard({ mulptipleQuizz, isFeedBack, increNum }) {
 
   const isCorrect = submitted && mulptipleQuizz.options[selected]?.correct;
 
-  // Kahoot color schemes for options
+  // Modern color schemes based on 30-10 rule
   const optionColors = [
-    { bg: "bg-red-500", hover: "hover:bg-red-600", border: "border-red-600", selected: "bg-red-600" },
-    { bg: "bg-blue-500", hover: "hover:bg-blue-600", border: "border-blue-600", selected: "bg-blue-600" },
-    { bg: "bg-yellow-500", hover: "hover:bg-yellow-600", border: "border-yellow-600", selected: "bg-yellow-600" },
-    { bg: "bg-green-600", hover: "hover:bg-green-700", border: "border-green-700", selected: "bg-green-700" }
+    { 
+      bg: "bg-[#06B6D4]", 
+      hover: "hover:bg-[#0891B2]", 
+      selected: "bg-[#0891B2]",
+      light: "bg-[#ECFEFF]",
+      border: "border-[#06B6D4]"
+    },
+    { 
+      bg: "bg-[#0EA5E9]", 
+      hover: "hover:bg-[#0284C7]", 
+      selected: "bg-[#0284C7]",
+      light: "bg-[#F0F9FF]",
+      border: "border-[#0EA5E9]"
+    },
+    { 
+      bg: "bg-[#06B6D4]", 
+      hover: "hover:bg-[#0891B2]", 
+      selected: "bg-[#0891B2]",
+      light: "bg-[#ECFEFF]",
+      border: "border-[#06B6D4]"
+    },
+    { 
+      bg: "bg-[#0EA5E9]", 
+      hover: "hover:bg-[#0284C7]", 
+      selected: "bg-[#0284C7]",
+      light: "bg-[#F0F9FF]",
+      border: "border-[#0EA5E9]"
+    }
   ];
 
-  // Kahoot shapes for options
-  const shapes = [
-    <svg viewBox="0 0 100 100" className="w-12 h-12" fill="currentColor">
-      <polygon points="50,10 90,90 10,90" />
-    </svg>,
-    <svg viewBox="0 0 100 100" className="w-12 h-12" fill="currentColor">
-      <polygon points="50,15 85,50 50,85 15,50" />
-    </svg>,
-    <svg viewBox="0 0 100 100" className="w-12 h-12" fill="currentColor">
-      <circle cx="50" cy="50" r="40" />
-    </svg>,
-    <svg viewBox="0 0 100 100" className="w-12 h-12" fill="currentColor">
-      <rect x="15" y="15" width="70" height="70" />
-    </svg>
-  ];
+  const optionLabels = ["A", "B", "C", "D"];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-purple-50 to-white flex flex-col">
-
-      {/* Header with question */}
-      <div className="flex justify-center p-4 mb-4">
-        <h2 className="text-4xl md:text-5xl font-bold text-black text-center max-w-4xl drop-shadow-lg">
+    <div className="question-card-container">
+      {/* Question Header - No card, directly on container */}
+      <div className="question-header">
+        <h2 className="question-text">
           {mulptipleQuizz.questionText}
         </h2>
       </div>
 
-      {/* Options grid */}
-      <div className="grid grid-cols-2 gap-4 p-4 pb-8">
+      {/* Options Grid */}
+      <div className="options-grid">
         {mulptipleQuizz.options.map((option, i) => {
           const isOptionSelected = selected === i;
           const isOptionCorrect = submitted && option.correct;
           const isOptionWrong = submitted && isOptionSelected && !option.correct;
-          const colorScheme = optionColors[i % 4];
+          const colorScheme = optionColors[i];
 
           return (
             <label
               key={i}
               htmlFor={`option-${mulptipleQuizz.mcId}-${option.mcoId}`}
               className={`
-                relative rounded-xl p-6 cursor-pointer transition-all duration-300 
-                ${isOptionSelected && !submitted ? colorScheme.selected : colorScheme.bg}
-                ${!submitted && !isOptionSelected && colorScheme.hover}
-                ${isOptionSelected && !submitted ? 'ring-8 ring-white ring-offset-4 ring-offset-purple-300 scale-105 shadow-2xl' : 'hover:scale-105'}
-                ${submitted ? 'cursor-default' : ''}
-                ${isOptionCorrect ? 'ring-8 ring-green-400 ring-offset-4 ring-offset-green-200 scale-105' : ''}
-                ${isOptionWrong ? 'ring-8 ring-red-400 ring-offset-4 ring-offset-red-200 opacity-60' : ''}
-                ${!isOptionSelected && !submitted ? 'shadow-lg hover:shadow-xl' : ''}
-                flex items-center gap-4
-                min-h-[120px]
-                ${isOptionSelected && !submitted ? 'animate-pulse-soft' : ''}
+                option-card
+                ${isOptionSelected && !submitted ? 'option-selected' : ''}
+                ${submitted ? 'option-submitted' : ''}
+                ${isOptionCorrect ? 'option-correct' : ''}
+                ${isOptionWrong ? 'option-wrong' : ''}
               `}
               style={{
-                transform: isOptionSelected && !submitted ? 'translateY(-4px)' : 'translateY(0)',
+                '--primary-color': colorScheme.bg.replace('bg-', ''),
+                '--hover-color': colorScheme.hover.replace('hover:', '').replace('bg-', ''),
+                '--selected-color': colorScheme.selected.replace('bg-', ''),
+                '--light-color': colorScheme.light.replace('bg-', '')
               }}
             >
               <input
@@ -94,79 +100,81 @@ export default function QuestionCard({ mulptipleQuizz, isFeedBack, increNum }) {
                 checked={isOptionSelected}
                 onChange={handleSelect}
                 disabled={submitted}
-                className="hidden"
+                className="option-input"
               />
               
-              {/* Shape icon with glow effect when selected */}
-              <div className={`text-white flex-shrink-0 transition-all duration-300 ${
-                isOptionSelected && !submitted ? 'drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] scale-110' : ''
-              }`}>
-                {shapes[i % 4]}
+              {/* Option Indicator - Only letter */}
+              <div className="option-indicator">
+                <span className="option-label">{optionLabels[i]}</span>
               </div>
 
-              {/* Option text */}
-              <span className={`text-white font-bold text-xl flex-1 transition-all duration-300 ${
-                isOptionSelected && !submitted ? 'scale-105' : ''
-              }`}>
-                {option.optionText}
-              </span>
+              {/* Option Content */}
+              <div className="option-content">
+                <span className="option-text">
+                  {option.optionText}
+                </span>
+                
+                {/* Feedback Icons */}
+                {submitted && option.correct && (
+                  <div className="feedback-icon correct">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                    </svg>
+                  </div>
+                )}
+                {isOptionWrong && (
+                  <div className="feedback-icon wrong">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/>
+                    </svg>
+                  </div>
+                )}
+              </div>
 
-              {/* Selection indicator */}
+              {/* Selection Glow */}
               {isOptionSelected && !submitted && (
-                <div className="absolute -top-2 -right-2 bg-white text-purple-700 rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl shadow-lg animate-bounce-soft">
-                  ✓
-                </div>
-              )}
-
-              {/* Feedback icons */}
-              {submitted && option.correct && (
-                <span className="text-white text-4xl flex-shrink-0 animate-bounce-soft">✓</span>
-              )}
-              {isOptionWrong && (
-                <span className="text-white text-4xl flex-shrink-0">✕</span>
+                <div className="selection-glow"></div>
               )}
             </label>
           );
         })}
       </div>
 
-      {/* Submit button */}
+      {/* Submit Button */}
       {!submitted && (
-        <div className="p-4 pb-8">
+        <div className="submit-section">
           <button
             type="button"
             onClick={handleSubmit}
             disabled={selected === null}
-            className={`w-full max-w-md mx-auto block py-4 px-8 font-bold text-xl rounded-xl shadow-lg transition-all
-              ${selected !== null 
-                ? 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-xl hover:scale-105 animate-pulse-soft' 
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }
-            `}
+            className={`submit-button ${selected !== null ? 'submit-active' : 'submit-disabled'}`}
           >
-            {selected !== null ? '✓ Submit Answer' : 'Select an answer'}
+            {selected !== null ? (
+              <>
+                <svg className="button-icon" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                </svg>
+                Xác nhận câu trả lời
+              </>
+            ) : (
+              'Chọn một đáp án'
+            )}
           </button>
         </div>
       )}
 
-      {/* Feedback section */}
+      {/* Feedback Section - Updated with subtle design */}
       {isFeedBack && submitted && (
-        <div className="p-4 pb-8">
-          <div
-            className={`max-w-md mx-auto p-6 rounded-xl shadow-lg ${
-              isCorrect
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
-            }`}
-          >
-            <div className="text-center">
-              <div className="text-3xl mb-2">
-                {isCorrect ? "🎉" : "😔"}
+        <div className="feedback-section">
+          <div className={`feedback-card ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`}>
+            <div className="feedback-content">
+              <div className="feedback-title">
+                {isCorrect ? "Chính xác! 🎉" : "Cần cải thiện"}
               </div>
-              <div className="font-bold text-2xl">
+              <div className="feedback-message">
                 {isCorrect
-                  ? "Great job!"
-                  : mulptipleQuizz.feedBack || "Incorrect answer"}
+                  ? "Bạn đã trả lời đúng!"
+                  : mulptipleQuizz.feedBack || "Hãy xem lại kiến thức và thử lại!"}
               </div>
             </div>
           </div>
@@ -174,30 +182,341 @@ export default function QuestionCard({ mulptipleQuizz, isFeedBack, increNum }) {
       )}
 
       <style jsx>{`
-        @keyframes pulse-soft {
+        .question-card-container {
+          background: #F1F5F9;
+          width: 100%;
+          padding: 1.5rem;
+          font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+          border-radius: 12px;
+          box-sizing: border-box;
+        }
+
+        .question-header {
+          text-align: center;
+          margin-bottom: 1.5rem;
+          padding: 0;
+        }
+
+        .question-text {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #1E293B;
+          line-height: 1.5;
+          margin: 0;
+        }
+
+        .options-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .option-card {
+          position: relative;
+          background: white;
+          border: 2px solid #E2E8F0;
+          border-radius: 12px;
+          padding: 1.25rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          min-height: 80px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          box-sizing: border-box;
+        }
+
+        .option-card:hover:not(.option-submitted) {
+          border-color: var(--primary-color);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(6, 182, 212, 0.15);
+        }
+
+        .option-selected {
+          border-color: var(--selected-color) !important;
+          background: var(--light-color);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(6, 182, 212, 0.2);
+        }
+
+        .option-correct {
+          border-color: #10B981 !important;
+          background: #ECFDF5 !important;
+          color: #065F46;
+        }
+
+        .option-wrong {
+          border-color: #EF4444 !important;
+          background: #FEF2F2 !important;
+          color: #7F1D1D;
+          opacity: 0.7;
+        }
+
+        .option-input {
+          display: none;
+        }
+
+        .option-indicator {
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+        }
+
+        .option-label {
+          background: #06B6D4;
+          color: white;
+          width: 2.25rem;
+          height: 2.25rem;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 0.9rem;
+          transition: all 0.3s ease;
+        }
+
+        .option-selected .option-label {
+          background: #F97316;
+          transform: scale(1.1);
+        }
+
+        .option-content {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex: 1;
+          gap: 1rem;
+        }
+
+        .option-text {
+          font-weight: 500;
+          color: #1E293B;
+          font-size: 0.95rem;
+          line-height: 1.4;
+          flex: 1;
+        }
+
+        .option-correct .option-text,
+        .option-wrong .option-text {
+          font-weight: 600;
+        }
+
+        .feedback-icon {
+          width: 1.75rem;
+          height: 1.75rem;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .feedback-icon.correct {
+          background: #10B981;
+          color: white;
+        }
+
+        .feedback-icon.wrong {
+          background: #EF4444;
+          color: white;
+        }
+
+        .selection-glow {
+          position: absolute;
+          top: -2px;
+          left: -2px;
+          right: -2px;
+          bottom: -2px;
+          border-radius: 12px;
+          background: linear-gradient(45deg, #06B6D4, #F97316);
+          z-index: -1;
+          animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .submit-section {
+          padding: 0.5rem 0 1rem;
+          text-align: center;
+        }
+
+        .submit-button {
+          background: #06B6D4;
+          color: white;
+          border: none;
+          border-radius: 50px;
+          padding: 0.875rem 2rem;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.75rem;
+          box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+
+        .submit-active:hover {
+          background: #0891B2;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+        }
+
+        .submit-disabled {
+          background: #CBD5E1;
+          color: #64748B;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .button-icon {
+          width: 1.125rem;
+          height: 1.125rem;
+        }
+
+        .feedback-section {
+          padding: 0.5rem 0 1rem;
+        }
+
+        .feedback-card {
+          max-width: 100%;
+          margin: 0 auto;
+          padding: 1rem 1.25rem;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+          box-sizing: border-box;
+          border: 1px solid #E2E8F0;
+        }
+
+        .feedback-correct {
+          background: #F8FAFC;
+          color: #1E293B;
+          border-left: 4px solid #06B6D4;
+        }
+
+        .feedback-wrong {
+          background: #F8FAFC;
+          color: #1E293B;
+          border-left: 4px solid #EF4444;
+        }
+
+        .feedback-content {
+          flex: 1;
+          text-align: center;
+        }
+
+        .feedback-title {
+          font-size: 1rem;
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+          color: #06B6D4;
+        }
+
+        .feedback-wrong .feedback-title {
+          color: #EF4444;
+        }
+
+        .feedback-message {
+          font-size: 0.875rem;
+          opacity: 0.8;
+        }
+
+        @keyframes pulse-glow {
           0%, 100% {
             opacity: 1;
           }
           50% {
-            opacity: 0.95;
+            opacity: 0.7;
           }
         }
-        
-        @keyframes bounce-soft {
-          0%, 100% {
-            transform: translateY(0);
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .question-card-container {
+            padding: 1rem;
           }
-          50% {
-            transform: translateY(-5px);
+
+          .question-header {
+            margin-bottom: 1rem;
+          }
+
+          .question-text {
+            font-size: 1.1rem;
+          }
+
+          .options-grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+          }
+
+          .option-card {
+            padding: 1rem;
+            min-height: 70px;
+            gap: 0.75rem;
+          }
+
+          .option-text {
+            font-size: 0.9rem;
+          }
+
+          .submit-button {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+          }
+
+          .feedback-card {
+            padding: 0.875rem 1rem;
+          }
+
+          .feedback-title {
+            font-size: 0.95rem;
+          }
+
+          .feedback-message {
+            font-size: 0.85rem;
           }
         }
-        
-        .animate-pulse-soft {
-          animation: pulse-soft 2s ease-in-out infinite;
-        }
-        
-        .animate-bounce-soft {
-          animation: bounce-soft 1s ease-in-out infinite;
+
+        @media (max-width: 480px) {
+          .question-card-container {
+            padding: 0.75rem;
+          }
+
+          .question-text {
+            font-size: 1rem;
+          }
+
+          .option-card {
+            padding: 0.875rem;
+            min-height: 65px;
+            gap: 0.625rem;
+          }
+
+          .option-label {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.85rem;
+            border-radius: 8px;
+          }
+
+          .option-text {
+            font-size: 0.875rem;
+          }
+
+          .submit-button {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.9rem;
+          }
+          
+          .feedback-card {
+            padding: 0.75rem 1rem;
+          }
         }
       `}</style>
     </div>
