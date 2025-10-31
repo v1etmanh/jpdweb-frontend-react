@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 
 export default function ReadingMultipleChoiceComponent({ 
   mulptipleQuizz, 
-  incre, 
   questionNumber,
   selectedAnswer,
   onAnswerChange,
-  submitted 
+  submitted,
+  showExplanation: forceShowExplanation // New prop to force show explanation
 }) {
   const [showExplanation, setShowExplanation] = useState(false);
 
@@ -14,8 +14,15 @@ export default function ReadingMultipleChoiceComponent({
     setShowExplanation(false);
   }, [mulptipleQuizz]);
 
+  // If forceShowExplanation is true, show explanation
+  const shouldShowExplanation = showExplanation || forceShowExplanation;
+
   if (!mulptipleQuizz?.readingQuestionOptions) {
-    return <div>No options available</div>;
+    return (
+      <div className="p-3 text-center text-text-secondary bg-surface rounded-lg border border-border-light text-xs">
+        No options available
+      </div>
+    );
   }
 
   const handleSelect = (index) => {
@@ -24,62 +31,76 @@ export default function ReadingMultipleChoiceComponent({
     }
   };
 
-  const isCorrectAnswer = submitted && selectedAnswer !== undefined && mulptipleQuizz.readingQuestionOptions[selectedAnswer]?.correct;
+  const isCorrectAnswer = submitted && selectedAnswer !== undefined && 
+    mulptipleQuizz.readingQuestionOptions[selectedAnswer]?.correct;
   const correctOptionIndex = mulptipleQuizz.readingQuestionOptions.findIndex(opt => opt.correct);
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 mb-4">
-      {/* Question Header */}
-      <div className="flex items-start gap-3 mb-4">
-        <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-          <span className="text-white font-bold text-sm">{questionNumber}</span>
+    <div className="bg-white rounded-lg border border-border-light shadow-sm p-3 mb-2">
+      {/* Question Header - Compact */}
+      <div className="flex items-start gap-2 mb-3">
+        <div className="flex-shrink-0 w-6 h-6 bg-accent-10 rounded-full flex items-center justify-center">
+          <span className="text-white font-bold text-xs">{questionNumber}</span>
         </div>
-        <h3 className="text-base font-semibold text-gray-900 flex-1">
+        <h3 className="text-sm font-semibold text-text-primary flex-1 leading-snug">
           {mulptipleQuizz.question}
         </h3>
       </div>
 
-      {/* Options */}
-      <div className="space-y-2 ml-11">
+      {/* Options - Compact */}
+      <div className="space-y-1.5 ml-8">
         {mulptipleQuizz.readingQuestionOptions.map((option, i) => {
           const isSelected = selectedAnswer === i;
           const isCorrect = option.correct;
-          const optionLetter = String.fromCharCode(65 + i); // A, B, C, D
+          const optionLetter = String.fromCharCode(65 + i);
           
-          let borderColor = "border-gray-200";
+          let borderColor = "border-border-light";
           let bgColor = "bg-white";
+          let textColor = "text-text-primary";
+          let hoverEffect = "";
           
           if (submitted) {
             if (isCorrect) {
-              borderColor = "border-green-500";
-              bgColor = "bg-green-50";
+              borderColor = "border-status-completed";
+              bgColor = "bg-status-completed/10";
             } else if (isSelected && !isCorrect) {
-              borderColor = "border-red-500";
+              borderColor = "border-red-400";
               bgColor = "bg-red-50";
+              textColor = "text-red-700";
             }
           } else if (isSelected) {
-            borderColor = "border-blue-500";
-            bgColor = "bg-blue-50";
+            borderColor = "border-primary-30";
+            bgColor = "bg-primary-30/10";
+          } else {
+            hoverEffect = "hover:border-primary-30 hover:shadow-xs transition-all duration-150";
           }
 
           return (
             <label
               key={`${mulptipleQuizz.rqId}-${i}`}
-              className={`flex items-start p-3 rounded-lg cursor-pointer border-2 transition-all ${borderColor} ${bgColor} ${
-                !submitted ? 'hover:border-blue-400' : ''
+              className={`flex items-start p-2 rounded-md cursor-pointer border ${borderColor} ${bgColor} ${textColor} ${hoverEffect} ${
+                !submitted ? 'group' : ''
               }`}
               onClick={() => handleSelect(i)}
             >
-              <div className="flex items-center gap-3 w-full">
-                <div className="flex-shrink-0 w-7 h-7 rounded border-2 border-gray-300 flex items-center justify-center font-semibold text-sm text-gray-600">
+              <div className="flex items-center gap-2 w-full">
+                <div className={`flex-shrink-0 w-5 h-5 rounded-md border flex items-center justify-center font-semibold text-xs transition-all duration-150 ${
+                  isSelected && !submitted 
+                    ? "border-primary-30 bg-primary-30 text-white" 
+                    : submitted && isCorrect 
+                    ? "border-status-completed bg-status-completed text-white"
+                    : submitted && isSelected && !isCorrect
+                    ? "border-red-400 bg-red-400 text-white"
+                    : "border-border-main bg-white text-text-secondary group-hover:border-primary-30 group-hover:text-primary-30"
+                }`}>
                   {optionLetter}
                 </div>
-                <span className="text-sm text-gray-800 flex-1">{option.optionText}</span>
+                <span className="text-xs flex-1 font-medium">{option.optionText}</span>
                 {submitted && isCorrect && (
-                  <span className="text-green-600 font-bold text-xl">✓</span>
+                  <span className="text-status-completed font-bold text-base">✓</span>
                 )}
                 {submitted && isSelected && !isCorrect && (
-                  <span className="text-red-600 font-bold text-xl">✗</span>
+                  <span className="text-red-400 font-bold text-base">✗</span>
                 )}
               </div>
             </label>
@@ -87,41 +108,43 @@ export default function ReadingMultipleChoiceComponent({
         })}
       </div>
 
-      {/* Explanation Toggle Button */}
-      {submitted && (
+      {/* Result Message - Compact */}
+      {submitted && selectedAnswer !== undefined && (
+        <div className={`mt-3 ml-8 p-2 rounded-md text-xs font-medium ${
+          isCorrectAnswer 
+            ? "bg-status-completed/10 text-status-completed border border-status-completed/20" 
+            : "bg-red-50 text-red-700 border border-red-200"
+        }`}>
+          {isCorrectAnswer ? "✓ Correct!" : "✗ Incorrect"}
+        </div>
+      )}
+
+      {/* Explanation Toggle Button - Only show when not forced */}
+      {submitted && !forceShowExplanation && (
         <button
           onClick={() => setShowExplanation(!showExplanation)}
-          className="mt-4 ml-11 flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm"
+          className="mt-2 ml-8 flex items-center gap-1.5 text-primary-30 hover:text-primary-dark font-medium text-xs transition-colors duration-150"
         >
-          <span className="bg-blue-100 rounded-full w-5 h-5 flex items-center justify-center text-xs">
-            ℹ️
+          <span className="bg-primary-30/10 rounded w-4 h-4 flex items-center justify-center text-xs">
+            💡
           </span>
-          Giải thích đáp án
-          <span className={`transform transition-transform ${showExplanation ? 'rotate-180' : ''}`}>
+          Explanation
+          <span className={`transform transition-transform duration-150 text-xs ${showExplanation ? 'rotate-180' : ''}`}>
             ▼
           </span>
         </button>
       )}
 
-      {/* Explanation */}
-      {submitted && showExplanation && (
-        <div className="mt-3 ml-11 p-4 rounded-lg bg-blue-50 border border-blue-200">
-          <p className="text-sm text-gray-800">
-            <span className="font-semibold">Đáp án đúng: {String.fromCharCode(65 + correctOptionIndex)}</span>
+      {/* Explanation - Show when toggled or forced */}
+      {submitted && shouldShowExplanation && (
+        <div className="mt-2 ml-8 p-2 rounded-md bg-primary-30/5 border border-primary-30/20">
+          <p className="text-xs text-text-primary">
+            <span className="font-semibold text-primary-30">Correct: {String.fromCharCode(65 + correctOptionIndex)}</span>
             <br />
-            {mulptipleQuizz.feedBack || "Sự lựa chọn này phù hợp nhất với nội dung của đoạn văn."}
+            <span className="text-text-secondary">
+              {mulptipleQuizz.feedBack || "This choice best aligns with the passage content."}
+            </span>
           </p>
-        </div>
-      )}
-
-      {/* Result Message */}
-      {submitted && selectedAnswer !== undefined && (
-        <div className={`mt-4 ml-11 p-3 rounded-lg text-sm font-medium ${
-          isCorrectAnswer 
-            ? "bg-green-100 text-green-800 border border-green-300" 
-            : "bg-red-100 text-red-800 border border-red-300"
-        }`}>
-          {isCorrectAnswer ? "✓ Chính xác!" : "✗ Sai rồi. Hãy xem giải thích bên dưới."}
         </div>
       )}
     </div>

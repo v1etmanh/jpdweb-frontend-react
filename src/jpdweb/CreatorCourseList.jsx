@@ -327,7 +327,7 @@ const CoursesList = () => {
             </div>
 
             <button
-              onClick={() => nav('/create-course')}
+              onClick={() => nav('/creator/create_course')}
               className="flex items-center gap-2 px-6 py-3 bg-[#F97316] text-white rounded-xl hover:bg-[#ea580c] font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Plus size={20} />
