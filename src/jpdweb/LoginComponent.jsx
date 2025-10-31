@@ -5,7 +5,7 @@ import { Loader } from "lucide-react";
 import { initKeycloak } from "./api/KeycloakService";
 
 export default function LoginComponent(){
-    const {isAuthentication,login,isLoading}=useAuth();
+    const {isAuthentication,login,isLoading,isAdmin}=useAuth();
     const nav=useNavigate();
     const location =useLocation();
     const[isLoggingIn,setIsLoggingIn]=useState(false)
@@ -14,7 +14,10 @@ const from =location.state?.from?.pathname||"/"
 useEffect(()=>{
     //neeu da authenticated thi redirect ve trang go
     if(isAuthentication){
+      if(!isAdmin)
         nav(from,{replace:true})
+      else 
+        nav("/admin/app_overview")
         return
     }
     // neeus dang  loading  thi doi

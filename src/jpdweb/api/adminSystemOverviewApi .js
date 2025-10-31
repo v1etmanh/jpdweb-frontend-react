@@ -1,0 +1,29 @@
+import { apiclient } from './BaseApi';
+import { callApi } from './apiClient';
+import { API_ENDPOINTS } from './apiEndpoints';
+
+export const adminSystemOverviewApi = {
+  /**
+   * 🌐 Lấy thông tin tổng quan hệ thống (CPU, Memory, Disk, DB, HTTP, App)
+   */
+  getOverview: () => {
+    return callApi(
+      () => apiclient.get(API_ENDPOINTS.APP_OVERVIEW.GET_OVERVIEW),
+      {
+        errorMessage: 'Không thể tải thông tin tổng quan hệ thống',
+      }
+    );
+  },
+
+  /**
+   * 💓 Lấy trạng thái sức khỏe của hệ thống (UP / DOWN / UNKNOWN)
+   */
+  getHealthStatus: () => {
+    return callApi(
+      () => apiclient.get(API_ENDPOINTS.APP_OVERVIEW.GET_HEALTH),
+      {
+        errorMessage: 'Không thể tải trạng thái hệ thống',
+      }
+    );
+  },
+};

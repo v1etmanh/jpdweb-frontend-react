@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
-
 import axios from 'axios';
 import './StudentJoin.css';
 import QuizWebSocketService from '../../hooks/QuizWebSocketService';
 import StudentQuizView from './StudentQuizView';
-
+import { useParams } from 'react-router-dom';
 
 function StudentJoin() {
-    const [sessionCode, setSessionCode] = useState('');
+    const { id } = useParams(); // ✅ Lấy sessionCode từ URL
     const [participantName, setParticipantName] = useState('');
     const [joined, setJoined] = useState(false);
     const [session, setSession] = useState(null);
     const [participant, setParticipant] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-const [quizStarted, setQuizStarted] = useState(false); // <-- Theo dõi trạng thái quiz đã bắt đầu
+    const [quizStarted, setQuizStarted] = useState(false);
+
     useEffect(() => {
         return () => {
             QuizWebSocketService.disconnect();
@@ -22,8 +22,8 @@ const [quizStarted, setQuizStarted] = useState(false); // <-- Theo dõi trạng 
     }, []);
 
     const joinSession = async () => {
-        if (!sessionCode || !participantName) {
-            setError('Please enter session code and your name');
+        if (!participantName || !id) { // ✅ Kiểm tra id từ params
+            setError('Please enter your name');
             return;
         }
 
@@ -31,9 +31,12 @@ const [quizStarted, setQuizStarted] = useState(false); // <-- Theo dõi trạng 
         setError('');
 
         try {
+            const upperSessionCode = id.toUpperCase(); // ✅ Dùng id từ useParams
+            console.log('🔵 Joining session:', upperSessionCode);
+
             // 1. Validate session via REST API
             const response = await axios.post('http://localhost:9090/api/quiz/join', {
-                sessionCode: sessionCode.toUpperCase(),
+                sessionCode: upperSessionCode,
                 participantName: participantName
             });
 
@@ -47,20 +50,26 @@ const [quizStarted, setQuizStarted] = useState(false); // <-- Theo dõi trạng 
             setParticipant(response.data.participant);
             setJoined(true);
 
-            // 2. Connect WebSocket
-            await QuizWebSocketService.connect(sessionCode.toUpperCase(), {
+            // 2. Connect WebSocket với ĐÚNG sessionCode
+            await QuizWebSocketService.connect(upperSessionCode, { // ✅ Dùng upperSessionCode
+                onConnected: () => {
+                    console.log('✅ WebSocket connected to session:', upperSessionCode);
+                },
                 onQuizStarted: (data) => {
                     console.log('🎉 Quiz started! Data:', data);
-                    setQuizStarted(true); // <-- Cập nhật state để chuyển view
-                },onConnected: () => {
-                    console.log('✅ Connected to WebSocket');
+                    setQuizStarted(true);
+                },
+                onQuestionStarted: (data) => { // ✅ QUAN TRỌNG - Lắng nghe QUESTION_STARTED
+                    console.log('📝 Question started:', data);
+                    setQuizStarted(true); // Chuyển sang QuizView
                 },
                 onError: (err) => {
                     console.error('❌ WebSocket error:', err);
+                    setError('WebSocket connection failed');
                 }
             });
 
-            console.log('✅ Successfully joined session');
+            console.log('✅ Successfully joined session and connected WebSocket');
 
         } catch (error) {
             console.error('❌ Error joining session:', error);
@@ -69,32 +78,25 @@ const [quizStarted, setQuizStarted] = useState(false); // <-- Theo dõi trạng 
             setLoading(false);
         }
     };
-if (quizStarted && session && participant) {
-        // RENDER STUDENT QUIZ VIEW NẾU QUIZ ĐÃ BẮT ĐẦU
+
+    if (quizStarted && session && participant) {
         return (
             <StudentQuizView 
                 sessionCode={session.sessionCode} 
                 participantId={participant.participantId} 
-                // Có thể truyền thêm STOMP client nếu cần
             />
         );
     }
+
     return (
         <div className="student-join">
             {!joined ? (
                 <div className="join-form">
                     <h1>🎮 Join Quiz</h1>
                     
-                    <div className="form-group">
-                        <label>Session Code:</label>
-                        <input
-                            type="text"
-                            value={sessionCode}
-                            onChange={(e) => setSessionCode(e.target.value.toUpperCase())}
-                            placeholder="Enter PIN"
-                            maxLength={6}
-                            className="code-input"
-                        />
+                    {/* Hiển thị session code từ URL */}
+                    <div className="session-display">
+                        <p>Session Code: <strong>{id}</strong></p>
                     </div>
 
                     <div className="form-group">
@@ -104,12 +106,13 @@ if (quizStarted && session && participant) {
                             value={participantName}
                             onChange={(e) => setParticipantName(e.target.value)}
                             placeholder="Enter your name"
+                            onKeyPress={(e) => e.key === 'Enter' && joinSession()}
                         />
                     </div>
 
                     {error && <div className="error-message">❌ {error}</div>}
 
-                    <button onClick={joinSession} disabled={loading}>
+                    <button onClick={joinSession} disabled={loading || !participantName}>
                         {loading ? 'Joining...' : 'Join Session'}
                     </button>
                 </div>
@@ -130,7 +133,8 @@ if (quizStarted && session && participant) {
 
                     <div className="waiting-message">
                         <div className="spinner"></div>
-                        <p>Waiting for the quiz to start...</p>
+                        <p>🔌 Connected to WebSocket</p>
+                        <p>⏳ Waiting for the quiz to start...</p>
                         <p className="hint">The teacher will start the quiz soon!</p>
                     </div>
                 </div>

@@ -17,7 +17,23 @@ const MultipleChoiceForm = ({ onSubmit, initialData, onDelete }) => {
       ]
     }
   ]);
-  
+  const resetForm = () => {
+    setQuestions([{
+      mcId: null,
+      question: '',
+      feedBack: '',
+      options: [
+        { mcoId: null, optionText: '', isCorrect: false },
+        { mcoId: null, optionText: '', isCorrect: false },
+        { mcoId: null, optionText: '', isCorrect: false },
+        { mcoId: null, optionText: '', isCorrect: false }
+      ]
+    }]);
+    hasLoadedInitialData.current = false;
+    setCurrentQuestionIndex(null);
+    setSidebarOpen(false);
+    setAiSuggestion('');
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasLoadedInitialData = useRef(false);
   
@@ -398,8 +414,10 @@ const applySuggestion = () => {
     
     try {
       await onSubmit(validQuestions);
+    resetForm()
     } catch (error) {
       console.error('Error submitting questions:', error);
+    
       alert('Có lỗi xảy ra khi gửi câu hỏi!');
     } finally {
       setIsSubmitting(false);

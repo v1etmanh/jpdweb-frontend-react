@@ -87,7 +87,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
 
       case 'MULTIPLE_CHOICE':
         return (
-          <div className="max-w-4xl mx-auto animate-fade-in">
+          <div className="w-[90%] mx-auto p-6">
             <MultipleChoicContainer 
               quizData={data} 
               onComplete={onComplete} 
@@ -271,7 +271,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
                 </div>
               </div>
             </div>
-            
+
             {data && (
               <div className="flex items-center space-x-3">
                 {isFinish && (
@@ -314,7 +314,7 @@ export default function CourseContentComponent({contents,moduleid,contentType,la
                   <p className="text-text-secondary text-sm">Hoàn thành nội dung này để mở khóa tiến độ học tập</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={onComplete}
                 className="bg-gradient-to-r from-primary-30 to-accent-10 hover:from-primary-dark hover:to-accent-dark text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-medium hover:shadow-card font-medium transform hover:scale-105"
               >

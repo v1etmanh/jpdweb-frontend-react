@@ -1,142 +1,127 @@
 import { useEffect, useState } from "react";
 
-export default function ReadingMultipleChoiceComponent({ mulptipleQuizz, incre }) {
-  const [selected, setSelected] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
+export default function ReadingMultipleChoiceComponent({ 
+  mulptipleQuizz, 
+  incre, 
+  questionNumber,
+  selectedAnswer,
+  onAnswerChange,
+  submitted 
+}) {
+  const [showExplanation, setShowExplanation] = useState(false);
 
   useEffect(() => {
-    console.log("Question data:", mulptipleQuizz);
-    setSelected(null);
-    setSubmitted(false);
+    setShowExplanation(false);
   }, [mulptipleQuizz]);
 
   if (!mulptipleQuizz?.readingQuestionOptions) {
-    return (
-      <div className="max-w-2xl mx-auto p-6 bg-surface rounded-2xl shadow-soft border border-border-light animate-fade-in">
-        <div className="text-center text-text-secondary font-medium">
-          No options available
-        </div>
-      </div>
-    );
+    return <div>No options available</div>;
   }
 
-  const handSelect = (e) => {
-    console.log("Selected option:", e.target.value, "Submitted:", submitted);
-    
+  const handleSelect = (index) => {
     if (!submitted) {
-      setSelected(parseInt(e.target.value));
+      onAnswerChange(mulptipleQuizz.rqId, index);
     }
   };
 
-  const handleSubmit = () => {
-    if (selected !== null) {
-      setSubmitted(true);
-      const isCorrect = mulptipleQuizz.readingQuestionOptions[selected]?.correct;
-      console.log("Is correct:", isCorrect);
-      if (isCorrect) incre();
-    }
-  };
-
-  const isCorrectAnswer = submitted && mulptipleQuizz.readingQuestionOptions[selected]?.correct;
+  const isCorrectAnswer = submitted && selectedAnswer !== undefined && mulptipleQuizz.readingQuestionOptions[selectedAnswer]?.correct;
+  const correctOptionIndex = mulptipleQuizz.readingQuestionOptions.findIndex(opt => opt.correct);
 
   return (
-    <div className="max-w-2xl mx-auto bg-surface rounded-2xl shadow-card border border-border-light p-6 mb-6 animate-slide-up">
-      {/* Question Section */}
-      <div className="max-h-48 overflow-y-auto mb-6 pr-3 custom-scrollbar">
-        <h2 className="text-lg font-semibold text-text-primary leading-relaxed">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 mb-4">
+      {/* Question Header */}
+      <div className="flex items-start gap-3 mb-4">
+        <div className="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+          <span className="text-white font-bold text-sm">{questionNumber}</span>
+        </div>
+        <h3 className="text-base font-semibold text-gray-900 flex-1">
           {mulptipleQuizz.question}
-        </h2>
+        </h3>
       </div>
 
-      {/* Options Section */}
-      <form className="space-y-3">
+      {/* Options */}
+      <div className="space-y-2 ml-11">
         {mulptipleQuizz.readingQuestionOptions.map((option, i) => {
-          const isSelected = selected === i;
+          const isSelected = selectedAnswer === i;
           const isCorrect = option.correct;
+          const optionLetter = String.fromCharCode(65 + i); // A, B, C, D
           
-          let optionStyle = "";
+          let borderColor = "border-gray-200";
+          let bgColor = "bg-white";
+          
           if (submitted) {
             if (isCorrect) {
-              optionStyle = "border-status-completed bg-green-50 shadow-sm";
-            } else if (isSelected) {
-              optionStyle = "border-red-400 bg-red-50 shadow-sm";
-            } else {
-              optionStyle = "border-border-main bg-white";
+              borderColor = "border-green-500";
+              bgColor = "bg-green-50";
+            } else if (isSelected && !isCorrect) {
+              borderColor = "border-red-500";
+              bgColor = "bg-red-50";
             }
-          } else {
-            optionStyle = isSelected 
-              ? "border-primary-30 bg-cyan-50 shadow-soft" 
-              : "border-border-main hover:border-primary-30 hover:shadow-soft bg-white transition-all duration-200";
+          } else if (isSelected) {
+            borderColor = "border-blue-500";
+            bgColor = "bg-blue-50";
           }
-          
+
           return (
             <label
               key={`${mulptipleQuizz.rqId}-${i}`}
-              htmlFor={`option-${mulptipleQuizz.rqId}-${i}`}
-              className={`flex items-start p-4 rounded-xl cursor-pointer border-2 transition-all duration-200 ${optionStyle} animate-scale-in`}
-              style={{ animationDelay: `${i * 0.05}s` }}
+              className={`flex items-start p-3 rounded-lg cursor-pointer border-2 transition-all ${borderColor} ${bgColor} ${
+                !submitted ? 'hover:border-blue-400' : ''
+              }`}
+              onClick={() => handleSelect(i)}
             >
-              <input
-                type="radio"
-                name={`quiz-${mulptipleQuizz.rqId}`}
-                id={`option-${mulptipleQuizz.rqId}-${i}`}
-                value={i}
-                checked={isSelected}
-                onChange={handSelect}
-                disabled={submitted}
-                className="mt-0.5 mr-3 accent-primary-30 scale-110"
-              />
-              <span className="text-text-primary flex-1 leading-relaxed">
-                {option.optionText}
-              </span>
-              
-              {/* Status icons for submitted state */}
-              {submitted && isCorrect && (
-                <div className="ml-2 text-status-completed text-lg animate-scale-in">
-                  ✓
+              <div className="flex items-center gap-3 w-full">
+                <div className="flex-shrink-0 w-7 h-7 rounded border-2 border-gray-300 flex items-center justify-center font-semibold text-sm text-gray-600">
+                  {optionLetter}
                 </div>
-              )}
-              {submitted && isSelected && !isCorrect && (
-                <div className="ml-2 text-red-500 text-lg animate-scale-in">
-                  ✗
-                </div>
-              )}
+                <span className="text-sm text-gray-800 flex-1">{option.optionText}</span>
+                {submitted && isCorrect && (
+                  <span className="text-green-600 font-bold text-xl">✓</span>
+                )}
+                {submitted && isSelected && !isCorrect && (
+                  <span className="text-red-600 font-bold text-xl">✗</span>
+                )}
+              </div>
             </label>
           );
         })}
+      </div>
 
-        {/* Submit Button */}
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={submitted || selected === null}
-          className={`w-full py-3 rounded-xl font-semibold text-white transition-all duration-200 mt-4 ${
-            submitted || selected === null
-              ? "bg-gray-300 cursor-not-allowed"
-              : "bg-primary-30 hover:bg-primary-dark shadow-soft hover:shadow-medium transform hover:scale-[1.02]"
-          }`}
-        >
-          {submitted ? "Đáp án đã được chọn" : "Xác nhận đáp án"}
-        </button>
-      </form>
-
-      {/* Feedback Section */}
+      {/* Explanation Toggle Button */}
       {submitted && (
-        <div
-          className={`mt-4 p-4 rounded-xl text-sm font-medium animate-fade-in ${
-            isCorrectAnswer 
-              ? "bg-green-100 text-status-completed border border-status-completed" 
-              : "bg-red-100 text-red-700 border border-red-300"
-          }`}
+        <button
+          onClick={() => setShowExplanation(!showExplanation)}
+          className="mt-4 ml-11 flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm"
         >
-          <div className="flex items-center">
-            <div className={`w-2 h-2 rounded-full mr-3 ${
-              isCorrectAnswer ? "bg-status-completed" : "bg-red-500"
-            }`}></div>
-            {isCorrectAnswer 
-              ? "Chính xác! Bạn đã trả lời đúng." 
-              : mulptipleQuizz.feedBack || "Chưa chính xác! Hãy thử lại lần sau."}
-          </div>
+          <span className="bg-blue-100 rounded-full w-5 h-5 flex items-center justify-center text-xs">
+            ℹ️
+          </span>
+          Giải thích đáp án
+          <span className={`transform transition-transform ${showExplanation ? 'rotate-180' : ''}`}>
+            ▼
+          </span>
+        </button>
+      )}
+
+      {/* Explanation */}
+      {submitted && showExplanation && (
+        <div className="mt-3 ml-11 p-4 rounded-lg bg-blue-50 border border-blue-200">
+          <p className="text-sm text-gray-800">
+            <span className="font-semibold">Đáp án đúng: {String.fromCharCode(65 + correctOptionIndex)}</span>
+            <br />
+            {mulptipleQuizz.feedBack || "Sự lựa chọn này phù hợp nhất với nội dung của đoạn văn."}
+          </p>
+        </div>
+      )}
+
+      {/* Result Message */}
+      {submitted && selectedAnswer !== undefined && (
+        <div className={`mt-4 ml-11 p-3 rounded-lg text-sm font-medium ${
+          isCorrectAnswer 
+            ? "bg-green-100 text-green-800 border border-green-300" 
+            : "bg-red-100 text-red-800 border border-red-300"
+        }`}>
+          {isCorrectAnswer ? "✓ Chính xác!" : "✗ Sai rồi. Hãy xem giải thích bên dưới."}
         </div>
       )}
     </div>
