@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Settings, RotateCcw, ExternalLink, Share2, BookOpen, Volume2, Maximize } from 'lucide-react';
+import { Play, Settings, RotateCcw, ExternalLink, Share2, BookOpen } from 'lucide-react';
 
 const VideoPlayer = ({ 
   videoUrl, 
@@ -14,7 +14,6 @@ const VideoPlayer = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const iframeRef = useRef(null);
 
   const extractVideoId = (url) => {
@@ -54,10 +53,6 @@ const VideoPlayer = ({
 
   const openInYoutube = () => {
     window.open(videoUrl, '_blank');
-  };
-
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
   };
 
   if (isLoading) {
@@ -111,9 +106,7 @@ const VideoPlayer = ({
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-base font-bold text-text-primary truncate">{title}</h2>
-              {description && (
-                <p className="text-text-secondary text-xs truncate">{description}</p>
-              )}
+              
             </div>
           </div>
           
@@ -138,12 +131,12 @@ const VideoPlayer = ({
         </div>
       </div>
 
-      {/* Video Container */}
+      {/* Video Container - Đơn giản hóa, loại bỏ các overlay chặn click */}
       <div 
-        className="relative bg-black rounded-b-xl overflow-hidden shadow-card group"
+        className="relative bg-black rounded-b-xl overflow-hidden shadow-card"
         style={{ width, height }}
       >
-        {/* Video Frame */}
+        {/* Video Frame - Đảm bảo iframe có thể nhận click */}
         <iframe
           ref={iframeRef}
           width="100%"
@@ -158,7 +151,7 @@ const VideoPlayer = ({
           onError={() => setIsError(true)}
         />
 
-        {/* Loading Overlay */}
+        {/* Loading Overlay - Chỉ hiển thị khi loading */}
         {isLoading && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="flex flex-col items-center space-y-3">
@@ -167,55 +160,6 @@ const VideoPlayer = ({
             </div>
           </div>
         )}
-
-        {/* Custom Controls Overlay */}
-        {showControls && (
-          <>
-            {/* Top Controls */}
-            <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="bg-black/70 backdrop-blur-sm rounded-lg px-2 py-1">
-                <span className="text-white text-xs font-medium">HD</span>
-              </div>
-            </div>
-
-            {/* Center Play Button (for custom controls) */}
-            <button
-              onClick={togglePlay}
-              className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            >
-              <div className="w-16 h-16 bg-primary-30 bg-opacity-90 hover:bg-opacity-100 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-105">
-                <Play className="w-6 h-6 text-white fill-current" />
-              </div>
-            </button>
-
-            {/* Bottom Controls */}
-            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="flex items-center gap-2">
-                <button className="w-8 h-8 bg-black/70 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                  <Volume2 className="w-4 h-4 text-white" />
-                </button>
-                <span className="text-white text-xs bg-black/50 px-2 py-1 rounded">00:00 / 00:00</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => setShowInfo(!showInfo)}
-                  className="w-8 h-8 bg-black/70 backdrop-blur-sm rounded-lg flex items-center justify-center"
-                >
-                  <Settings className="w-4 h-4 text-white" />
-                </button>
-                <button className="w-8 h-8 bg-black/70 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                  <Maximize className="w-4 h-4 text-white" />
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Progress Bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
-          <div className="h-full bg-accent-10 w-1/3"></div>
-        </div>
       </div>
 
       {/* Video Stats/Info Bar - Compact */}
@@ -224,7 +168,7 @@ const VideoPlayer = ({
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 bg-status-completed rounded-full animate-pulse"></div>
-              Đang phát
+              Sẵn sàng phát
             </span>
             <span>Chất lượng: HD</span>
           </div>
