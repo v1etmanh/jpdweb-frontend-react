@@ -22,14 +22,17 @@ export default function SpeakingPage({ paragraphs, pictureAndQuestions, isSave, 
   const requiredPics = hasPictures ? Math.ceil(pictureAndQuestions.length / 2) : 0;
  
   // Reset isDone when isSave prop changes
-  useEffect(() => {
-    setIsDone(isSave);
-    if (!isSave) {
-      // When starting a new session, reset completion tracking
-      setCompletedParas([]);
-      setCompletedPics([]);
-    }
-  }, [isSave]);
+useEffect(() => {
+  if (!isSave) {
+    // bắt đầu session mới
+    setIsDone(false);
+    setCompletedParas([]);
+    setCompletedPics([]);
+  } else {
+    // save → chỉ set isDone = true, không reset completed
+    setIsDone(true);
+  }
+}, [isSave]);
 
   // Calculate if we've completed the required minimums
   const meetsRequirements = 

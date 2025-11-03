@@ -1,82 +1,241 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+
 import QuizWebSocketService from '../../hooks/QuizWebSocketService';
 import { useParams } from 'react-router-dom';
 import { sessionApi } from '../api/sessionApi';
-
+import audioSrc from "../../images/The-Future-Is-Yours.mp3";//The-Future-Is-Yours.mp3
 function TeacherDashboard() {
-    const [kahootId, setKahootId] = useState('1');
     const [teacherName, setTeacherName] = useState('Teacher');
     const [session, setSession] = useState(null);
     const [participants, setParticipants] = useState([]);
     const [connected, setConnected] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [quizStatus, setQuizStatus] = useState('WAITING_FOR_PLAYERS');
-    const [currentQuestion, setCurrentQuestion] = useState(null);
-    const [timerActive, setTimerActive] = useState(false);
-    const [finalResults, setFinalResults] = useState(null);
+    const audioRef = useRef(null);
+  
+  // State để theo dõi trạng thái phát nhạc (optional - cho UI control)
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.5); // Volume mặc định 50%
+   useEffect(() => {
+    console.log('🎵 [Step 1] Initializing audio...');
+    
+    // ============================================
+    // BƯỚC 1: Khởi tạo và Tải âm thanh
+    // ============================================
+    
+    // Tạo Audio element
+    const audio = new Audio(audioSrc);
+    
+    // Cấu hình thuộc tính cơ bản
+    audio.loop = true;              // Bật chế độ lặp
+    audio.volume = volume;          // Thiết lập âm lượng
+    audio.preload = 'auto';         // Tải trước toàn bộ file
+    
+    // Lưu vào ref để có thể truy cập ở nơi khác
+    audioRef.current = audio;
+
+    // ============================================
+    // BƯỚC 2: Phát âm thanh tự động
+    // ============================================
+    
+    /**
+     * Hàm khởi động phát nhạc
+     * Xử lý các trường hợp lỗi autoplay do browser policy
+     */
+    const startPlayback = async () => {
+      try {
+        console.log('🎵 [Step 2] Attempting to play audio...');
+        
+        // play() trả về Promise, cần await
+        await audio.play();
+        
+        setIsPlaying(true);
+        console.log('✅ Audio is playing successfully!');
+        
+      } catch (error) {
+        console.warn('⚠️ Autoplay blocked by browser:', error);
+        
+        // Xử lý khi autoplay bị chặn
+        // Có thể hiển thị button cho user click để bật nhạc
+        setIsPlaying(false);
+        
+        // Hoặc retry sau một khoảng thời gian
+        // setTimeout(startPlayback, 1000);
+      }
+    };
+
+    // Event listeners để tracking trạng thái
+    const handlePlay = () => {
+      console.log('🎵 Audio started playing');
+      setIsPlaying(true);
+    };
+
+    const handlePause = () => {
+      console.log('⏸️ Audio paused');
+      setIsPlaying(false);
+    };
+
+    const handleEnded = () => {
+      console.log('🔄 Audio ended (will loop automatically)');
+    };
+
+    const handleError = (e) => {
+      console.error('❌ Audio error:', e);
+      setIsPlaying(false);
+    };
+
+    // Gắn event listeners
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+
+    // Bắt đầu phát
+    startPlayback();
+
+    // ============================================
+    // BƯỚC 3: Cleanup Function - QUAN TRỌNG!
+    // ============================================
+    
+    /**
+     * Cleanup function được gọi khi:
+     * - Component unmount
+     * - Dependencies thay đổi (nếu có)
+     * 
+     * Mục đích:
+     * - Dừng phát nhạc
+     * - Gỡ bỏ event listeners (tránh memory leak)
+     * - Giải phóng tài nguyên audio
+     */
+    return () => {
+      console.log('🧹 [Step 3] Cleaning up audio resources...');
+      
+      // 1. Dừng phát nhạc
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0; // Reset về đầu
+      }
+      
+      // 2. Gỡ bỏ tất cả event listeners
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+      
+      // 3. Giải phóng tài nguyên
+      audio.src = ''; // Xóa source
+      audioRef.current = null;
+      
+      console.log('✅ Cleanup completed!');
+    };
+    
+  }, [volume]);
+    // Nhóm quiz state lại
+    const [quizState, setQuizState] = useState({
+        status: 'WAITING_FOR_PLAYERS',
+        currentQuestion: null,
+        timerActive: false,
+        showingResult: false,
+        timeLeft: 0
+    });
+    
     const [questionResult, setQuestionResult] = useState(null);
-    const [showingResult, setShowingResult] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(0);
+    const [finalResults, setFinalResults] = useState(null);
+    
     const { id } = useParams();
+    
+    // Dùng ref để tránh stale closure
+    const questionEndedRef = useRef(false);
+    const timerRef = useRef(null);
+    const resultTimerRef = useRef(null);
 
-    const handleEndQuestion = useCallback(() => {
-        if (session && connected && currentQuestion && !showingResult) {
-            console.log('🏁 Ending question...');
-            QuizWebSocketService.endQuestion();
-        }
-    }, [session, connected, currentQuestion, showingResult]);
-
+    // ✅ Cleanup tốt hơn
     useEffect(() => {
         return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+            if (resultTimerRef.current) clearTimeout(resultTimerRef.current);
             QuizWebSocketService.disconnect();
         };
     }, []);
 
+    // ✅ handleEndQuestion với debounce
+    const handleEndQuestion = useCallback(() => {
+        if (session && connected && quizState.currentQuestion && 
+            !quizState.showingResult && !questionEndedRef.current) {
+            console.log('🏁 Ending question...');
+            questionEndedRef.current = true;
+            QuizWebSocketService.endQuestion();
+        }
+    }, [session, connected, quizState.currentQuestion, quizState.showingResult]);
+
+    // ✅ Timer effect được cải thiện
     useEffect(() => {
-        if (quizStatus !== 'ACTIVE' || !timerActive || !currentQuestion || showingResult) {
+        // Cleanup previous timer
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
+
+        if (quizState.status !== 'ACTIVE' || !quizState.timerActive || 
+            !quizState.currentQuestion || quizState.showingResult) {
             return;
         }
 
         console.log("⏱️ Starting timer for question...");
+        questionEndedRef.current = false;
         
-        const questionTimeLimit = currentQuestion.timeLimit || 30;
-        setTimeLeft(questionTimeLimit);
+        const questionTimeLimit = quizState.currentQuestion.timeLimit || 30;
+        setQuizState(prev => ({ ...prev, timeLeft: questionTimeLimit }));
 
-        const countdownInterval = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
+        timerRef.current = setInterval(() => {
+            setQuizState(prev => {
+                const newTimeLeft = prev.timeLeft - 1;
+                
+                if (newTimeLeft <= 0) {
                     console.log("⏰ Time's up! Auto-ending question.");
                     handleEndQuestion();
-                    return 0;
+                    return { ...prev, timeLeft: 0 };
                 }
-                return prev - 1;
+                
+                return { ...prev, timeLeft: newTimeLeft };
             });
         }, 1000);
 
         return () => {
-            console.log("🛑 Clearing countdown interval.");
-            clearInterval(countdownInterval);
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+            }
         };
         
-    }, [quizStatus, timerActive, currentQuestion, showingResult, handleEndQuestion]);
+    }, [quizState.status, quizState.timerActive, quizState.currentQuestion, 
+        quizState.showingResult, handleEndQuestion]);
 
+    // ✅ Result display timer
     useEffect(() => {
-        if (showingResult && questionResult) {
+        if (resultTimerRef.current) {
+            clearTimeout(resultTimerRef.current);
+            resultTimerRef.current = null;
+        }
+
+        if (quizState.showingResult && questionResult) {
             console.log("📊 Showing results for 5 seconds...");
             
-            const resultTimer = setTimeout(() => {
+            resultTimerRef.current = setTimeout(() => {
                 console.log("⏰ Result display time ended. Moving to next question.");
-                setShowingResult(false);
+                setQuizState(prev => ({ ...prev, showingResult: false }));
                 setQuestionResult(null);
+                questionEndedRef.current = false;
                 QuizWebSocketService.startNextQuestion();
             }, 5000);
 
-            return () => clearTimeout(resultTimer);
+            return () => {
+                if (resultTimerRef.current) {
+                    clearTimeout(resultTimerRef.current);
+                    resultTimerRef.current = null;
+                }
+            };
         }
-    }, [showingResult, questionResult]);
-
-    // Không cần fetchFinalResults nữa, sử dụng participants từ WebSocket
+    }, [quizState.showingResult, questionResult]);
 
     const createSession = async () => {
         setLoading(true);
@@ -100,6 +259,7 @@ function TeacherDashboard() {
         }
     };
 
+    // ✅ WebSocket connection với cleanup tốt hơn
     const connectWebSocket = async (sessionCode) => {
         try {
             await QuizWebSocketService.connect(sessionCode, {
@@ -110,7 +270,12 @@ function TeacherDashboard() {
                 },
                 onParticipantJoined: (data) => {
                     console.log('👤 Participant joined:', data);
-                    setParticipants(prev => [...prev, data.participant]);
+                    setParticipants(prev => {
+                        // Tránh duplicate
+                        const exists = prev.find(p => p.participantId === data.participant.participantId);
+                        if (exists) return prev;
+                        return [...prev, data.participant];
+                    });
                 },
                 onParticipantsList: (data) => {
                     console.log('👥 Participants list:', data);
@@ -122,31 +287,55 @@ function TeacherDashboard() {
                 },
                 onQuestionStarted: (data) => {
                     console.log('❓ New Question Started:', data);
-                    setCurrentQuestion(data);
-                    setShowingResult(false);
+                    questionEndedRef.current = false;
+                    setQuizState(prev => ({
+                        ...prev,
+                        currentQuestion: data,
+                        showingResult: false,
+                        timerActive: true
+                    }));
                     setQuestionResult(null);
-                    setTimerActive(true);
                 },
                 onQuestionEnded: (data) => {
                     console.log('🏁 Question ended, received results:', data);
                     setQuestionResult(data);
-                    setShowingResult(true);
-                    setTimerActive(false);
+                    setQuizState(prev => ({
+                        ...prev,
+                        showingResult: true,
+                        timerActive: false
+                    }));
+                    
+                    // ✅ Update participants với scores mới
+                    if (data.results && Array.isArray(data.results)) {
+                        setParticipants(prev => {
+                            return prev.map(p => {
+                                const result = data.results.find(r => r.participantId === p.participantId);
+                                if (result) {
+                                    return { ...p, currentScore: result.totalScore };
+                                }
+                                return p;
+                            });
+                        });
+                    }
                 },
                 onQuizStarted: (data) => {
                     console.log('🎉 Quiz started broadcast received!', data);
-                    setQuizStatus('ACTIVE');
+                    setQuizState(prev => ({ ...prev, status: 'ACTIVE' }));
                 },
                 onQuizFinished: (data) => {
                     console.log('🏁 Quiz finished broadcast received!', data);
-                    setQuizStatus('FINISHED');
-                    setTimerActive(false);
-                    setCurrentQuestion(null);
-                    // Sắp xếp participants hiện tại theo điểm và set vào finalResults
+                    setQuizState(prev => ({
+                        ...prev,
+                        status: 'FINISHED',
+                        timerActive: false,
+                        currentQuestion: null
+                    }));
+                    
+                    // ✅ Sắp xếp và lưu kết quả cuối
                     setParticipants(prev => {
-                        const sortedParticipants = [...prev].sort((a, b) => b.currentScore - a.currentScore);
-                        setFinalResults(sortedParticipants);
-                        return prev;
+                        const sorted = [...prev].sort((a, b) => b.currentScore - a.currentScore);
+                        setFinalResults(sorted);
+                        return sorted;
                     });
                 }
             });
@@ -177,7 +366,6 @@ function TeacherDashboard() {
     const renderQuestionResult = () => {
         if (!questionResult) return null;
 
-        // Sắp xếp kết quả theo totalScore giảm dần
         const sortedResults = [...questionResult.results].sort((a, b) => b.totalScore - a.totalScore);
 
         return (
@@ -211,7 +399,7 @@ function TeacherDashboard() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {questionResult.results.map((result, index) => (
+                                        {questionResult.results.map((result) => (
                                             <tr 
                                                 key={result.participantId} 
                                                 className={`border-b border-gray-200 ${
@@ -312,6 +500,7 @@ function TeacherDashboard() {
                     </div>
 
                     <div className="p-8">
+                        {/* ✅ Dùng finalResults thay vì oldParticipants */}
                         {finalResults.map((p, index) => (
                             <div 
                                 key={p.participantId}
@@ -360,10 +549,19 @@ function TeacherDashboard() {
                     <div className="p-6 bg-gray-50 rounded-b-3xl">
                         <button 
                             onClick={() => {
+                                // ✅ Reset toàn bộ state
                                 setSession(null);
                                 setParticipants([]);
-                                setQuizStatus('WAITING_FOR_PLAYERS');
+                                setQuizState({
+                                    status: 'WAITING_FOR_PLAYERS',
+                                    currentQuestion: null,
+                                    timerActive: false,
+                                    showingResult: false,
+                                    timeLeft: 0
+                                });
                                 setFinalResults(null);
+                                setQuestionResult(null);
+                                questionEndedRef.current = false;
                                 QuizWebSocketService.disconnect();
                             }}
                             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-2xl font-black text-xl hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg"
@@ -414,9 +612,9 @@ function TeacherDashboard() {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {showingResult && renderQuestionResult()}
+                        {quizState.showingResult && renderQuestionResult()}
 
-                        {quizStatus === 'FINISHED' && finalResults ? (
+                        {quizState.status === 'FINISHED' && finalResults ? (
                             renderFinalResults()
                         ) : (
                             <>
@@ -425,7 +623,7 @@ function TeacherDashboard() {
                                         <div className="flex-1">
                                             <h2 className="text-2xl font-black text-gray-800 mb-2">
                                                 📌 Session Active
-                                                {quizStatus === 'FINISHED' && <span className="ml-2 text-red-600">(KẾT THÚC)</span>}
+                                                {quizState.status === 'FINISHED' && <span className="ml-2 text-red-600">(KẾT THÚC)</span>}
                                             </h2>
                                             <div className="flex items-center gap-3 mb-2">
                                                 <span className="text-4xl font-black text-purple-600">
@@ -450,23 +648,23 @@ function TeacherDashboard() {
                                     </div>
                                 </div>
 
-                                {currentQuestion && !showingResult && (
+                                {quizState.currentQuestion && !quizState.showingResult && (
                                     <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl shadow-xl p-6 text-white">
                                         <h3 className="text-2xl font-black mb-4">❓ Câu Hỏi Hiện Tại</h3>
                                         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
                                             <p className="text-lg font-semibold mb-2">
-                                                Câu {currentQuestion.questionNumber}/{session.totalQuestions}
+                                                Câu {quizState.currentQuestion.questionNumber}/{session.totalQuestions}
                                             </p>
                                             <h4 className="text-2xl font-bold mb-4">
-                                                {currentQuestion.question.content}
+                                                {quizState.currentQuestion.question.content}
                                             </h4>
                                             <div className="flex items-center justify-between">
                                                 <div className="text-3xl font-black">
-                                                    ⏱️ {timeLeft}s
+                                                    ⏱️ {quizState.timeLeft}s
                                                 </div>
                                                 <button 
                                                     onClick={handleEndQuestion}
-                                                    disabled={showingResult}
+                                                    disabled={quizState.showingResult}
                                                     className="bg-white text-purple-600 px-6 py-3 rounded-xl font-black hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105"
                                                 >
                                                     🏁 Kết Thúc Ngay
@@ -512,7 +710,10 @@ function TeacherDashboard() {
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {participants.map((participant, index) => (
+                                            {/* ✅ Dùng participants và sắp xếp theo điểm */}
+                                            {[...participants]
+                                                .sort((a, b) => b.currentScore - a.currentScore)
+                                                .map((participant, index) => (
                                                 <div 
                                                     key={participant.participantId}
                                                     className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-4 border-2 border-purple-200 hover:border-purple-400 transition-all transform hover:scale-105"
@@ -536,13 +737,13 @@ function TeacherDashboard() {
                                     )}
                                 </div>
 
-                                {quizStatus === 'WAITING_FOR_PLAYERS' && (
+                                {quizState.status === 'WAITING_FOR_PLAYERS' && (
                                     <button 
                                         onClick={handleStartQuiz}
                                         disabled={participants.length === 0 || !connected}
                                         className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-6 rounded-3xl font-black text-2xl hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-2xl"
                                     >
-                                        {quizStatus === 'ACTIVE' ? 'Quiz Đang Chạy' : '🚀 Start Quiz'}
+                                        {quizState.status === 'ACTIVE' ? 'Quiz Đang Chạy' : '🚀 Start Quiz'}
                                     </button>
                                 )}
                             </>

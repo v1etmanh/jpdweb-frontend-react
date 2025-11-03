@@ -751,28 +751,7 @@ export default function CourseContentOverviewComponent(){
             </div>
 
             {/* Progress Summary */}
-            <div className="mt-6 p-4 bg-gradient-to-br from-primary-30/5 to-accent-10/5 rounded-xl border border-border-light shadow-soft">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-text-primary text-sm">Tiến độ học tập</h3>
-                <span className="text-lg font-bold text-primary-30">{overallProgress}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-                <div
-                  className="bg-gradient-to-r from-primary-30 to-accent-10 h-2 rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: `${overallProgress}%` }}
-                ></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="text-center p-2 bg-white rounded-lg border border-border-light">
-                  <div className="text-lg font-bold text-status-completed mb-0.5">{completedModules}</div>
-                  <div className="text-text-secondary">Đã hoàn thành</div>
-                </div>
-                <div className="text-center p-2 bg-white rounded-lg border border-border-light">
-                  <div className="text-lg font-bold text-primary-30 mb-0.5">{totalModules - completedModules}</div>
-                  <div className="text-text-secondary">Bài còn lại</div>
-                </div>
-              </div>
-            </div>
+         
           </div>
         </div>
       </div>

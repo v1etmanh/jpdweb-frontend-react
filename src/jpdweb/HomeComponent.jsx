@@ -461,8 +461,7 @@ export default function HomepageComponent() {
         style={{ backgroundImage: `url(${home1})` }}
       >
         {/* Animated gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#06B6D4]/80 via-[#0891B2]/70 to-[#F97316]/60 animate-gradient"></div>
-
+        
         {/* Floating geometric shapes */}
         <div
           className="absolute top-17 right-17 w-27 h-27 bg-white/10 backdrop-blur-sm rounded-full"
@@ -541,6 +540,11 @@ export default function HomepageComponent() {
             </div>
 
             <input
+            onKeyDown={(e) => {
+  if (e.key === 'Enter') {
+    nav(`/course_result/${name}`);
+  }
+}}
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
