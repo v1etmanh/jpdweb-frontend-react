@@ -16,7 +16,7 @@ import {
   Filter,
   Search
 } from 'lucide-react';
-import { adminApi } from '../api/adminCreatorApi';
+import { adminApi } from '../api/admin/adminCreatorApi';
 
 const CreatorViolationsHistory = () => {
   const { creatorId } = useParams();

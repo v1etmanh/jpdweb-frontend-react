@@ -2,8 +2,8 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './security/Authentication';
 import { getCreatorAccount } from './api/ApiConnect';
 import { useEffect } from 'react';
-import { creatorApi } from './api/creatorApi';
-import { showErrorNotification } from './api/apiClient';
+import { creatorApi } from './api/creator/creatorApi';
+import { showErrorNotification } from './api/core/apiClient';
 
 function CreatorProtectedRoute({ children }) {
   const { isAuthentication, isLoading, isCreator,setCreatorInfor ,creatorInfor} = useAuth();

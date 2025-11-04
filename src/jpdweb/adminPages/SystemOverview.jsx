@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { adminSystemOverviewApi } from "../api/adminSystemOverviewApi ";
+import {adminSystemOverviewApi} from "../api/admin/adminSystemOverviewApi";
+
 
 const SystemOverview = () => {
   const [overview, setOverview] = useState(null);

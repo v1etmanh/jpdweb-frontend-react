@@ -9,7 +9,7 @@ import {
   X,
   Loader2,
 } from "lucide-react";
-import { adminApi } from "../api/adminCreatorApi";
+import { adminApi } from "../api/admin/adminCreatorApi";
 import { useNavigate } from "react-router-dom";
 
 const AdminCreatorManagement = () => {

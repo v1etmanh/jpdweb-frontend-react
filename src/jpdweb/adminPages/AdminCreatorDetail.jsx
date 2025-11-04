@@ -23,7 +23,7 @@ import {
   ExternalLink,
   Download
 } from 'lucide-react';
-import { adminApi } from '../api/adminCreatorApi';
+import { adminApi } from '../api/admin/adminCreatorApi';
 
 // Import API - uncomment khi sử dụng thực tế
 // import { adminApi } from './path/to/your/api';

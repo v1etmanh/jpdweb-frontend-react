@@ -1,6 +1,6 @@
 // AdminDiagnosticsPage.jsx
 import React, { useEffect, useState } from 'react';
-import { adminDiagnosticsApi } from '../api/adminDiagnosticsApi';
+import { adminDiagnosticsApi } from '../api/admin/adminDiagnosticsApi';
 
 const INJECTED_STYLE_ID = 'admin-diagnostics-styles-no-horizontal-scroll';
 

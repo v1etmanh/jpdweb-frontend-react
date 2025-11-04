@@ -1,5 +1,5 @@
 import { data } from "react-router-dom";
-import { apiclient } from "./BaseApi";
+import { apiclient } from "./core/BaseApi";
 import { captureOwnerStack } from "react";
 export const getAccount=()=>{
     return apiclient.get("/api/customer/account_infor")

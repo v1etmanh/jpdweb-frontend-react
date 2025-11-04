@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { adminTransactionApi } from "../api/adminTransactionApi";
+import { adminTransactionApi } from "../api/admin/adminTransactionApi";
 import { Loader2, X, DollarSign, Package, User, Calendar, Key, TrendingUp } from "lucide-react";
 
 export default function TransactionsListPage() {

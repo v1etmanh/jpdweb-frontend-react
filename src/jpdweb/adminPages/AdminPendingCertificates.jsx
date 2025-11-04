@@ -18,7 +18,7 @@ import {
   Search,
   Filter
 } from 'lucide-react';
-import { adminApi } from '../api/adminCreatorApi';
+import { adminApi } from '../api/admin/adminCreatorApi';
 
 const AdminPendingCertificates = () => {
   const navigate = useNavigate();

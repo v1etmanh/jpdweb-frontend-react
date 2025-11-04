@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { apiclient } from "../api/BaseApi";
-import { getKeycloakInstance, logOutKeycloak } from "../api/KeycloakService";
+import { apiclient } from "../api/core/BaseApi";
+import { getKeycloakInstance, logOutKeycloak } from "../api/core/KeycloakService";
 import { getAccount } from "../api/ApiConnect";
 
 export const AuthContext = createContext();

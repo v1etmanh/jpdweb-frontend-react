@@ -1,49 +1,49 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useState } from "react";
 
-import HomepageComponent from "./HomeComponent";
-import CoursesResultComponent from "./CoursesResultComponent";
+import HomepageComponent from "./creator&&customer/component/HomeComponent";
+import CoursesResultPage from "./creator&&customer/page/CoursesResultPage";
 import "./JpdWebStyle.css";
-import CourseDescription from "./CourseDescription";
-import MyLearningComponent from "./MyLearningComponent";
-import CourseContentComponent from "./CourseContentComponent";
-import HeaderComponent from "./HeaderComponent";
+import CourseDescriptionPage from "./creator&&customer/page/CourseDescriptionPage";
+import MyLearningPage from "./creator&&customer/page/MyLearningPage";
+import CourseContentComponent from "./creator&&customer/component/CourseContentComponent";
+import HeaderComponent from "./creator&&customer/component/HeaderComponent";
 
-import CreatorHomePage from "./CreateHomePage";
-import CreatorProfileComponent from "./CreateProfileComponent";
+import CreatorHomePage from "./creator&&customer/page/CreateHomePage";
+import CreatorProfileComponent from "./creator&&customer/page/RegisterCreatorPage";
 
-import Sidebar from "./CreatorSideBar";
+import Sidebar from "./CreatorSideBarComponent";
 
 import { BookOpen, Menu, X } from "lucide-react";
 
-import CreateCourseForm from "./CreateCourseForm";
-import CourseManagementInterface from "./CourseManagementComponent";
+import CreateCourseForm from "./creator&&customer/page/CreateCourseForm";
+import CourseManagementInterface from "./creator&&customer/page/CourseManagementPage";
 
-import DirectComponent from "./DictionaryConponent";
+import DirectComponent from "./creator&&customer/component/DictionaryConponent";
 import { Button } from "react-bootstrap";
-import FooterComponent from "./FooteComponent";
-import CoursesTable from "./CourseTable";
-import CourseDetail from "./CourseCommercialDetailComponent";
-import CoursesList from "./CreatorCourseList";
-import CreatorAccountInfo from "./CreatorAccount";
-import CourseContentOverviewComponent from "./CourseContentOverviewComponent";
+import FooterComponent from "./creator&&customer/component/FooteComponent";
+import CoursesTable from "./creator&&customer/page/CoursesInforPage";
+import CourseDetail from "./creator&&customer/page/CourseCommercialDetailPage";
+import CoursesList from "./creator&&customer/page/CreatorCourseListPage";
+import CreatorAccountInfo from "./creator&&customer/page/CreatorAccount";
+import CourseContentOverviewPage from "./creator&&customer/page/CourseContentOverviewPage";
 import AuthProvider, { useAuth } from "./security/Authentication";
-import LoginComponent from "./LoginComponent";
+import LoginComponent from "./creator&&customer/component/LoginComponent";
 
-import "./api/AuthInterceptor";
+import "./api/core/AuthInterceptor";
 
 import ProtectedRoute from "./ProtectedRoute";
 import CreatorProtectedRoute from "./CreatorProtectedRoute";
 import AdminRoute from "./AdminRoute";
 
-import WithdrawHistory from "./CreatorHistoryTransacction";
-import TransactionDetailPage from "./TransactionDetailPage";
-import BalanceComponent from "./BalanceComponent";
+import WithdrawHistory from "./creator&&customer/page/CreatorHistoryTransactionPage";
+import TransactionDetailPage from "./creator&&customer/page/TransactionDetailPage";
+import BalancePage from "./creator&&customer/page/BalancePage";
 
-import KahootList from "./KahootManagement";
-import TeacherDashboard from "./kahoot/TeacherDashboard";
-import StudentJoin from "./kahoot/StudentJoin";
-import KahootSpecificContent from "./KahootSpecificContent";
+import KahootList from "./creator&&customer/page/KahootManagementPage";
+import TeacherDashboard from "./creator&&customer/kahoot/TeacherDashboard";
+import StudentJoin from "./creator&&customer/kahoot/StudentJoin";
+import KahootSpecificContentPage from "./creator&&customer/page/KahootSpecificContentPage";
 
 import AdminCreatorManagement from "./adminPages/AdminCreatorPages";
 import AdminCreatorDetail from "./adminPages/AdminCreatorDetail";
@@ -293,9 +293,9 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route
             path="/course_result/:name"
-            element={<CoursesResultComponent />}
+            element={<CoursesResultPage />}
           />
-          <Route path="/course/specific/:id" element={<CourseDescription />} />
+          <Route path="/course/specific/:id" element={<CourseDescriptionPage />} />
 
           {/* PUBLIC - Student Join Kahoot (không cần đăng nhập) */}
           <Route
@@ -382,7 +382,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
             path="/mylearning"
             element={
               <ProtectedRoute>
-                <MyLearningComponent />
+                <MyLearningPage />
               </ProtectedRoute>
             }
           />
@@ -390,7 +390,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
             path="/course/content_overview/:id"
             element={
               <ProtectedRoute>
-                <CourseContentOverviewComponent />
+                <CourseContentOverviewPage />
               </ProtectedRoute>
             }
           />
@@ -422,7 +422,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
             path="/creator/commercial/balance"
             element={
               <ProtectedRoute>
-                <BalanceComponent />
+                <BalancePage />
               </ProtectedRoute>
             }
           />
@@ -456,7 +456,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
             path="/creator/class/kahoot/:id"
             element={
               <CreatorProtectedRoute>
-                <KahootSpecificContent />
+                <KahootSpecificContentPage />
               </CreatorProtectedRoute>
             }
           />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { adminTransactionApi } from "../api/adminTransactionApi";
+import { adminTransactionApi } from "../api/admin/adminTransactionApi";
 
 export default function RevenueReportPage() {
   const [period, setPeriod] = useState("MONTH"); // DAY, WEEK, MONTH, QUARTER, YEAR
