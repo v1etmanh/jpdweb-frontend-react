@@ -368,14 +368,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
               </AdminRoute>
             }
           />
-          <Route
-            path="/admin/diagnosticsPage"
-            element={
-              <AdminRoute>
-                <AdminDiagnosticsPage />
-              </AdminRoute>
-            }
-          />
+        
 
           {/* USER PROTECTED ROUTES - cần đăng nhập */}
           <Route

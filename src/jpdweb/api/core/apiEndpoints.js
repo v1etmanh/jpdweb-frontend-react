@@ -144,6 +144,12 @@ export const API_ENDPOINTS = {
 },KAHOOT_API: {
     CREATE_SESSION: '/api/quiz/create', // POST
     GET_FINAL_RESULTS: '/api/quiz/:sessionCode/participants' // GET
-},
+}, 
+COMMENT: {
+        GET_ALL: '/api/courses/:courseId/comments',              // GET – Lấy tất cả bình luận của khóa học
+        CREATE: '/api/courses/:courseId/comments',               // POST – Tạo bình luận mới
+        UPDATE: '/api/courses/:courseId/comments/:commentId',    // PUT – Cập nhật bình luận
+        DELETE: '/api/courses/:courseId/comments/:commentId'     // DELETE – Xóa bình luận
+    }
 
 };

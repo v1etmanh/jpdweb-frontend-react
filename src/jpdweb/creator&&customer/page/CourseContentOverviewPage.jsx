@@ -6,6 +6,7 @@ import { API_RESPONSE_TYPES, showErrorNotification, showWarningNotification, sho
 import { reportApi } from "../../api/system/reportApi";
 import { feedbackApi } from "../../api/system/feedbackApi";
 import CourseContentComponent from "../component/CourseContentComponent";
+import CommentComponent from "../component/CommentComponent";
 
 export default function CourseContentOverviewPage(){
   const { id } = useParams();
@@ -18,6 +19,10 @@ export default function CourseContentOverviewPage(){
   const [expandedChapters, setExpandedChapters] = useState(new Set([0]));
   const [expandedModules, setExpandedModules] = useState(new Set());
   const [isFinish,setFinish]=useState(false)
+  
+  // ========== THÊM STATE CHẾ ĐỘ TẬP TRUNG ==========
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  
   // Current content state
   const [currentContent, setCurrentContent] = useState(null);
   const [currentChapter, setCurrentChapter] = useState(null);
@@ -35,7 +40,7 @@ export default function CourseContentOverviewPage(){
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
   const [feedbackDetail, setFeedbackDetail] = useState('');
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
-
+  const [hiddenComment,setHiddentComment]=useState(true)
   const reportTypes = [
     { value: 'INAPPROPRIATE_CONTENT', label: 'Nội dung phản cảm, tục tĩu, không phù hợp' },
     { value: 'MISLEADING_INFORMATION', label: 'Thông tin sai lệch hoặc gây hiểu nhầm' },
@@ -46,6 +51,27 @@ export default function CourseContentOverviewPage(){
     { value: 'RELIGIOUS_OR_POLITICAL_CONTENT', label: 'Nội dung tôn giáo hoặc chính trị không phù hợp' },
     { value: 'OTHER', label: 'Khác' }
   ];
+
+  // ========== XỬ LÝ ESC KEY ĐỂ THOÁT FOCUS MODE ==========
+  useEffect(() => {
+    const handleEscKey = (e) => {
+      if (e.key === 'Escape' && isFocusMode) {
+        setIsFocusMode(false);
+      }
+    };
+
+    if (isFocusMode) {
+      document.addEventListener('keydown', handleEscKey);
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isFocusMode]);
 
   const handleError = (response) => {
     switch (response.responseType) {
@@ -271,6 +297,19 @@ export default function CourseContentOverviewPage(){
       content => content.typeOfContent?.includes(contentType)
     ) || false;
   };
+const numberFinish = () => {
+  const chapters = courseData.chapters;
+  let numberF = 0;
+
+  chapters.forEach(chapter => {
+    const modules = chapter.modules;
+    modules.forEach(module => {
+      numberF += module.customerModuleContents.length;
+    });
+  });
+
+  return numberF;
+};
 
   const formatContentType = (type) => {
     return type
@@ -436,11 +475,76 @@ export default function CourseContentOverviewPage(){
     );
   }
 
-  const chapters = courseData.chapters;
-  const totalModules = chapters.reduce((sum, ch) => sum + (ch.modules?.length || 0), 0);
-  const completedModules = Math.floor(totalModules * 0.3);
-  const overallProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
+  const chapters = courseData.chapters || [];
 
+const totalModules = chapters.reduce((sum, ch) => {
+  if (!ch.modules) return sum; // Nếu không có modules thì bỏ qua
+  const moduleCount = ch.modules.reduce(
+    (innerSum, m) => innerSum + ((m.contentTypes && m.contentTypes.length) || 0),
+    0
+  );
+  return sum + moduleCount;
+}, 0);
+
+const completedModules = numberFinish();
+
+const overallProgress =
+  totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
+
+  // ========== FOCUS MODE RENDER ==========
+  if (isFocusMode && currentContent) {
+    return (
+      <div className="fixed inset-0 bg-black z-50 flex flex-col">
+        {/* Focus Mode Header - Compact */}
+        <div className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setIsFocusMode(false)}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors group"
+              title="Thoát chế độ tập trung (ESC)"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+            
+            <div className="border-l border-gray-700 pl-4">
+              <div className="text-sm font-semibold text-white">{currentModule?.titleOfModule}</div>
+              <div className="text-xs text-gray-400 flex items-center space-x-2">
+                <span>{formatContentType(currentContentType)}</span>
+                {isFinish && (
+                  <>
+                    <span>•</span>
+                    <span className="text-green-400">✓ Đã hoàn thành</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-400 hidden sm:block">Nhấn ESC để thoát</span>
+          </div>
+        </div>
+
+        {/* Focus Mode Content */}
+        <div className="flex-1 overflow-y-auto bg-background">
+          <div className="max-w-6xl mx-auto p-6">
+            <CourseContentComponent 
+              contents={currentContent}
+              moduleid={currentModule.moduleId}
+              contentType={currentContentType}
+              language={courseData.language}
+              isFinish={isFinish}
+              onComplete={onComplete}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ========== NORMAL MODE RENDER ==========
   return (
     <div className="min-h-screen bg-background font-sans">
       {/* Compact Header */}
@@ -454,7 +558,7 @@ export default function CourseContentOverviewPage(){
               <p className="text-text-secondary text-xs mt-0.5">Tiếp tục hành trình học tập của bạn</p>
             </div>
             
-            {/* Current Module Info - Moved from bottom bar */}
+            {/* Current Module Info */}
             {currentModule && (
               <div className="hidden md:flex items-center space-x-4 pl-4 border-l border-border-light">
                 <div className="text-right">
@@ -479,8 +583,23 @@ export default function CourseContentOverviewPage(){
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Action Buttons - Moved from bottom bar */}
+            {/* Action Buttons */}
             <div className="flex items-center space-x-2">
+              {/* ========== NÚT CHẾ ĐỘ TẬP TRUNG ========== */}
+              {currentContent && (
+                <button 
+                  className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-medium hover:shadow-card font-medium text-sm group"
+                  onClick={() => setIsFocusMode(true)}
+                  title="Chế độ tập trung - Xem toàn màn hình"
+                >
+                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                  </svg>
+                  <span className="hidden sm:inline">Tập trung</span>
+                </button>
+              )}
+            {/* Action Buttons - Moved from bottom bar */}
+            
               <button 
                 className="flex items-center space-x-2 px-3 py-2 bg-primary-30 text-white rounded-lg hover:bg-primary-dark transition-all duration-300 shadow-medium hover:shadow-card font-medium text-sm group"
                 onClick={() => setShowFeedbackPopup(true)}
@@ -500,6 +619,15 @@ export default function CourseContentOverviewPage(){
                 </svg>
                 <span className="hidden sm:inline">Báo cáo</span>
               </button>
+              <button 
+                className="flex items-center space-x-2 px-3 py-2 bg-accent-10 text-white rounded-lg hover:bg-accent-dark transition-all duration-300 shadow-medium hover:shadow-card font-medium text-sm group"
+                onClick={() => setHiddentComment(false)}
+              >
+                <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span className="hidden sm:inline">Comment</span>
+              </button>
             </div>
 
             {/* Progress Display */}
@@ -516,6 +644,8 @@ export default function CourseContentOverviewPage(){
               </div>
             </div>
           </div>
+          {!hiddenComment&&
+          <CommentComponent courseId={id}></CommentComponent>}
         </div>
 
         {/* Mobile Progress Bar */}

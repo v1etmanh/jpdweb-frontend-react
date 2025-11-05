@@ -9,7 +9,7 @@ import { showErrorNotification, showSuccessNotification } from "../../api/core/a
 const CourseCard = ({ course, onEdit, onStatusChanged }) => {
   const [isChanging, setIsChanging] = useState(false);
   const [copied, setCopied] = useState(false);
-
+const nav=useNavigate()
   const handlePublicStatusChange = async () => {
     setIsChanging(true);
     const response = await creatorApi.changeCoursesStatus(course.id);
@@ -152,6 +152,19 @@ const CourseCard = ({ course, onEdit, onStatusChanged }) => {
             )}
           </button>
         </div>
+        <div className="flex items-center justify-center pt-4 border-t border-gray-100">
+  <button
+    onClick={() => nav(`/course/content_overview/${course.id}`)}
+    disabled={isChanging}
+    className="px-4 py-2 bg-[#06B6D4] text-white rounded-xl hover:bg-[#0891b2] 
+               focus:outline-none focus:ring-2 focus:ring-[#06B6D4] focus:ring-opacity-50 
+               disabled:opacity-50 disabled:cursor-not-allowed transition-all 
+               duration-200 text-sm font-semibold shadow-sm hover:shadow-md"
+  >
+    Review
+  </button>
+</div>
+
       </div>
     </div>
   );

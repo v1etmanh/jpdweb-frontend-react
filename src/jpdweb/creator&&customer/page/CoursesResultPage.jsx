@@ -1,6 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-// Giả sử courseApi và notifications được import đúng
 import { courseApi } from "../../api/creator/courseApi";
 import {
   API_RESPONSE_TYPES,
@@ -8,7 +7,6 @@ import {
   showWarningNotification,
 } from "../../api/core/apiClient";
 
-// Helper function to convert sort option to API parameter
 const getSortParam = (option) => {
   switch (option) {
     case 0:
@@ -18,89 +16,37 @@ const getSortParam = (option) => {
     case 2:
       return "price,desc";
     default:
-      return "courseId,desc"; // Sắp xếp mặc định
+      return "courseId,desc";
   }
 };
 
 export default function CoursesResultPage() {
   const { name } = useParams();
   const nav = useNavigate();
+  
+  const prevNameRef = useRef(name);
 
   // ========== STATE MANAGEMENT ==========
-  // Chỉ lưu trữ 12 khóa học của trang hiện tại
   const [targetCourses, setTargetCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState(3);
   const [loading, setLoading] = useState(false);
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isManualSearch, setIsManualSearch] = useState(false);
 
-  // ========== PAGINATION STATE (TỪ SERVER) ==========
-  // Các state này sẽ được cập nhật từ response của API
-  const [currentPage, setCurrentPage] = useState(0); // 0-indexed để khớp với Spring Pageable
+  // ========== PAGINATION STATE ==========
+  const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [pageSize, setPageSize] = useState(12);
+  const [pageSize] = useState(12);
 
-  // ========== PAGINATION FUNCTIONS ==========
-  /**
-   * Chuyển đến trang cụ thể (0-indexed)
-   */
-  const goToPage = (pageNumber) => {
-    // Đã là 0-indexed, không cần trừ 1
-    if (pageNumber >= 0 && pageNumber < totalPages) {
-      setCurrentPage(pageNumber);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+  // ========== RESET PAGE CHỈ KHI NAME THAY ĐỔI ==========
+  useEffect(() => {
+    if (prevNameRef.current !== name) {
+      setCurrentPage(0);
+      setSortOption(3); // Reset sort option khi search mới
+      prevNameRef.current = name;
     }
-  };
-
-  /**
-   * Tạo mảng số trang để hiển thị
-   */
-  const getPageNumbers = () => {
-    const pageNumbers = [];
-    const maxPagesToShow = 7;
-    const currentDisplayPage = currentPage + 1; // Trang hiển thị (1-indexed)
-
-    if (totalPages <= maxPagesToShow) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
-    } else {
-      pageNumbers.push(1);
-
-      let startPage = Math.max(2, currentDisplayPage - 1);
-      let endPage = Math.min(totalPages - 1, currentDisplayPage + 1);
-
-      // Điều chỉnh nếu đang ở gần đầu
-      if (currentDisplayPage <= 3) {
-        startPage = 2;
-        endPage = 4;
-      }
-
-      // Điều chỉnh nếu đang ở gần cuối
-      if (currentDisplayPage >= totalPages - 2) {
-        startPage = totalPages - 3;
-        endPage = totalPages - 1;
-      }
-
-      if (startPage > 2) {
-        pageNumbers.push("...");
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i);
-      }
-
-      if (endPage < totalPages - 1) {
-        pageNumbers.push("...");
-      }
-
-      pageNumbers.push(totalPages);
-    }
-
-    return pageNumbers;
-  };
+  }, [name]);
 
   // ========== HANDLE SEARCH ERRORS ==========
   const handleSearchCourseError = useCallback(
@@ -132,41 +78,11 @@ export default function CoursesResultPage() {
     [name]
   );
 
-  // ========== DEBOUNCE SEARCH TERM ==========
-  /**
-   * Debounce search term để tránh gọi API quá nhiều lần khi người dùng đang gõ
-   */
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 500); // Đợi 500ms sau khi người dùng ngừng gõ
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  // ========== AUTO SEARCH ON DEBOUNCED TERM CHANGE ==========
-  /**
-   * Tự động navigate đến trang tìm kiếm mới khi debouncedSearchTerm thay đổi
-   */
-  useEffect(() => {
-    if (debouncedSearchTerm.trim().length >= 2) {
-      // Reset trang và sort khi tìm kiếm mới
-      setCurrentPage(0);
-      setSortOption(3);
-      setIsManualSearch(false); // Đánh dấu là tìm kiếm tự động
-      nav(`/course_result/${encodeURIComponent(debouncedSearchTerm.trim())}`);
-    }
-  }, [debouncedSearchTerm, nav]);
-
-  // ========== SEARCH COURSES EFFECT (SERVER-SIDE) ==========
-  /**
-   * Tự động tìm kiếm khi `name`, `currentPage`, `pageSize`, hoặc `sortOption` thay đổi
-   */
+  // ========== SEARCH COURSES EFFECT ==========
   useEffect(() => {
     let isCancelled = false;
 
     const findCourses = async () => {
-      // Kiểm tra nếu name là "all" hoặc không có name, lấy tất cả khóa học
       const isExploreAll = !name || name.toLowerCase() === "all";
 
       if (!isExploreAll && name.trim().length < 2) {
@@ -179,12 +95,9 @@ export default function CoursesResultPage() {
       setLoading(true);
 
       try {
-        // Lấy tham số sắp xếp
         const sortParam = getSortParam(sortOption);
-
-        // **GỌI API VỚI PAGINATION VÀ SORT**
-        // Nếu là "all", tìm kiếm với empty string hoặc wildcard
         const searchKeyword = isExploreAll ? "" : name;
+        
         const response = await courseApi.searchCourse(
           searchKeyword,
           currentPage,
@@ -194,11 +107,11 @@ export default function CoursesResultPage() {
 
         if (!isCancelled) {
           if (response.success && response.data) {
-            // **CẬP NHẬT STATE TỪ PHẢN HỒI CỦA SERVER**
             setTargetCourses(response.data.content || []);
             setTotalPages(response.data.totalPages || 0);
             setTotalElements(response.data.totalElements || 0);
-            setCurrentPage(response.data.number || 0); // 'number' là trang hiện tại (0-indexed)
+            // ========== XÓA DÒNG NÀY ĐI ==========
+            // setCurrentPage(response.data.number || 0); // ← XÓA DÒNG NÀY
           } else {
             handleSearchCourseError(response);
             setTargetCourses([]);
@@ -226,16 +139,63 @@ export default function CoursesResultPage() {
     return () => {
       isCancelled = true;
     };
-    // `useEffect` sẽ chạy lại khi bất kỳ giá trị nào trong đây thay đổi
   }, [name, currentPage, pageSize, sortOption, handleSearchCourseError]);
 
-  // ========== HANDLE FILTER/SORT (SERVER-SIDE) ==========
-  /**
-   * Xử lý sắp xếp. Chỉ cần cập nhật state, useEffect sẽ tự động gọi lại API.
-   */
+  // ========== PAGINATION FUNCTIONS ==========
+  const goToPage = (pageNumber) => {
+    if (pageNumber >= 0 && pageNumber < totalPages) {
+      setCurrentPage(pageNumber);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 7;
+    const currentDisplayPage = currentPage + 1;
+
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      pageNumbers.push(1);
+
+      let startPage = Math.max(2, currentDisplayPage - 1);
+      let endPage = Math.min(totalPages - 1, currentDisplayPage + 1);
+
+      if (currentDisplayPage <= 3) {
+        startPage = 2;
+        endPage = 4;
+      }
+
+      if (currentDisplayPage >= totalPages - 2) {
+        startPage = totalPages - 3;
+        endPage = totalPages - 1;
+      }
+
+      if (startPage > 2) {
+        pageNumbers.push("...");
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+
+      if (endPage < totalPages - 1) {
+        pageNumbers.push("...");
+      }
+
+      pageNumbers.push(totalPages);
+    }
+
+    return pageNumbers;
+  };
+
+  // ========== HANDLE FILTER/SORT ==========
   const handleFilterChange = (option) => {
     setSortOption(option);
-    setCurrentPage(0); // Reset về trang đầu tiên khi sắp xếp
+    setCurrentPage(0); // Reset về trang đầu khi sort
   };
 
   // ========== HANDLE SEARCH ==========
@@ -250,10 +210,9 @@ export default function CoursesResultPage() {
       return;
     }
 
-    // Khi tìm kiếm mới, reset trang và sort
-    setCurrentPage(0);
-    setSortOption(3);
-    setIsManualSearch(true); // Đánh dấu là tìm kiếm thủ công
+    // Không cần reset currentPage và sortOption ở đây
+    // Vì useEffect theo dõi name sẽ tự động reset
+    setIsManualSearch(true);
     nav(`/course_result/${encodeURIComponent(trimmed)}`);
   };
 
@@ -263,9 +222,10 @@ export default function CoursesResultPage() {
     }
   };
 
+  // ... phần còn lại giữ nguyên
+  
   // ========== LOADING STATE ==========
   if (loading && targetCourses.length === 0) {
-    // Chỉ hiển thị loading toàn màn hình khi tải lần đầu
     return (
       <div className="min-h-screen bg-gray-100 py-12">
         <div className="max-w-7xl mx-auto px-4">
@@ -300,15 +260,10 @@ export default function CoursesResultPage() {
   // ========== EMPTY STATE ==========
   if (targetCourses.length === 0 && !loading) {
     const isExploreAll = !name || name.toLowerCase() === "all";
-
-    // Chỉ hiển thị empty state khi:
-    // 1. Đang xem tất cả khóa học (isExploreAll = true)
-    // 2. Hoặc người dùng đã nhấn nút tìm kiếm thủ công (isManualSearch = true)
     const shouldShowEmptyState = isExploreAll || isManualSearch;
 
     return (
       <div className="min-h-screen bg-gray-100">
-        {/* Header với thanh tìm kiếm - Luôn hiển thị */}
         <div className="bg-white shadow-lg border-b-4 border-[#F97316]">
           <div className="max-w-8xl mx-auto px-4 py-6">
             <div className="text-center mb-8">
@@ -320,7 +275,6 @@ export default function CoursesResultPage() {
               </h1>
             </div>
 
-            {/* Thanh tìm kiếm */}
             <div className="max-w-3xl mx-auto mb-6">
               <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border-4 border-white/50 p-1.5 hover:shadow-[#F97316]/30 transition-shadow duration-300">
                 <div className="flex items-center gap-2.5">
@@ -370,7 +324,6 @@ export default function CoursesResultPage() {
               </div>
             </div>
 
-            {/* Bộ lọc */}
             <div className="flex justify-end">
               <select
                 value={sortOption}
@@ -386,13 +339,11 @@ export default function CoursesResultPage() {
           </div>
         </div>
 
-        {/* Nội dung empty state */}
         <div className="py-12">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center">
               <div className="bg-white rounded-2xl shadow-xl p-12 max-w-2xl mx-auto">
                 {shouldShowEmptyState ? (
-                  // Hiển thị thông báo không tìm thấy kết quả
                   <>
                     <div className="w-24 h-24 bg-[#e53935] rounded-full flex items-center justify-center mx-auto mb-6">
                       <svg
@@ -432,7 +383,6 @@ export default function CoursesResultPage() {
                     </button>
                   </>
                 ) : (
-                  // Hiển thị loading khi đang gõ tự động
                   <>
                     <div className="w-24 h-24 bg-[#1e88e5] rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
                       <svg
@@ -463,10 +413,10 @@ export default function CoursesResultPage() {
     );
   }
 
-  // ========== MAIN CONTENT ==========
+  // ========== MAIN CONTENT ========== (giữ nguyên phần còn lại)
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header với thanh tìm kiếm */}
+      {/* Header, Course Grid, Pagination - giữ nguyên như code cũ */}
       <div className="bg-white shadow-lg border-b-4 border-[#F97316]">
         <div className="max-w-8xl mx-auto px-4 py-6">
           <div className="text-center mb-8">
@@ -478,7 +428,6 @@ export default function CoursesResultPage() {
             </h1>
           </div>
 
-          {/* Thanh tìm kiếm */}
           <div className="max-w-3xl mx-auto mb-6">
             <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border-4 border-white/50 p-1.5 hover:shadow-[#F97316]/30 transition-shadow duration-300">
               <div className="flex items-center gap-2.5">
@@ -528,7 +477,6 @@ export default function CoursesResultPage() {
             </div>
           </div>
 
-          {/* Bộ lọc */}
           <div className="flex justify-end">
             <select
               value={sortOption}
@@ -544,26 +492,21 @@ export default function CoursesResultPage() {
         </div>
       </div>
 
-      {/* ========== DANH SÁCH KHÓA HỌC ========== */}
-      {/* Hiển thị lớp phủ loading khi chuyển trang */}
       <div
         className={`max-w-7xl mx-auto px-4 py-12 relative ${
           loading ? "opacity-50 transition-opacity duration-300" : ""
         }`}
       >
-        {/* Render `targetCourses` (chỉ 12 item) trực tiếp */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {targetCourses.map((course, index) => (
             <div
               key={course.id || index}
               className="group cursor-pointer transform hover:scale-105 transition-transform duration-300"
               onClick={() => {
-                // Scroll về đầu trang trước khi chuyển trang
                 window.scrollTo({ top: 0, behavior: "smooth" });
                 nav(`/course/specific/${course.id}`);
               }}
             >
-              {/* Course Card (Giữ nguyên) */}
               <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full flex flex-col">
                 <div className="relative aspect-video overflow-hidden bg-gray-200">
                   {course.img ? (
@@ -656,7 +599,6 @@ export default function CoursesResultPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Scroll về đầu trang trước khi chuyển trang
                       window.scrollTo({ top: 0, behavior: "smooth" });
                       nav(`/course/specific/${course.id}`);
                     }}
@@ -689,10 +631,8 @@ export default function CoursesResultPage() {
           ))}
         </div>
 
-        {/* ========== PAGINATION UI (SERVER-SIDE) ========== */}
         {totalPages > 1 && (
           <div className="mt-12 flex justify-center items-center gap-2">
-            {/* Nút Previous */}
             <button
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 0 || loading}
@@ -710,7 +650,7 @@ export default function CoursesResultPage() {
                 viewBox="0 0 24 24"
               >
                 <path
-                  strokeLinecap="round"
+                 strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
                   d="M15 19l-7-7 7-7"
@@ -718,7 +658,6 @@ export default function CoursesResultPage() {
               </svg>
             </button>
 
-            {/* Các số trang */}
             <div className="flex gap-2">
               {getPageNumbers().map((pageNum, index) => {
                 if (pageNum === "...") {
@@ -732,7 +671,6 @@ export default function CoursesResultPage() {
                   );
                 }
 
-                // pageNum là 1-indexed, currentPage là 0-indexed
                 const pageIndex = pageNum - 1;
                 return (
                   <button
@@ -755,7 +693,6 @@ export default function CoursesResultPage() {
               })}
             </div>
 
-            {/* Nút Next */}
             <button
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages - 1 || loading}
@@ -783,7 +720,6 @@ export default function CoursesResultPage() {
           </div>
         )}
 
-        {/* Thông tin trang hiện tại */}
         {totalPages > 0 && (
           <div className="mt-6 text-center">
             <p className="text-gray-600 text-sm">
@@ -801,7 +737,6 @@ export default function CoursesResultPage() {
         )}
       </div>
 
-      {/* ========== FOOTER ========== */}
       <div className="bg-[#243864] text-white py-8">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h3 className="text-2xl font-bold mb-2">
