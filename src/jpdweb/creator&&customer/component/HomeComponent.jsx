@@ -454,6 +454,7 @@ export default function HomepageComponent() {
         }
       `}</style>
 
+
       {/* Hero Section */}
       <section
         id="home-section"
