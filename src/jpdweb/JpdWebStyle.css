@@ -733,4 +733,38 @@ body {
   .countdown-number {
     font-size: 24px;
   }
+  /* ===== HERO BACKGROUND MỜ NHẸ - ĐẸP NHƯ ẢNH GỐC ===== */
+#home-section {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Lớp mờ + blur nhẹ - chính xác như ảnh bạn gửi */
+#home-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(1.2px);
+  -webkit-backdrop-filter: blur(1.2px);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Đảm bảo nội dung chữ nằm trên lớp mờ */
+#home-section > .container,
+#home-section > div > .container {
+  position: relative;
+  z-index: 20;
+}
+
+/* Floating shapes (nếu có) vẫn đẹp */
+#home-section > div[class*="absolute"] {
+  z-index: 15;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(6deg); }
+}
+.animate-float { animation: float 6s ease-in-out infinite; }
 }

@@ -453,83 +453,60 @@ export default function HomepageComponent() {
           animation: scroll-left 30s linear infinite;
         }
       `}</style>
+  <section
+  id="home-section"
+  className="relative w-full pt-32 pb-20 px-4 md:px-17 bg-cover bg-center bg-no-repeat min-h-screen overflow-hidden -mt-0"
+  style={{ backgroundImage: `url(${home1})` }}
+>
+  {/* LỚP MỜ NHẸ - HOẠT ĐỘNG 100% */}
+  <div className="absolute inset-0 bg-black/20 backdrop-blur-sm z-10 pointer-events-none"></div>
 
-      {/* Hero Section */}
-      <section
-        id="home-section"
-        className="relative w-full pt-32 pb-20 px-17 bg-cover bg-center bg-no-repeat min-h-[calc(100vh-400px)] overflow-hidden -mt-0"
-        style={{ backgroundImage: `url(${home1})` }}
-      >
-        {/* Animated gradient overlay */}
-        
-        {/* Floating geometric shapes */}
-        <div
-          className="absolute top-17 right-17 w-27 h-27 bg-white/10 backdrop-blur-sm rounded-full"
-          style={{ animation: "float 6s ease-in-out infinite" }}
-        ></div>
-        <div
-          className="absolute bottom-34 left-8 w-20 h-20 bg-[#F97316]/20 backdrop-blur-sm rotate-45"
-          style={{ animation: "float 8s ease-in-out infinite 1s" }}
-        ></div>
-        <div
-          className="absolute top-34 left-1/3 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full"
-          style={{ animation: "float 7s ease-in-out infinite 2s" }}
-        ></div>
+  {/* Floating shapes */}
+  <div className="absolute top-17 right-17 w-27 h-27 bg-white/15 backdrop-blur-sm rounded-full animate-float"></div>
+  <div className="absolute bottom-34 left-8 w-20 h-20 bg-[#F97316]/20 backdrop-blur-sm rotate-45 animate-float" style={{ animationDelay: "1s" }}></div>
+  <div className="absolute top-34 left-1/3 w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full animate-float" style={{ animationDelay: "2s" }}></div>
 
-        <div className="container mx-auto max-w-screen-xl px-4 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-7">
-            {/* TEXT SECTION */}
-            <div className="lg:col-span-7 flex flex-col items-start text-left gap-7">
-              <div className="space-y-2 animate-fade-in-up mb-[50px]">
-                <div className="py-2">
-                  <span className="inline-block ml-[110px] bg-white/20 backdrop-blur-md text-white px-5 py-1.5 rounded-full text-xs font-bold border border-white/30 shadow-lg">
-                    🚀 Nền tảng học ngôn ngữ #1
-                  </span>
-                </div>
+  <div className="container mx-auto max-w-screen-xl px-4 relative z-20">
+    <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-7">
+      <div className="lg:col-span-7 flex flex-col items-start text-left gap-7">
+        <div className="space-y-6 animate-fade-in-up">
+          <div className="py-2">
+            <span className="inline-block ml-[110px] bg-white/25 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-bold border border-white/40 shadow-lg">
+              Nền tảng học ngôn ngữ #1
+            </span>
+          </div>
 
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white drop-shadow-2xl leading-tight">
-                  Welcome to Your
-                  <span className="block mt-1.5 bg-gradient-to-r from-[#F97316] via-white to-[#F97316] bg-clip-text text-transparent">
-                    JPD Learning Journey
-                  </span>
-                </h1>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white drop-shadow-2xl leading-tight">
+            Welcome to Your
+            <span className="block mt-2 bg-gradient-to-r from-[#F97316] via-white to-[#F97316] bg-clip-text text-transparent">
+              JPD Learning Journey
+            </span>
+          </h1>
 
-                <p className="text-lg md:text-xl text-white/95 drop-shadow-lg max-w-2xl leading-relaxed">
-                  Học ngôn ngữ dễ dàng với cấu trúc khóa học được hướng dẫn và
-                  tài liệu thân thiện.
-                </p>
+          {/* CHỮ TIẾNG VIỆT NHỎ, KHÔNG KHUNG, RÕ ĐẸP */}
+          <p className="text-base md:text-lg text-white/90 drop-shadow-md max-w-2xl leading-relaxed font-medium">
+            Học ngôn ngữ dễ dàng với cấu trúc khóa học được hướng dẫn và tài liệu thân thiện.
+          </p>
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-3">
-                  <button
-                    onClick={scrollToCourses}
-                    className="group relative bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold py-3 px-7 rounded-full shadow-2xl transition duration-300 hover:scale-110 hover:shadow-[#F97316]/50 overflow-hidden text-base"
-                  >
-                    <span className="relative z-10 flex items-center justify-center gap-2">
-                      Bắt đầu học ngay
-                      <svg
-                        className="w-4 h-4 group-hover:translate-x-1 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 7l5 5m0 0l-5 5m5-5H6"
-                        />
-                      </svg>
-                    </span>
-                    <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* (Right column intentionally left empty for future content / hero art) */}
+          <div className="flex flex-col sm:flex-row gap-4 pt-6">
+            <button
+              onClick={scrollToCourses}
+              className="group relative bg-gradient-to-r from-[#F97316] to-[#EA580C] text-white font-bold py-4 px-9 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 hover:shadow-orange-500/50 overflow-hidden text-lg flex items-center gap-3"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-3">
+                Bắt đầu học ngay
+                <svg className="w-5 h-5 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </span>
+              <div className="absolute inset-0 bg-white/30 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+            </button>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Search Bar */}
       <div className="flex justify-center -mt-7 px-4 relative z-20">
