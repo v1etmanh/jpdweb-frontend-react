@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, FileText, ImageIcon, XIcon, Loader2Icon, ListChecks } from 'lucide-react';
 import { saveImg } from '../../api/ApiConnect';
 import { useSearchParams } from 'react-router-dom';
+import { creatorApi } from '../../api/creator/creatorApi';
+import { showWarningNotification } from '../../api/core/apiClient';
 
 const WritingQuestionForm = ({ onSubmit, initialData, onDelete }) => {
   const [questions, setQuestions] = useState([
@@ -159,13 +161,20 @@ const [searchParams] = useSearchParams();
   };
 
   // Xóa ảnh
-  const removeImage = (index) => {
+  const removeImage = async(index) => {
     const confirmed = window.confirm("Bạn có muốn xóa ảnh này không?");
-    if (confirmed) {
-      updateQuestion(index, 'imageUrl', '');
-      const fileInput = document.getElementById(`image-${index}`);
+   
+     if (confirmed) {
+         const response=await creatorApi.deleteFile(questions[index].imageUrl);
+         if(response.success){
+          updateQuestion(index, 'imageUrl', '');
+        const fileInput = document.getElementById(`image-${index}`);
       if (fileInput) fileInput.value = '';
-    }
+         }
+        else {
+          showWarningNotification("khong the xoa hinh anh nay")
+        }
+      }
   };
 
   // Xử lý submit
@@ -338,8 +347,7 @@ const [searchParams] = useSearchParams();
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-lg"
-                      title="Xóa ảnh"
+                     title="Xóa ảnh"
                     >
                       <XIcon className="w-5 h-5" />
                     </button>

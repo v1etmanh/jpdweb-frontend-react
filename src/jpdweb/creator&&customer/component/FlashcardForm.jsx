@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { PlusCircleIcon, Trash2Icon, ImageIcon, XIcon, Loader2Icon } from 'lucide-react';
 import { saveImg } from '../../api/ApiConnect';
+import { creatorApi } from '../../api/creator/creatorApi';
+import { showErrorNotification } from '../../api/core/apiClient';
 
 const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
   const [flashCards, setFlashCards] = useState([
@@ -99,10 +101,15 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
     }
   };
 
-  const removeImage = (index) => {
+  const removeImage = async(index) => {
     const confirmed = window.confirm("Bạn có muốn xóa ảnh này không?");
     if (confirmed) {
+     const response=await creatorApi.deleteFile(flashCards[index].imageUrl);
+     if(response.success)
       updateFlashCard(index, 'imageUrl', '');
+    else {
+      showErrorNotification("khong the xoa hinh anh nay")
+    }
     }
   };
 
@@ -272,8 +279,7 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
   <button
     type="button"
     onClick={() => removeImage(index)}
-    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-lg"
-    title="Xóa ảnh"
+     title="Xóa ảnh"
   >
     <XIcon className="w-5 h-5" />
   </button>
@@ -286,6 +292,7 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
   >
    link
   </a>
+  
 </div>
               )}
             </div>

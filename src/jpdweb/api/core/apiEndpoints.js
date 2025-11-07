@@ -48,6 +48,7 @@ export const API_ENDPOINTS = {
         // File Upload
         SAVE_IMAGE: '/api/creator/uploadFile/saveImg',
         SAVE_PDF: '/api/creator/uploadFile/savePdf',
+        DELETE_BY_URL:'/api/creator/uploadFile/delete_file',
 
         // AI
         GENERATE_FEEDBACK: '/api/creator/AI/generateFeeback',

@@ -308,6 +308,22 @@ getCommercialCourse: () => {
             { errorMessage: 'Không thể upload PDF' }
         );
     },
+     /**
+     * delete file
+     * @param {string} url - Form data
+     */
+    deleteFile: (url) => {
+        return callApi(
+            () => apiclient.delete(
+                API_ENDPOINTS.CREATOR.DELETE_BY_URL,
+                {params:{url:url}},
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            ),
+            { errorMessage: 'Không thể upload PDF' }
+        );
+    },
+    
+    //flashcard,lisstenchoice,speakingwithpicture,writing,
 
     /**
      * Tạo yêu cầu rút tiền
