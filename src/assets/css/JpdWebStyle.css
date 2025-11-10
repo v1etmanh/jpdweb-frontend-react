@@ -1,0 +1,29 @@
+html,body{
+    height: 100%;
+    margin:0;
+    padding: 0;
+}
+.wrapper{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+   
+}
+.header {
+  position: fixed;
+  top: 0;
+  height: 70px;
+  width: 100%;
+  z-index: 1000;
+}
+.main-content{
+    flex: 1;
+ padding-top: 70px; 
+}
+.site-header {
+  position: sticky;  /* giữ cố định khi cuộn */
+  top: 0;
+  z-index: 1040;     /* cao hơn content, thấp hơn modal nếu có */
+  background: #fff;  /* để không trong suốt */
+}
+

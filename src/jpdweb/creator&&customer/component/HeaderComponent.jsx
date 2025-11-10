@@ -97,7 +97,7 @@ export default function HeaderComponent() {
             </li>
             <li>
               <Link
-                to="/dictionary"
+                to="/dictionary/community"
                 className={`relative inline-block text-xl font-semibold no-underline group transition-colors duration-300 ${
                   !isScrolled && isHomePage
                     ? "text-white hover:text-white/80"
