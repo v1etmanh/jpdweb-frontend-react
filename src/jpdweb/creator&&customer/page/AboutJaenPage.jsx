@@ -89,51 +89,55 @@ export default function AboutJaenPage() {
       </motion.section>
 
       {/* ================= Why Learn with JAEN ================= */}
-      <motion.section
-        initial={{ opacity: 0, y: 60 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="w-full bg-cyan-600 text-white py-24 px-6 text-center"
-      >
-        <h2 className="text-3xl md:text-4xl font-bold mb-12">
-          Why Learn with JAEN – Vì sao chọn JAEN
-        </h2>
-        <div className="grid md:grid-cols-4 gap-10 max-w-6xl mx-auto text-left">
-          <div>
-            <h3 className="text-xl font-semibold mb-2 text-orange-500 font-bold">
-              Integrated & Smart Learning
-            </h3>
-            <p className="text-cyan-50 text-sm">
-              10 interactive modules to develop all skills — listening, speaking, reading, and writing.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2 text-orange-500 font-bold">
-              Empowering Educators
-            </h3>
-            <p className="text-cyan-50 text-sm">
-              Design and manage your own courses with no technical barriers.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2 text-orange-500 font-bold">
-              Seamless Experience
-            </h3>
-            <p className="text-cyan-50 text-sm">
-              All-in-one platform — from video upload to progress tracking.
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold mb-2 text-orange-500 font-bold">
-              Connected Community
-            </h3>
-            <p className="text-cyan-50 text-sm">
-              Join study groups and forums to learn and grow together.
-            </p>
-          </div>
+<motion.section
+  initial={{ opacity: 0, y: 60 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8 }}
+  viewport={{ once: true }}
+  className="relative w-full bg-cyan-500 text-white py-24 px-6 text-center overflow-hidden"
+>
+  {/* Lớp phủ làm sáng nền */}
+  <div className="absolute inset-0 bg-white opacity-10"></div>
+
+  {/* Nội dung chính */}
+  <div className="relative z-10 max-w-6xl mx-auto">
+    <h2 className="text-3xl md:text-4xl font-extrabold mb-12">
+      Why Learn with JAEN – Vì sao chọn JAEN
+    </h2>
+
+    <div className="grid md:grid-cols-4 gap-10 text-left items-start">
+      {[
+        {
+          title: "Integrated Learning",
+          desc: "10 interactive modules to develop all skills — listening, speaking, reading, and writing.",
+        },
+        {
+          title: "Empowering Educators",
+          desc: "Design and manage your own courses with no technical barriers.",
+        },
+        {
+          title: "Seamless Experience",
+          desc: "All-in-one platform — from video upload to progress tracking.",
+        },
+        {
+          title: "Connected Community",
+          desc: "Join study groups and forums to learn and grow together.",
+        },
+      ].map((item, i) => (
+        <div
+          key={i}
+          className="flex flex-col justify-start h-full text-left space-y-2 hover:translate-y-[-4px] transition-transform duration-300"
+        >
+          <h3 className="text-lg md:text-xl font-bold text-orange-500">
+            {item.title}
+          </h3>
+          <p className="text-white text-sm leading-relaxed">{item.desc}</p>
         </div>
-      </motion.section>
+      ))}
+    </div>
+  </div>
+</motion.section>
+
 
       {/* ================= Vision Section ================= */}
       <motion.section
