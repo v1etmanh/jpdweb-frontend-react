@@ -9,6 +9,7 @@ import {
   MoreVertical,
   Tag,
   FileText,
+  Globe,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { rememberWordApi } from "../../api/system/rememberApi";
@@ -31,7 +32,13 @@ export default function DirectComponent() {
   const [alertType, setAlertType] = useState("success");
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
+  const[language,setLanguage]=useState("")
+  /*package com.jpd.web.model;
 
+public enum Language {ENGLISH,VIETNAMESE,
+CHINESE,JAPANESE,KOREAN,FRENCH,GERMAN,SPANISH,ITALIAN,RUSSIAN,
+}
+*/
   // API functions
   const addNewWord = async (payload) => {
     try {
@@ -55,7 +62,7 @@ export default function DirectComponent() {
         setSynonymInput("");
         setExampleInput("");
         setDisplay(false);
-
+        setLanguage("")
         return response;
       } else {
         showAlertMessage(response.message || "Thêm từ thất bại!", "error");
@@ -170,6 +177,7 @@ export default function DirectComponent() {
       description: description.trim(),
       synonyms: synonyms,
       example: examples,
+      language:language
     };
 
     await addNewWord(payload);
@@ -331,6 +339,29 @@ export default function DirectComponent() {
                         className="w-full px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-30 focus:border-transparent transition-all duration-300 bg-white"
                       />
                     </div>
+                     <div className="space-y-2">
+  <label className="block text-sm font-semibold text-text-primary">
+    <Globe size={16} className="inline mr-1" />
+    Language <span className="text-accent-10">*</span>
+  </label>
+  <select
+    value={language}
+    onChange={(e) => setLanguage(e.target.value)}
+    className="w-full px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-30 focus:border-transparent transition-all duration-300 bg-white appearance-none cursor-pointer"
+  >
+    <option value="">Chọn ngôn ngữ...</option>
+    <option value="ENGLISH">🇬🇧 English</option>
+    <option value="VIETNAMESE">🇻🇳 Tiếng Việt</option>
+    <option value="CHINESE">🇨🇳 中文 (Chinese)</option>
+    <option value="JAPANESE">🇯🇵 日本語 (Japanese)</option>
+    <option value="KOREAN">🇰🇷 한국어 (Korean)</option>
+    <option value="FRENCH">🇫🇷 Français (French)</option>
+    <option value="GERMAN">🇩🇪 Deutsch (German)</option>
+    <option value="SPANISH">🇪🇸 Español (Spanish)</option>
+    <option value="ITALIAN">🇮🇹 Italiano (Italian)</option>
+    <option value="RUSSIAN">🇷🇺 Русский (Russian)</option>
+  </select>
+</div>
                   </div>
 
                   {/* Description */}
@@ -461,6 +492,7 @@ export default function DirectComponent() {
                         setDisplay(false);
                         setWord("");
                         setMeaning("");
+                        setLanguage("")
                         setDescription("");
                         setSynonyms([]);
                         setExamples([]);
@@ -590,6 +622,7 @@ export default function DirectComponent() {
                                 {wordItem.word}
                               </h5>
                               <p className="text-sm text-text-secondary mt-1">{wordItem.meaning}</p>
+                                <p className="text-sm text-text-secondary mt-1">{wordItem.language}</p>
                             </div>
                             <div className="flex items-center gap-1">
                               <span

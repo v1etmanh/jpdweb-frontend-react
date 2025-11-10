@@ -97,6 +97,7 @@ export default function CommunityDictionary() {
       const response = await dictionaryCommunityApi.getWordDetail(wordId);
       
       if (response.success) {
+        console.log(response)
         setSelectedWord(response.data);
         setShowDetailModal(true);
       }
@@ -517,9 +518,9 @@ export default function CommunityDictionary() {
                           '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
                       }}
                     >
-                      {selectedWord.word.word}
+                      {selectedWord.word}
                     </h2>
-                    <p className="text-lg opacity-90">{selectedWord.word.meaning}</p>
+                    <p className="text-lg opacity-90">{selectedWord.meaning}</p>
                   </div>
                   <button
                     onClick={() => setShowDetailModal(false)}
@@ -532,13 +533,13 @@ export default function CommunityDictionary() {
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-2 bg-white/20 px-3 py-1.5 rounded-lg">
                     <MessageCircle size={16} />
-                    {selectedWord.word.customerEmail?.split("@")[0]}
+                    {selectedWord.customerEmail?.split("@")[0]}
                   </span>
                   <button
                     onClick={() => 
                       selectedWord.hasVoted 
-                        ? handleUnvote(selectedWord.word.rwId)
-                        : handleVote(selectedWord.word.rwId)
+                        ? handleUnvote(selectedWord.rwId)
+                        : handleVote(selectedWord.rwId)
                     }
                     className={`flex items-center gap-2 px-4 py-1.5 rounded-lg font-semibold transition-all ${
                       selectedWord.hasVoted
@@ -550,7 +551,7 @@ export default function CommunityDictionary() {
                       size={16} 
                       className={selectedWord.hasVoted ? "fill-current" : ""} 
                     />
-                    {selectedWord.word.voteCount || 0}
+                    {selectedWord.voteCount || 0}
                   </button>
                 </div>
               </div>
@@ -558,27 +559,27 @@ export default function CommunityDictionary() {
               {/* Modal Body */}
               <div className="p-6 space-y-6">
                 {/* Description */}
-                {selectedWord.word.description && (
+                {selectedWord.description && (
                   <div>
                     <h3 className="text-sm font-semibold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 mb-3">
                       <Sparkles size={14} />
                       Ghi chú
                     </h3>
                     <p className="text-text-primary leading-relaxed">
-                      {selectedWord.word.description}
+                      {selectedWord.description}
                     </p>
                   </div>
                 )}
 
                 {/* Synonyms */}
-                {selectedWord.word.synonyms && selectedWord.word.synonyms.length > 0 && (
+                {selectedWord.synonyms && selectedWord.synonyms.length > 0 && (
                   <div>
                     <h3 className="text-sm font-semibold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 mb-3">
                       <Tag size={14} />
                       Từ đồng nghĩa
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                      {selectedWord.word.synonyms.map((syn, idx) => (
+                      {selectedWord.synonyms.map((syn, idx) => (
                         <span
                           key={idx}
                           className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg font-medium"
@@ -595,14 +596,14 @@ export default function CommunityDictionary() {
                 )}
 
                 {/* Examples */}
-                {selectedWord.word.example && selectedWord.word.example.length > 0 && (
+                {selectedWord.example && selectedWord.example.length > 0 && (
                   <div>
                     <h3 className="text-sm font-semibold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 mb-3">
                       <FileText size={14} />
                       Ví dụ
                     </h3>
                     <div className="space-y-3">
-                      {selectedWord.word.example.map((ex, idx) => (
+                      {selectedWord.example.map((ex, idx) => (
                         <div
                           key={idx}
                           className="pl-4 border-l-4 border-purple-300 py-2"
