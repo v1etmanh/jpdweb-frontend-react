@@ -57,6 +57,9 @@ import AdminDiagnosticsPage from "./adminPages/AdminDiagnosticsPage";
 
 import AdminHeader from "./adminPages/AdminHeader";
 import Unauthorized from "./Unauthorized";
+import CommunityDictionary from "./creator&&customer/page/DictionaryCommunityPage";
+import AdminCourseManagement from "./adminPages/AdminCourseManagement";
+import AdminCourseDetailPage from "./adminPages/AdminCourseDetailPage";
 
 export default function JpdWebComponent() {
   // Nâng state lên từ B để có thể control ở cấp cao hơn
@@ -290,6 +293,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
           {/* PUBLIC ROUTES */}
           <Route path="/" element={<HomepageComponent />} />
           <Route path="/login" element={<LoginComponent />} />
+          <Route path="/dictionary" element={<CommunityDictionary />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route
             path="/course_result/:name"
@@ -345,6 +349,22 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
             }
           />
           <Route
+            path="/admin/course-manager"
+            element={
+              <AdminRoute>
+                <AdminCourseManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/course/:courseId"
+            element={
+              <AdminRoute>
+                <AdminCourseDetailPage />
+              </AdminRoute>
+            }
+          />
+          <Route
             path="/admin/auditlog-history/:creatorId"
             element={
               <AdminRoute>
@@ -369,7 +389,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
             }
           />
         
-
+  
           {/* USER PROTECTED ROUTES - cần đăng nhập */}
           <Route
             path="/mylearning"

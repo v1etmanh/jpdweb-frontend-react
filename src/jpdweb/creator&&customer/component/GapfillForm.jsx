@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { LightbulbIcon, PlusCircleIcon, Trash2Icon, TriangleDashedIcon, XIcon, Loader2Icon, CheckCircleIcon } from 'lucide-react';
 import { Markdown } from 'react-bootstrap-icons';
 import { generateFeedBack } from '../../api/ApiConnect';
+import { showWarningNotification } from '../../api/core/apiClient';
 
 const GapFillForm = ({ onSubmit, initialData, onDelete }) => {
   const [questions, setQuestions] = useState([
@@ -13,7 +14,7 @@ const GapFillForm = ({ onSubmit, initialData, onDelete }) => {
     }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const updateIndex=useRef([])
   // 🎯 AI Feedback States
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(null);
@@ -221,6 +222,9 @@ const GapFillForm = ({ onSubmit, initialData, onDelete }) => {
       } else if (gapCount < currentAnswers.length) {
         newQuestions[questionIndex].answers = currentAnswers.slice(0, gapCount);
       }
+      if (!updateIndex.current.includes(questionIndex)) {
+      updateIndex.current = [...updateIndex.current, questionIndex];
+    }
       
       // Track current question for AI
       setCurrentQuestionIndex(questionIndex);
@@ -278,7 +282,8 @@ const GapFillForm = ({ onSubmit, initialData, onDelete }) => {
     const newQuestions = [...questions];
     newQuestions[questionIndex].answers[answerIndex].answer = value;
     setQuestions(newQuestions);
-    
+    //
+  
     // Trigger AI when answer changes
     setCurrentQuestionIndex(questionIndex);
   };
@@ -347,12 +352,22 @@ const GapFillForm = ({ onSubmit, initialData, onDelete }) => {
   };
 
   // Submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!validateForm()) return;
 
-    const validQuestions = questions.map(q => ({
+  // Lọc các câu hỏi cần submit
+  const validQuestions = questions
+    .map((q, index) => ({ ...q, originalIndex: index })) // Giữ lại index gốc
+    .filter((q) => {
+      // Thẻ mới (mcId = null hoặc -1) → luôn submit
+      if (!q.mcId || q.mcId === -1) return true;
+      
+      // Thẻ cũ (mcId có giá trị) → chỉ submit nếu đã được update
+      return updateIndex.current.includes(q.originalIndex);
+    })
+    .map(q => ({
       mcId: q.mcId || -1,
       typeOfContent: "GAPFILL",
       questionText: q.question.trim(),
@@ -365,18 +380,27 @@ const GapFillForm = ({ onSubmit, initialData, onDelete }) => {
         }))
     }));
 
-    setIsSubmitting(true);
+  if (validQuestions.length === 0) {
+    showWarningNotification('Không có câu hỏi nào cần cập nhật!');
+    return;
+  }
+
+  setIsSubmitting(true);
+  
+  try {
+    await onSubmit(validQuestions);
+    console.log('Đã submit:', validQuestions);
+    console.log('Update indexes:', updateIndex.current);
     
-    try {
-      await onSubmit(validQuestions);
-      resetForm();
-    } catch (error) {
-      console.error('Error submitting questions:', error);
-      alert('Có lỗi xảy ra khi gửi câu hỏi!');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    resetForm();
+    updateIndex.current = []; // Reset danh sách index đã update
+  } catch (error) {
+    console.error('Error submitting questions:', error);
+    showWarningNotification('Có lỗi xảy ra khi gửi câu hỏi!');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   // Preview
   const renderQuestionPreview = (questionText) => {

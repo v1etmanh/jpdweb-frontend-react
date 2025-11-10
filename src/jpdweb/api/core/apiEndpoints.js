@@ -74,8 +74,9 @@ export const API_ENDPOINTS = {
         CREATE_NEW:'/api/customer/dictionary',
         DELETE_WORD:'/api/customer/dictionary/:id',
         UPDATE_WORS:'/api/customer/dictionary'
-    }
-    ,
+    },
+    
+    
     AI:{
         WRITING_EVALUATE:'/api/customer/evaluate/evaluateWriting'
     },
@@ -151,6 +152,27 @@ COMMENT: {
         CREATE: '/api/courses/:courseId/comments',               // POST – Tạo bình luận mới
         UPDATE: '/api/courses/:courseId/comments/:commentId',    // PUT – Cập nhật bình luận
         DELETE: '/api/courses/:courseId/comments/:commentId'     // DELETE – Xóa bình luận
-    }
+    },
+      DICTIONARY_COMMUNITY: {
+        GET_ALL_WORDS: '/api/dictionary/words',                 // GET – Lấy danh sách từ (phân trang)
+        SEARCH_WORDS: '/api/dictionary/search',                 // GET – Tìm kiếm từ theo keyword
+        GET_WORD_DETAIL: '/api/dictionary/words/:id',           // GET – Lấy chi tiết 1 từ
+        VOTE_WORD: '/api/dictionary/words/:id/vote',            // POST – Vote cho 1 từ
+        UNVOTE_WORD: '/api/dictionary/words/:id/vote',          // DELETE – Hủy vote
+        GET_TOP_VOTED: '/api/dictionary/top'                    // GET – Lấy top từ được vote nhiều nhất
+    },
+ADMIN_COURSE: {
+    // 📋 Lấy danh sách khóa học (có phân trang + tìm kiếm)
+    GET_ALL: '/api/admin/courses',
+
+    // 🔍 Lấy chi tiết khóa học theo ID
+    GET_BY_ID: '/api/admin/courses/:courseId',
+
+    // 🚫 Khóa khóa học
+    BAN: '/api/admin/courses/:courseId/ban',
+
+    // 🔓 Mở khóa khóa học
+    UNBAN: '/api/admin/courses/:courseId/unban',
+},
 
 };

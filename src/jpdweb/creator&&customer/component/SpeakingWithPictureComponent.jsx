@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { evaluateAnswer } from '../../api/ApiConnect';
+import { showWarningNotification } from '../../api/core/apiClient';
 
 const SpeakingPictureQuestion = ({ imageUrl, questions, increNum, language }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -77,7 +78,19 @@ const SpeakingPictureQuestion = ({ imageUrl, questions, increNum, language }) =>
     
     return () => cleanupResources();
   }, [isInitialized, currentIdx]);
-
+  
+const checkAudioDuration = (blob, maxDuration = 23) => {
+  return new Promise((resolve) => {
+    const audio = new Audio(URL.createObjectURL(blob));
+    
+    audio.onloadedmetadata = () => {
+      URL.revokeObjectURL(audio.src);
+      resolve(audio.duration <= maxDuration);
+    };
+    
+    audio.onerror = () => resolve(false);
+  });
+};
   const processRecordingAsync = async (blob, questionIdx) => {
     const requestId = `request_${questionIdx}_${Date.now()}`;
     
@@ -89,7 +102,12 @@ const SpeakingPictureQuestion = ({ imageUrl, questions, increNum, language }) =>
       formData.append('audio', blob, `audio_${questionIdx}.webm`);
       formData.append('sentence', questions[questionIdx].answer);
       formData.append('language', languageMap[language].substring(0,2));
-      
+     const isValid = await checkAudioDuration(blob, 23);
+    
+    if (!isValid) {
+      showWarningNotification("Audio có độ dài quá lớn (tối đa 23 giây)");
+      return; // Dừng lại, không gửi request
+    }
       const response = await evaluateAnswer(formData);
       
       // THÊM: Cập nhật câu trả lời hiện tại để hiển thị

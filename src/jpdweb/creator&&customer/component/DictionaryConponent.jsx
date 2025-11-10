@@ -5,9 +5,10 @@ import {
   RefreshCw,
   AlertTriangle,
   X,
-  JapaneseYen,
   Sparkles,
   MoreVertical,
+  Tag,
+  FileText,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { rememberWordApi } from "../../api/system/rememberApi";
@@ -17,6 +18,10 @@ export default function DirectComponent() {
   const [meaning, setMeaning] = useState("");
   const [description, setDescription] = useState("");
   const [word, setWord] = useState("");
+  const [synonyms, setSynonyms] = useState([]);
+  const [synonymInput, setSynonymInput] = useState("");
+  const [examples, setExamples] = useState([]);
+  const [exampleInput, setExampleInput] = useState("");
   const [activeTab, setActiveTab] = useState("add");
   const [myWords, setMyWords] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -41,9 +46,14 @@ export default function DirectComponent() {
 
         showAlertMessage("Thêm từ thành công!", "success");
 
+        // Reset form
         setWord("");
         setMeaning("");
         setDescription("");
+        setSynonyms([]);
+        setExamples([]);
+        setSynonymInput("");
+        setExampleInput("");
         setDisplay(false);
 
         return response;
@@ -112,6 +122,30 @@ export default function DirectComponent() {
     setTimeout(() => setShowAlert(false), 4000);
   };
 
+  // Handle synonyms
+  const addSynonym = () => {
+    if (synonymInput.trim() && !synonyms.includes(synonymInput.trim())) {
+      setSynonyms([...synonyms, synonymInput.trim()]);
+      setSynonymInput("");
+    }
+  };
+
+  const removeSynonym = (index) => {
+    setSynonyms(synonyms.filter((_, i) => i !== index));
+  };
+
+  // Handle examples
+  const addExample = () => {
+    if (exampleInput.trim() && !examples.includes(exampleInput.trim())) {
+      setExamples([...examples, exampleInput.trim()]);
+      setExampleInput("");
+    }
+  };
+
+  const removeExample = (index) => {
+    setExamples(examples.filter((_, i) => i !== index));
+  };
+
   const filteredWords = myWords.filter(
     (wordItem) =>
       wordItem.word?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,6 +168,8 @@ export default function DirectComponent() {
       word: word.trim(),
       meaning: meaning.trim(),
       description: description.trim(),
+      synonyms: synonyms,
+      example: examples,
     };
 
     await addNewWord(payload);
@@ -265,6 +301,7 @@ export default function DirectComponent() {
                 </div>
               ) : (
                 <div className="space-y-6 animate-scale-in">
+                  {/* Word and Meaning */}
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="block text-sm font-semibold text-text-primary">
@@ -296,19 +333,127 @@ export default function DirectComponent() {
                     </div>
                   </div>
 
+                  {/* Description */}
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-text-primary">
-                      Ghi chú & Ví dụ
+                      Ghi chú & Mô tả
                     </label>
                     <textarea
                       rows={3}
-                      placeholder="Nhập mô tả, ví dụ hoặc ghi chú..."
+                      placeholder="Nhập mô tả, ghi chú về từ vựng..."
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       className="w-full px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-30 focus:border-transparent transition-all duration-300 bg-white resize-none"
                     />
                   </div>
 
+                  {/* Synonyms */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-text-primary flex items-center gap-2">
+                      <Tag size={16} className="text-accent-10" />
+                      Từ đồng nghĩa
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Nhập từ đồng nghĩa..."
+                        value={synonymInput}
+                        onChange={(e) => setSynonymInput(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && addSynonym()}
+                        className="flex-1 px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-30 focus:border-transparent transition-all duration-300 bg-white"
+                        style={{
+                          fontFamily:
+                            '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={addSynonym}
+                        className="px-4 py-3 bg-primary-30 text-white rounded-xl hover:bg-primary-30/90 transition-all duration-300 font-semibold"
+                      >
+                        <Plus size={18} />
+                      </button>
+                    </div>
+                    {synonyms.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {synonyms.map((syn, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-30/10 text-primary-30 rounded-lg text-sm font-medium"
+                            style={{
+                              fontFamily:
+                                '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
+                            }}
+                          >
+                            {syn}
+                            <button
+                              onClick={() => removeSynonym(index)}
+                              className="hover:text-red-600 transition-colors"
+                            >
+                              <X size={14} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Examples */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-text-primary flex items-center gap-2">
+                      <FileText size={16} className="text-accent-10" />
+                      Ví dụ
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Nhập câu ví dụ..."
+                        value={exampleInput}
+                        onChange={(e) => setExampleInput(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && addExample()}
+                        className="flex-1 px-4 py-3 border border-border-light rounded-xl focus:ring-2 focus:ring-primary-30 focus:border-transparent transition-all duration-300 bg-white"
+                        style={{
+                          fontFamily:
+                            '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={addExample}
+                        className="px-4 py-3 bg-primary-30 text-white rounded-xl hover:bg-primary-30/90 transition-all duration-300 font-semibold"
+                      >
+                        <Plus size={18} />
+                      </button>
+                    </div>
+                    {examples.length > 0 && (
+                      <div className="space-y-2 mt-3">
+                        {examples.map((ex, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-2 px-3 py-2 bg-accent-10/10 text-text-primary rounded-lg text-sm"
+                          >
+                            <span
+                              className="flex-1"
+                              style={{
+                                fontFamily:
+                                  '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
+                              }}
+                            >
+                              {index + 1}. {ex}
+                            </span>
+                            <button
+                              onClick={() => removeExample(index)}
+                              className="text-text-muted hover:text-red-600 transition-colors flex-shrink-0"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
                   <div className="flex gap-3 justify-end pt-4 border-t border-border-light">
                     <button
                       type="button"
@@ -317,6 +462,10 @@ export default function DirectComponent() {
                         setWord("");
                         setMeaning("");
                         setDescription("");
+                        setSynonyms([]);
+                        setExamples([]);
+                        setSynonymInput("");
+                        setExampleInput("");
                       }}
                       className="px-6 py-3 border border-border-light text-text-secondary rounded-xl hover:bg-background transition-all duration-300 font-semibold"
                     >
@@ -419,7 +568,7 @@ export default function DirectComponent() {
                       {filteredWords.map((wordItem, index) => (
                         <div
                           key={wordItem.rwId}
-                          className={`border rounded-lg p-3 transition-all duration-300 group relative dropdown-container ${
+                          className={`border rounded-lg p-4 transition-all duration-300 group relative dropdown-container ${
                             hoveredCard === wordItem.rwId
                               ? "bg-primary-30/10 border-2 border-primary-30 shadow-medium"
                               : "bg-white border-border-light shadow-soft"
@@ -431,7 +580,7 @@ export default function DirectComponent() {
                           <div className="flex justify-between items-start">
                             <div className="flex-1 min-w-0">
                               <h5
-                                className="text-base font-bold truncate"
+                                className="text-lg font-bold truncate"
                                 style={{
                                   fontFamily:
                                     '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
@@ -440,7 +589,7 @@ export default function DirectComponent() {
                               >
                                 {wordItem.word}
                               </h5>
-                              <p className="text-sm mt-1">{wordItem.meaning}</p>
+                              <p className="text-sm text-text-secondary mt-1">{wordItem.meaning}</p>
                             </div>
                             <div className="flex items-center gap-1">
                               <span
@@ -489,18 +638,70 @@ export default function DirectComponent() {
                             </div>
                           </div>
 
-                          {/* Description appears on hover */}
-                          {wordItem.description &&
-                            hoveredCard === wordItem.rwId && (
-                              <div className="mt-2 pt-2 border-t border-primary-30/30 animate-scale-in">
-                                <span className="text-xs font-semibold text-primary-30 bg-primary-30/10 px-2 py-1 rounded">
-                                  Ghi chú
-                                </span>
-                                <p className="text-text-primary text-xs mt-1">
-                                  {wordItem.description}
-                                </p>
-                              </div>
-                            )}
+                          {/* Extended info appears on hover */}
+                          {hoveredCard === wordItem.rwId && (
+                            <div className="mt-3 pt-3 border-t border-primary-30/30 animate-scale-in space-y-2">
+                              {/* Description */}
+                              {wordItem.description && (
+                                <div>
+                                  <span className="text-xs font-semibold text-primary-30 bg-primary-30/10 px-2 py-1 rounded">
+                                    Ghi chú
+                                  </span>
+                                  <p className="text-text-primary text-sm mt-1">
+                                    {wordItem.description}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {/* Synonyms */}
+                              {wordItem.synonyms && wordItem.synonyms.length > 0 && (
+                                <div>
+                                  <span className="text-xs font-semibold text-primary-30 bg-primary-30/10 px-2 py-1 rounded inline-flex items-center gap-1">
+                                    <Tag size={12} />
+                                    Từ đồng nghĩa
+                                  </span>
+                                  <div className="flex flex-wrap gap-1.5 mt-1">
+                                    {wordItem.synonyms.map((syn, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="text-xs px-2 py-1 bg-accent-10/10 text-accent-10 rounded font-medium"
+                                        style={{
+                                          fontFamily:
+                                            '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
+                                        }}
+                                      >
+                                        {syn}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Examples */}
+                              {wordItem.example && wordItem.example.length > 0 && (
+                                <div>
+                                  <span className="text-xs font-semibold text-primary-30 bg-primary-30/10 px-2 py-1 rounded inline-flex items-center gap-1">
+                                    <FileText size={12} />
+                                    Ví dụ
+                                  </span>
+                                  <div className="space-y-1 mt-1">
+                                    {wordItem.example.map((ex, idx) => (
+                                      <p
+                                        key={idx}
+                                        className="text-xs text-text-primary pl-3 border-l-2 border-accent-10/30"
+                                        style={{
+                                          fontFamily:
+                                            '"Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif',
+                                        }}
+                                      >
+                                        {idx + 1}. {ex}
+                                      </p>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
