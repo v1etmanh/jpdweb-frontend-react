@@ -54,6 +54,9 @@ import TransactionsListPage from "./adminPages/TransactionsListPage";
 import RevenueReportPage from "./adminPages/RevenueReportPage";
 import SystemOverview from "./adminPages/SystemOverview";
 import AdminDiagnosticsPage from "./adminPages/AdminDiagnosticsPage";
+import AboutJaenPage from "./creator&&customer/page/AboutJaenPage"
+
+
 
 import AdminHeader from "./adminPages/AdminHeader";
 import Unauthorized from "./Unauthorized";
@@ -290,6 +293,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
           {/* PUBLIC ROUTES */}
           <Route path="/" element={<HomepageComponent />} />
           <Route path="/login" element={<LoginComponent />} />
+          <Route path="/about/*" element={<AboutJaenPage />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route
             path="/course_result/:name"
