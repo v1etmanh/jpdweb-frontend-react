@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { apiclient } from "../api/core/BaseApi";
 import { getKeycloakInstance, logOutKeycloak } from "../api/core/KeycloakService";
 import { getAccount } from "../api/ApiConnect";
+import { creatorApi } from "jpdweb/api/creator/creatorApi";
+import { showErrorNotification } from "jpdweb/api/core/apiClient";
 
 export const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -126,6 +128,12 @@ const refreshed = await keycloak.updateToken(30);
             console.log('📝 Account data:', response.data);
             setUser(response.data);
             setCreator(response.data.creator);
+            const response1 = await creatorApi.getAccount();
+                if (response1.success)
+                  setCreatorInfor(response1.data)
+                else {
+                  showErrorNotification('Không thể tải dữ liệu')
+                }
             
             // Setup token refresh
             await setUpTokenRefresh();
