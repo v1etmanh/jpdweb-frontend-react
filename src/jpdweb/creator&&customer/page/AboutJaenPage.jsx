@@ -65,15 +65,15 @@ export default function AboutJaenPage() {
     },
     vi: {
       hero: {
-        title: "Nơi việc học ngôn ngữ trở nên thông minh hơn",
-        subtitle: "Tại JAEN, chúng tôi tin rằng ngôn ngữ kết nối mọi người — và việc học chúng nên đơn giản, tương tác và truyền cảm hứng.",
-        cta1: "Bắt đầu học",
-        cta2: "Giảng dạy trên JAEN"
+        title: "Việc học ngôn ngữ trở nên thông minh và dễ dàng hơn",
+        subtitle: "Tại JAEN, chúng tôi tin rằng ngôn ngữ kết nối mọi người — và việc học chúng trở nên đơn giản, tiện lợi và nhiệt huyết.",
+        cta1: "Bắt đầu ",
+        cta2: "Tạo khóa học"
       },
       mission: {
         title: "Sứ mệnh của chúng tôi",
         quote: "Trao quyền cho mọi người dạy và học ngôn ngữ một cách thông minh, đơn giản và hiệu quả hơn.",
-        description: "JAEN tồn tại để thu hẹp khoảng cách giữa giáo viên và người học trong kỷ nguyên số — tập hợp mọi thứ cần thiết cho giáo dục ngôn ngữ hiện đại tại một nơi.",
+        description: "JAEN ra đời để thu hẹp khoảng cách giữa giáo viên và người học trong kỷ nguyên số — tập hợp mọi thứ cần thiết cho giáo dục ngôn ngữ hiện đại tại một nơi.",
         cards: [
           {
             title: "Dành cho Người học",
@@ -81,7 +81,7 @@ export default function AboutJaenPage() {
           },
           {
             title: "Dành cho Giáo viên",
-            body: "Tạo, xuất bản và kiếm thu nhập từ khóa học dễ dàng với công cụ tích hợp mạnh mẽ."
+            body: "Sáng tạo nội dung, xuất bản và kiếm thu nhập từ khóa học dễ dàng với công cụ tích hợp mạnh mẽ."
           },
           {
             title: "Dành cho Tất cả",
