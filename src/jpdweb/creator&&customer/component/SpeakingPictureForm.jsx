@@ -15,6 +15,8 @@ import {
   Upload
 } from 'lucide-react';
 import { saveImg } from '../../api/ApiConnect';
+import { creatorApi } from '../../api/creator/creatorApi';
+import { showWarningNotification } from '../../api/core/apiClient';
 
 const SpeakingPictureForm = ({ onSubmit, initialData, onDelete }) => {
   const [pictureQuestions, setPictureQuestions] = useState([
@@ -171,19 +173,37 @@ const SpeakingPictureForm = ({ onSubmit, initialData, onDelete }) => {
   };
 
   // Remove image
-  const removeImage = (pictureIndex) => {
-    setPictureQuestions(prev => {
-      const newQuestions = [...prev];
-      
-      if (newQuestions[pictureIndex].picturePreview) {
-        URL.revokeObjectURL(newQuestions[pictureIndex].picturePreview);
+  const removeImage = async (pictureIndex) => {
+  const target = pictureQuestions[pictureIndex];
+  if (!target) return;
+
+  // Nếu có ảnh thì xóa trên server trước
+  if (target.pictureUrl) {
+    try {
+      const response = await creatorApi.deleteFile(target.pictureUrl);
+      if (!response.success) {
+        showWarningNotification("Không thể xóa hình ảnh này");
+        return;
       }
-      
-      newQuestions[pictureIndex].picturePreview = null;
-      newQuestions[pictureIndex].pictureUrl = '';
-      return newQuestions;
-    });
-  };
+    } catch (error) {
+      console.error("Lỗi khi xóa ảnh:", error);
+      showWarningNotification("Xóa ảnh thất bại");
+      return;
+    }
+  }
+
+  // Sau khi xóa server thành công -> cập nhật state
+  setPictureQuestions((prev) => {
+    const newQuestions = [...prev];
+    if (newQuestions[pictureIndex].picturePreview) {
+      URL.revokeObjectURL(newQuestions[pictureIndex].picturePreview);
+    }
+    newQuestions[pictureIndex].picturePreview = null;
+    newQuestions[pictureIndex].pictureUrl = '';
+    return newQuestions;
+  });
+};
+
 
   // Add question
   const addQuestion = (pictureIndex) => {

@@ -37,6 +37,7 @@ import {
 import { creatorApi } from '../../api/creator/creatorApi';
 import { API_RESPONSE_TYPES, showSuccessNotification, showWarningNotification } from '../../api/core/apiClient';
 import { apiclient } from '../../api/core/BaseApi';
+import RejectionModal from '../component/RejectionModal';
 
 // Content type mapping
 const CONTENT_TYPES = {
@@ -74,7 +75,10 @@ const CourseManagementInterface = () => {
   const [editingModule, setEditingModule] = useState(null);
   const [selectedChapterForModule, setSelectedChapterForModule] = useState(null);
   const [selectedModuleForContent, setSelectedModuleForContent] = useState(null);
-//
+/*setRejectedList(rejected);
+      setShowModal(true);*/
+     const[rejectList,setRejectedList]=useState([])
+     const[showModal,setShowModal] =useState(false)
 const handleApiError = (response, defaultMessage = 'Có lỗi xảy ra') => {
     const message = response.message || defaultMessage
 
@@ -265,16 +269,27 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
       
       // Update cache with saved content
       if(response.success){
+        const { approved, rejected, approvedCount, rejectedCount } = response.data;
+    
+        console.log(response.data)
       const contentType = updateData[0]?.typeOfContent;
       if (contentType) {
         const cacheKey = `${courseId}_${chapterId}_${moduleId}_${contentType}`;
         setLoadedContents(prev => ({
           ...prev,
-          [cacheKey]: response.data
+          [cacheKey]: response.data.approved
         }));
       }
+      console.log(rejectedCount)
       
      showSuccessNotification("Save Successfull")
+     if (rejected.length > 0) {
+      setRejectedList(rejected);
+      setShowModal(true);
+      showSuccessNotification(`✓ ${approvedCount} saved, ⚠️ ${rejectedCount} rejected`);
+    } else {
+      showSuccessNotification("✓ All contents saved successfully");
+    }
     }
     else{
     handleApiError(response,"fail to fetch content ")
@@ -1359,6 +1374,7 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
               />
             )}
           </div>
+       
         </div>
       );
     }
@@ -1504,6 +1520,12 @@ ta hiểu được cơ chế ban đầu sẽ là load data vào local storage  t
           </div>
         </div>
       )}
+         <RejectionModal 
+      isOpen={showModal}
+      onClose={() => setShowModal(false)}
+      rejectedContents={rejectList}
+      approvedCount={ 0}
+    />
     </div>
   );
 };

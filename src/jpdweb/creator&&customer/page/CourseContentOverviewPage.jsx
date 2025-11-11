@@ -540,9 +540,25 @@ const overallProgress =
             />
           </div>
         </div>
+      
       </div>
     );
   }
+  if(!hiddenComment)
+    return <div>
+           <button 
+                className="flex items-center space-x-2 px-3 py-2 bg-accent-10 text-white rounded-lg hover:bg-accent-dark transition-all duration-300 shadow-medium hover:shadow-card font-medium text-sm group"
+                onClick={() => setHiddentComment((prev)=>!prev)}
+              >
+                <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span className="hidden sm:inline">quay lại</span>
+              </button>
+          <CommentComponent courseId={id}></CommentComponent>
+        
+    </div>
+  
 
   // ========== NORMAL MODE RENDER ==========
   return (
@@ -621,7 +637,7 @@ const overallProgress =
               </button>
               <button 
                 className="flex items-center space-x-2 px-3 py-2 bg-accent-10 text-white rounded-lg hover:bg-accent-dark transition-all duration-300 shadow-medium hover:shadow-card font-medium text-sm group"
-                onClick={() => setHiddentComment(false)}
+                onClick={() => setHiddentComment((prev)=>!prev)}
               >
                 <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>

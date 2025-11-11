@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { PlusCircleIcon, Trash2Icon, ImageIcon, XIcon, Loader2Icon } from 'lucide-react';
 import { saveImg } from '../../api/ApiConnect';
+import { creatorApi } from '../../api/creator/creatorApi';
+import { showErrorNotification, showWarningNotification } from '../../api/core/apiClient';
 
 const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
   const [flashCards, setFlashCards] = useState([
@@ -8,10 +10,10 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState(null);
-  
+  const updateIndex = useRef([]);
   // ✅ SỬA: Map imgUrl từ backend → imageUrl trong state
   useEffect(() => {
-   console.log(initialData)
+   
      
     if (initialData && Array.isArray(initialData) && initialData.length > 0) {
    
@@ -58,7 +60,12 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
     const newFlashCards = flashCards.map((card, i) => 
       i === index ? { ...card, [field]: value } : card
     );
+  // Kiểm tra và cập nhật updateIndex.current
+  if (!updateIndex.current.includes(index)) {
+    updateIndex.current = [...updateIndex.current, index];
+  }
     setFlashCards(newFlashCards);
+
   };
 
   const handleImageUpload = async (index, file) => {
@@ -99,10 +106,15 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
     }
   };
 
-  const removeImage = (index) => {
+  const removeImage = async(index) => {
     const confirmed = window.confirm("Bạn có muốn xóa ảnh này không?");
     if (confirmed) {
+     const response=await creatorApi.deleteFile(flashCards[index].imageUrl);
+     if(response.success)
       updateFlashCard(index, 'imageUrl', '');
+    else {
+      showErrorNotification("khong the xoa hinh anh nay")
+    }
     }
   };
 
@@ -112,17 +124,28 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
     
     // Validate và map đúng field cho backend
     const validFlashCards = flashCards
-      .filter(card => card.word.trim() !== '' && card.meaning.trim() !== '')
-      .map(card => ({
-        mcId: card.mcId,
-        word: card.word.trim(),
-        meaning: card.meaning.trim(),
-        typeOfContent: "FLASHCARD",
-        imgUrl: card.imageUrl // ← Map imageUrl → imgUrl để gửi backend
-      }));
+    .map((card, index) => ({ ...card, originalIndex: index })) // Giữ lại index gốc
+    .filter((card, index) => {
+      // Kiểm tra có đầy đủ thông tin không
+      const hasValidData = card.word.trim() !== '' && card.meaning.trim() !== '';
+      if (!hasValidData) return false;
+      
+      // Thẻ mới (mcId = null) → luôn submit
+      if (!card.mcId) return true;
+      
+      // Thẻ cũ (mcId có giá trị) → chỉ submit nếu đã được update
+      return updateIndex.current.includes(card.originalIndex);
+    })
+    .map(card => ({
+      mcId: card.mcId,
+      word: card.word.trim(),
+      meaning: card.meaning.trim(),
+      typeOfContent: "FLASHCARD",
+      imgUrl: card.imageUrl
+    }));
     
     if (validFlashCards.length === 0) {
-      alert('Vui lòng nhập ít nhất một flashcard với đầy đủ thông tin!');
+      showWarningNotification('ko có sự thay đổi nào');
       return;
     }
 
@@ -130,7 +153,7 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
     
     try {
       await onSubmit(validFlashCards);
-      
+      console.log(updateIndex)
       // Reset form
       setFlashCards([{ 
         mcId: null, 
@@ -272,8 +295,7 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
   <button
     type="button"
     onClick={() => removeImage(index)}
-    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-lg"
-    title="Xóa ảnh"
+     title="Xóa ảnh"
   >
     <XIcon className="w-5 h-5" />
   </button>
@@ -286,6 +308,7 @@ const FlashCardForm = ({ onSubmit, initialData, onDelete }) => {
   >
    link
   </a>
+  
 </div>
               )}
             </div>

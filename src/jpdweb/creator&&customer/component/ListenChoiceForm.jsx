@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Image, Check, X, Loader2, Upload, Eye, EyeOff, RotateCcw } from 'lucide-react';
 import { saveImg } from '../../api/ApiConnect';
+import { creatorApi } from '../../api/creator/creatorApi';
+import { showWarningNotification } from '../../api/core/apiClient';
 
 const MIN_OPTIONS = 2;
 const DEFAULT_OPTIONS_COUNT = 4;
@@ -189,8 +191,17 @@ const ListeningChoiceForm = ({ onSubmit, initialData, onDelete }) => {
   };
 
   // Remove image
-  const removeImage = (questionIndex) => {
-    updateQuestion(questionIndex, 'imgUrl', '');
+  const removeImage = async(questionIndex) => {
+      const confirmed = window.confirm("Bạn có muốn xóa ảnh này không?");
+        if (confirmed) {
+         const response=await creatorApi.deleteFile(questions[questionIndex].imgUrl);
+         if(response.success)
+         updateQuestion(questionIndex, 'imgUrl', '');
+        else {
+          showWarningNotification("khong the xoa hinh anh nay")
+        }
+        }
+    
   };
 
   // Toggle image preview

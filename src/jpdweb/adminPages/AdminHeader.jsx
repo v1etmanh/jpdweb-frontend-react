@@ -33,7 +33,7 @@ export default function AdminHeader() {
     { path: "/admin/creator-page", icon: Users, label: "Quản lý Creator" },
     { path: "/admin/pending-certificate", icon: FileText, label: "Chứng chỉ" },
     { path: "/admin/transaction-page", icon: DollarSign, label: "Giao dịch" },
-    { path: "/admin/statistic-revenue", icon: TrendingUp, label: "Thống kê" },
+    { path: "/admin/course-manager", icon: LayoutDashboard, label: "Khóa học" },
 
   ];
 

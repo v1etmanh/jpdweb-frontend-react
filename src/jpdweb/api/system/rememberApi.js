@@ -25,7 +25,7 @@ export const rememberWordApi = {
     */
       deleteWord: (id) => {
         return callApi(
-            () => apiclient.post(API_ENDPOINTS.REMEMBERWORD.DELETE_WORD.replace(':id',id)),
+            () => apiclient.delete(API_ENDPOINTS.REMEMBERWORD.DELETE_WORD.replace(':id',id)),
             { errorMessage: 'Không thể tải your words' }
         );
     },
