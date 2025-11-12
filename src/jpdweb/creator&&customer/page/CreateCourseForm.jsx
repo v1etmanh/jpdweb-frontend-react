@@ -84,6 +84,8 @@ const CreateCourseForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [courseData, setCourseData] = useState(() => {
     const draft = localStorage.getItem("courseDraft");
+
+    
     return draft
       ? JSON.parse(draft)
       : {
@@ -108,7 +110,7 @@ const CreateCourseForm = () => {
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const auth = useAuth();
-
+ console.log(auth.creatorInfor);
   const languages = useMemo(
     () => [
       { value: "ENGLISH", label: "English" },
@@ -314,7 +316,7 @@ const CreateCourseForm = () => {
 
     setIsSubmitting(true);
 
-    console.log(auth.creatorInfor.status);
+    console.log(auth.creatorInfor);
     if (
       courseData.courseType === "PAID" &&
       auth.creatorInfor.status !== "SUCCESS"

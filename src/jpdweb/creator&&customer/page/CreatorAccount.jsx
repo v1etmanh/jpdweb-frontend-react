@@ -24,7 +24,7 @@ const CreatorAccountInfo = () => {
     phone: '',
     bio: ''
   });
-
+console.log(creatorInfor)
   // Map creatorInfo data to states
   const states = useMemo(() => {
     if (!creatorInfor) return [];
@@ -65,7 +65,7 @@ const CreatorAccountInfo = () => {
         title: 'Chứng chỉ cá nhân', 
         description: 'Chứng minh trình độ học vấn của bạn', 
         required: false, 
-        completed: creatorInfor.certificateUrl.length>0,
+        completed: creatorInfor.certificateUrl?.length>0,
         data: {
           certificateUrl: creatorInfor.certificateUrl
         }

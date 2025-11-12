@@ -24,7 +24,9 @@ import {
   FaInfinity,
   FaBullseye,
   FaClipboardList,
-  FaUserGraduate
+  FaUserGraduate,
+  FaCreditCard,
+  FaTimes
 } from 'react-icons/fa';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 
@@ -34,11 +36,18 @@ const ACCESS_MODE = {
   PRIVATE: "PRIVATE",
 };
 
+const PAYMENT_METHODS = {
+  PAYPAL: "PAYPAL",
+  VNPAY: "VNPAY",
+};
+
 export default function CourseDescriptionPage() {
   const [course, setCourse] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [isProcessing, setIsProcessing] = useState(false);
   const [expandedChapters, setExpandedChapters] = useState({});
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(PAYMENT_METHODS.PAYPAL);
   const { id } = useParams();
   const nav = useNavigate();
 
@@ -83,16 +92,7 @@ export default function CourseDescriptionPage() {
     }
   };
 
-  const handlePaidCourse = async () => {
-    const confirmed = window.confirm(
-      `Bạn muốn mua khóa học "${course.name}"?\n\n` +
-        `Giá: $${course.price}\n` +
-        `Phương thức thanh toán: PayPal\n\n` +
-        `Nhấn OK để tiếp tục thanh toán`
-    );
-
-    if (!confirmed) return;
-
+  const handlePayPalPayment = async () => {
     setIsProcessing(true);
     const response = await paymentApi.createOrder(
       course.courseId,
@@ -104,12 +104,45 @@ export default function CourseDescriptionPage() {
         `/transaction-detail?orderId=${order_id}` +
           `&approvalUrl=${encodeURIComponent(approval_url)}` +
           `&courseTitle=${encodeURIComponent(course.name)}` +
-          `&amount=${course.price}`
+          `&amount=${course.price}` +
+          `&paymentMethod=paypal`
       );
     } else {
       handleEnrollmentError(response);
     }
     setIsProcessing(false);
+    setShowPaymentModal(false);
+  };
+
+  const handleVNPayPayment = async () => {
+    setIsProcessing(true);
+    console.log(course.price*1000)
+    const response = await paymentApi.createVNPAYOrder(
+      course.courseId,
+      course.price*1000
+    );
+    if (response.success) {
+      const { paymentUrl } = response.data;
+      // Chuyển hướng trực tiếp đến VNPay
+      window.location.href = paymentUrl;
+    } else {
+      handleEnrollmentError(response);
+    }
+    setIsProcessing(false);
+    setShowPaymentModal(false);
+  };
+
+  const handlePaidCourse = async () => {
+    // Mở modal chọn phương thức thanh toán
+    setShowPaymentModal(true);
+  };
+
+  const handleConfirmPayment = async () => {
+    if (selectedPaymentMethod === PAYMENT_METHODS.PAYPAL) {
+      await handlePayPalPayment();
+    } else if (selectedPaymentMethod === PAYMENT_METHODS.VNPAY) {
+      await handleVNPayPayment();
+    }
   };
 
   const handlePublicCourse = async () => {
@@ -182,6 +215,140 @@ export default function CourseDescriptionPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-cyan-50">
+      {/* Payment Method Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-fadeIn">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <FaCreditCard className="text-[#06B6D4]" />
+                Chọn phương thức thanh toán
+              </h2>
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <FaTimes size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {/* PayPal Option */}
+              <div
+                onClick={() => setSelectedPaymentMethod(PAYMENT_METHODS.PAYPAL)}
+                className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
+                  selectedPaymentMethod === PAYMENT_METHODS.PAYPAL
+                    ? "border-[#0070BA] bg-blue-50 shadow-md"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      selectedPaymentMethod === PAYMENT_METHODS.PAYPAL
+                        ? "border-[#0070BA] bg-[#0070BA]"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    {selectedPaymentMethod === PAYMENT_METHODS.PAYPAL && (
+                      <FaCheckCircle className="text-white text-sm" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <img
+                        src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_37x23.jpg"
+                        alt="PayPal"
+                        className="h-6"
+                      />
+                      <span className="font-bold text-gray-900">PayPal</span>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Thanh toán an toàn qua PayPal
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* VNPay Option */}
+              <div
+                onClick={() => setSelectedPaymentMethod(PAYMENT_METHODS.VNPAY)}
+                className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
+                  selectedPaymentMethod === PAYMENT_METHODS.VNPAY
+                    ? "border-[#0071C2] bg-blue-50 shadow-md"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      selectedPaymentMethod === PAYMENT_METHODS.VNPAY
+                        ? "border-[#0071C2] bg-[#0071C2]"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    {selectedPaymentMethod === PAYMENT_METHODS.VNPAY && (
+                      <FaCheckCircle className="text-white text-sm" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="bg-[#0071C2] text-white px-2 py-1 rounded font-bold text-sm">
+                        VNPAY
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Thanh toán qua cổng VNPAY (ATM, QR)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Summary */}
+            <div className="bg-gray-50 rounded-xl p-4 mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-gray-600">Khóa học:</span>
+                <span className="font-semibold text-gray-900 text-right max-w-xs truncate">
+                  {course.name}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Tổng tiền:</span>
+                <span className="text-2xl font-bold text-[#F97316]">
+                  ₫{course.price.toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <button
+                onClick={handleConfirmPayment}
+                disabled={isProcessing}
+                className="w-full bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white py-3 rounded-xl font-bold hover:from-[#F97316] hover:to-[#EA580C] transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isProcessing ? (
+                  <>
+                    <FaSync className="animate-spin" /> Đang xử lý...
+                  </>
+                ) : (
+                  <>
+                    <FaShoppingCart /> Xác nhận thanh toán
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all"
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header Section - Redesigned Layout */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -560,6 +727,22 @@ export default function CourseDescriptionPage() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
