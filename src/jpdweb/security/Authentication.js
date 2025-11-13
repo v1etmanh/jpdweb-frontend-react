@@ -127,18 +127,12 @@ const refreshed = await keycloak.updateToken(30);
             const response = await getAccount();
             console.log('📝 Account data:', response.data);
             setUser(response.data);
-            setCreator(response.data.creator);
-            if(isCreator){
-            const response1 = await creatorApi.getAccount();
-                if (response1.success)
-                  setCreatorInfor(response1.data)
-                else {
-                  showErrorNotification('Không thể tải dữ liệu')
-                }
-            }
-            else{
-                
-            }
+            const isCreatorNow = response.data.creator;
+            setCreator(isCreatorNow);
+          
+            
+            
+            
             
             // Setup token refresh
             await setUpTokenRefresh();
