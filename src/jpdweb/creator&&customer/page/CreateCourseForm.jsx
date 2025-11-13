@@ -110,6 +110,7 @@ const CreateCourseForm = () => {
   });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const auth = useAuth();
+  
  console.log(auth.creatorInfor);
   const languages = useMemo(
     () => [
@@ -381,7 +382,7 @@ const CreateCourseForm = () => {
     courseData,
     isUpdateCertificate,
     navigate,
-    auth.creatorInfor.status,
+    auth.creator,
   ]);
 
   const removeImage = useCallback(() => {
