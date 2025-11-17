@@ -31,6 +31,7 @@
     "react-router-dom": "^7.5.3",
     "react-scripts": "5.0.1",
     "react-split": "^2.0.14",
+    "recharts": "^3.4.1",
     "sockjs-client": "^1.6.1",
     "wanakana": "^5.3.1",
     "web-vitals": "^2.1.4",

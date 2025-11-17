@@ -129,9 +129,11 @@ getCommercialCourse: () => {
     /**
      * Lấy thống kê
      */
-    getStatistic: () => {
+    getStatistic: (month,year) => {
         return callApi(
-            () => apiclient.get(API_ENDPOINTS.CREATOR.GET_STATISTIC),
+            () => apiclient.get(API_ENDPOINTS.CREATOR.GET_STATISTIC,{params:{month:month, 
+                year:year
+            }}),
             { errorMessage: 'Không thể lấy thông tin thống kê' }
         );
     },

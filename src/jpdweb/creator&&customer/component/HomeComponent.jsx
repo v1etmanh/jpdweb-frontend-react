@@ -9,6 +9,7 @@ import { Search } from "lucide-react";
 import { courseApi } from "../../api/creator/courseApi";
 import { showWarningNotification } from "../../api/core/apiClient";
 import ReactCountryFlag from "react-country-flag";
+import { useAuth } from "jpdweb/security/Authentication";
 
 // ===================== CourseCard =====================
 const CourseCard = ({ course, type }) => {
@@ -337,7 +338,7 @@ export default function HomepageComponent() {
   const [courseInL, setCourseInL] = useState([]);
   const [name, setName] = useState("");
   const nav = useNavigate();
-
+   const {isAdmin}=useAuth()
   // Danh sách ngôn ngữ cho carousel
   const languages = [
     { code: "FR", name: "French", bgColor: "bg-indigo-600" },
@@ -351,8 +352,10 @@ export default function HomepageComponent() {
   ];
 
   useEffect(() => {
+    if(isAdmin){nav("/admin/creator-page")}
+    else
     fetchdata();
-  }, []);
+  },[isAdmin, nav]);
 
   const fetchdata = async () => {
     const response = await courseApi.getRecommendCourses();

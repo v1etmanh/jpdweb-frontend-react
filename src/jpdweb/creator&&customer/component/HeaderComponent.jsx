@@ -95,19 +95,7 @@ export default function HeaderComponent() {
                 <span className="absolute left-0 bottom-[-5px] w-0 h-0.5 bg-gradient-to-r from-[#06B6D4] to-[#F97316] transition-all duration-300 group-hover:w-full"></span>
               </Link>
             </li>
-            <li>
-              <Link
-                to="/dictionary/community"
-                className={`relative inline-block text-xl font-semibold no-underline group transition-colors duration-300 ${
-                  !isScrolled && isHomePage
-                    ? "text-white hover:text-white/80"
-                    : "text-gray-800 hover:text-[#06B6D4]"
-                }`}
-              >
-                dictionary
-                <span className="absolute left-0 bottom-[-3px] w-0 h-0.5 bg-gradient-to-r from-[#06B6D4] to-[#F97316] transition-all duration-300 group-hover:w-full"></span>
-              </Link>
-            </li>
+           
             {auth.isAuthentication && (
               <li>
                 <Link
@@ -141,12 +129,7 @@ export default function HeaderComponent() {
                 Login
                 <span className="absolute left-0 bottom-[-3px] w-0 h-0.5 bg-[#FF8A80] transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link
-                to="/register"
-                className="px-4 py-2 bg-[#F97316] text-white font-semibold rounded-full hover:bg-[#EA580C] transition duration-300 shadow-md hover:shadow-lg no-underline text-lg"
-              >
-                Register
-              </Link>
+              
             </>
           ) : (
             <>

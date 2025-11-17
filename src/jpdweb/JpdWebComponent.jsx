@@ -63,6 +63,9 @@ import Unauthorized from "./Unauthorized";
 import CommunityDictionary from "./creator&&customer/page/DictionaryCommunityPage";
 import AdminCourseManagement from "./adminPages/AdminCourseManagement";
 import AdminCourseDetailPage from "./adminPages/AdminCourseDetailPage";
+import AuthCallback from "./creator&&customer/component/AuthCallback";
+import AdminDashboard from "pages/Admin/AdminDashboard";
+import AdminDashboardPage from "./adminPages/AdminDashboardPage";
 
 export default function JpdWebComponent() {
   // Nâng state lên từ B để có thể control ở cấp cao hơn
@@ -274,7 +277,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
             isOpen={isCreator}
             onToggle={() => setCreator((prev) => !prev)}
           >
-            {isCreator ? <X size={22} /> : <Menu size={22} />}
+            {isCreator ? <X size={18} /> : <Menu size={15} />}
           </Sidebar>
         </>
       )}
@@ -297,7 +300,8 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
           <Route path="/" element={<HomepageComponent />} />
           <Route path="/login" element={<LoginComponent />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
-          <Route path="/dictionary/community" element={<CommunityDictionary />} />
+           <Route path="/auth/callback" element={<AuthCallback />} /> {/* ✅ THÊM ROUTE */}
+                
            <Route path="/about" element={<AboutJaenPage />} />
           <Route
             path="/course_result/:name"
@@ -316,7 +320,7 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
             path="/admin/app_overview"
             element={
               <AdminRoute>
-                <SystemOverview />
+                <AdminDashboardPage />
               </AdminRoute>
             }
           />

@@ -8,13 +8,21 @@ export const adminSystemOverviewApi = {
    */
   getOverview: () => {
     return callApi(
-      () => apiclient.get(API_ENDPOINTS.APP_OVERVIEW.GET_OVERVIEW),
+      () => apiclient.get(API_ENDPOINTS.ADMIN.ADMIN_OVERVIEW),
       {
         errorMessage: 'Không thể tải thông tin tổng quan hệ thống',
       }
     );
   },
-
+ 
+ getChart: () => {
+    return callApi(
+      () => apiclient.get(API_ENDPOINTS.ADMIN.ADMIN_CHART),
+      {
+        errorMessage: 'Không thể tải thông tin tổng quan hệ thống',
+      }
+    );
+  },
   /**
    * 💓 Lấy trạng thái sức khỏe của hệ thống (UP / DOWN / UNKNOWN)
    */

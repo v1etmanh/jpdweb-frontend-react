@@ -108,6 +108,8 @@ export const API_ENDPOINTS = {
     },
     ADMIN: {
         // Creator Management
+        ADMIN_OVERVIEW:'/api/admin/dashboard/overview',
+        ADMIN_CHART:'/api/admin/dashboard/chart',
         GET_CREATORS: '/api/admin/creators',
         GET_CREATOR_DETAIL: '/api/admin/creators/:creatorId',
         GET_PENDING_CERTIFICATES: '/api/admin/creators/pending-certificates',
