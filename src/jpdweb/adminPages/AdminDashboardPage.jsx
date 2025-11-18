@@ -56,28 +56,28 @@ export default function AdminDashboardPage() {
       {/* Overview Cards */}
       {overview && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded shadow">
-            <p className="text-gray-500">Tổng số Creator</p>
-            <p className="text-2xl font-bold">{overview.totalCreators}</p>
+          <div className="p-4 rounded-xl shadow" style={{ backgroundColor: '#06b6d4' }}>
+            <p className="text-white text-xl">Tổng số Creator</p>
+            <p className="text-2xl font-bold text-white">{overview.totalCreators}</p>
           </div>
-          <div className="bg-white p-4 rounded shadow">
-            <p className="text-gray-500">Tổng số khóa học</p>
-            <p className="text-2xl font-bold">{overview.totalCourses}</p>
+          <div className="p-4 rounded-xl shadow" style={{ backgroundColor: '#06b6d4' }}>
+            <p className="text-white text-xl">Tổng số khóa học</p>
+            <p className="text-2xl font-bold text-white">{overview.totalCourses}</p>
           </div>
-          <div className="bg-white p-4 rounded shadow">
-            <p className="text-gray-500">Tổng số đăng ký</p>
-            <p className="text-2xl font-bold">{overview.totalEnrollments}</p>
+          <div className="p-4 rounded-xl shadow" style={{ backgroundColor: '#06b6d4' }}>
+            <p className="text-white text-xl">Tổng số lượt đăng ký</p>
+            <p className="text-2xl font-bold text-white">{overview.totalEnrollments}</p>
           </div>
-          <div className="bg-white p-4 rounded shadow">
-            <p className="text-gray-500">Doanh thu</p>
-            <p className="text-2xl font-bold">${overview.totalRevenue}</p>
+          <div className="p-4 rounded-xl shadow" style={{ backgroundColor: '#06b6d4' }}>
+            <p className="text-white text-xl">Doanh thu</p>
+            <p className="text-2xl font-bold text-white">${overview.totalRevenue}</p>
           </div>
         </div>
       )}
 
       {/* Revenue Chart */}
-      <div className="bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-bold mb-4">Doanh thu theo tháng</h2>
+      <div className="bg-white p-6 rounded-2xl shadow">
+        <h2 className="text-3xl font-bold mb-4">Doanh thu theo tháng</h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={chartData}>
             <XAxis dataKey="name" />
