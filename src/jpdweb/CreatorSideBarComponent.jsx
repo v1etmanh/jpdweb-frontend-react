@@ -18,7 +18,24 @@ import { Link, useLocation } from "react-router-dom";
 const Sidebar = ({ isOpen, onToggle }) => {
   const location = useLocation();
   const [isCommercialOpen, setIsCommercialOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const sidebarRef = useRef(null);
+  
+  const isHomePage = location.pathname === "/";
+
+  // Theo dõi scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -41,6 +58,9 @@ const Sidebar = ({ isOpen, onToggle }) => {
     };
   }, [isOpen, onToggle]);
 
+  // Ẩn sidebar khi ở trang Home và chưa scroll
+  const shouldHideSidebar = isHomePage && !isScrolled;
+
   return (
     <>
       {/* Fixed Sidebar */}
@@ -48,17 +68,18 @@ const Sidebar = ({ isOpen, onToggle }) => {
         ref={sidebarRef}
         style={{
           position: "fixed",
-          left: "0",
-          top: "85px", // Bắt đầu từ dưới header (chiều cao header ~ 85px)
-          height: "calc(100vh - 85px)", // Trừ đi chiều cao header
+          left: shouldHideSidebar ? "-280px" : "0",
+          top: "85px",
+          height: "calc(100vh - 85px)",
           width: isOpen ? "280px" : "75px",
           backgroundColor: "white",
           boxShadow: "4px 0 16px rgba(6, 182, 212, 0.2)",
-          transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          zIndex: 40, // Thấp hơn header (header có z-50)
+          transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+          zIndex: 40,
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
+          overflow: "hidden", // Quan trọng: ẩn mọi scrollbar
+          opacity: shouldHideSidebar ? 0 : 1,
         }}
       >
         {/* Toggle Button */}
@@ -142,10 +163,23 @@ const Sidebar = ({ isOpen, onToggle }) => {
           style={{
             padding: "8px 0",
             flex: 1,
-            overflowY: "auto",
+            overflowY: "auto", // Cho phép scroll nhưng sẽ ẩn scrollbar
+            overflowX: "hidden", // Ẩn scrollbar ngang
             marginTop: isOpen ? "0" : "60px",
+            // CSS để ẩn scrollbar trên các trình duyệt
+            scrollbarWidth: "none", /* Firefox */
+            msOverflowStyle: "none", /* IE and Edge */
           }}
         >
+          {/* Thêm style để ẩn scrollbar trên Webkit browsers (Chrome, Safari) */}
+          <style>
+            {`
+              nav::-webkit-scrollbar {
+                display: none;
+              }
+            `}
+          </style>
+
           <Link
             to="/creator/create_course"
             style={{
@@ -209,6 +243,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
             {isOpen && <span>Create Your Course</span>}
           </Link>
 
+          {/* ... (các Link khác giữ nguyên) ... */}
           <Link
             to="/creator/courseList"
             style={{
@@ -396,7 +431,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
             {isOpen && <span>Creator Account</span>}
           </Link>
 
-          {/* Commercial Dropdown */}
+          {/* Commercial Dropdown - phần này vẫn giữ nguyên */}
           <div
             style={{
               borderTop: "1px solid rgba(6, 182, 212, 0.15)",
@@ -479,7 +514,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
               )}
             </button>
 
-            {/* Submenu */}
+            {/* Submenu - phần này vẫn giữ nguyên */}
             {isCommercialOpen && isOpen && (
               <div
                 style={{
@@ -495,6 +530,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
                   gap: "3px",
                 }}
               >
+                {/* ... (các Link trong submenu giữ nguyên) ... */}
                 <Link
                   to="/creator/commercial/dashboard"
                   style={{
