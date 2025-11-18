@@ -15,11 +15,11 @@ export const adminSystemOverviewApi = {
     );
   },
  
- getChart: () => {
+  getChart: (period = 'MONTH') => {
     return callApi(
-      () => apiclient.get(API_ENDPOINTS.ADMIN.ADMIN_CHART),
+      () => apiclient.get(API_ENDPOINTS.ADMIN.ADMIN_CHART, { params: { period } }),
       {
-        errorMessage: 'Không thể tải thông tin tổng quan hệ thống',
+        errorMessage: 'Không thể tải thông tin biểu đồ',
       }
     );
   },

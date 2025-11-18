@@ -48,6 +48,7 @@ export default function CourseDescriptionPage() {
   const [expandedChapters, setExpandedChapters] = useState({});
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(PAYMENT_METHODS.PAYPAL);
+  const [isHoveringButton, setIsHoveringButton] = useState(false);
   const { id } = useParams();
   const nav = useNavigate();
 
@@ -655,11 +656,15 @@ export default function CourseDescriptionPage() {
                     className="w-full bg-gradient-to-r from-[#06B6D4] to-[#0891B2] text-white py-3 rounded-xl font-bold hover:from-[#F97316] hover:to-[#EA580C] transition-all shadow-lg flex items-center justify-center gap-2"
                     onClick={handleBuyNow}
                     disabled={isProcessing}
+                    onMouseEnter={() => setIsHoveringButton(true)}
+                    onMouseLeave={() => setIsHoveringButton(false)}
                   >
                     {isProcessing 
                       ? <><FaSync className="animate-spin" /> Đang xử lý...</>
                       : course.price === 0 
-                        ? <><FaPlayCircle /> Tham gia ngay</>
+                        ? (course.accessMode === ACCESS_MODE.PRIVATE && isHoveringButton)
+                          ? <><FaPlayCircle /> Nhập key</>
+                          : <><FaPlayCircle /> Tham gia ngay</>
                         : <><FaShoppingCart /> Mua ngay</>}
                   </button>
                   <button
