@@ -107,7 +107,7 @@ function TeacherDashboard() {
      * - Giải phóng tài nguyên audio
      */
     return () => {
-      console.log('🧹 [Step 3] Cleaning up audio resources...');
+      console.log(' [Step 3] Cleaning up audio resources...');
       
       // 1. Dừng phát nhạc
       if (audioRef.current) {
@@ -125,7 +125,7 @@ function TeacherDashboard() {
       audio.src = ''; // Xóa source
       audioRef.current = null;
       
-      console.log('✅ Cleanup completed!');
+      console.log(' Cleanup completed!');
     };
     
   }, [volume]);
@@ -148,7 +148,7 @@ function TeacherDashboard() {
     const timerRef = useRef(null);
     const resultTimerRef = useRef(null);
 
-    // ✅ Cleanup tốt hơn
+    //  Cleanup tốt hơn
     useEffect(() => {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
@@ -157,7 +157,7 @@ function TeacherDashboard() {
         };
     }, []);
 
-    // ✅ handleEndQuestion với debounce
+    // handleEndQuestion với debounce
     const handleEndQuestion = useCallback(() => {
         if (session && connected && quizState.currentQuestion && 
             !quizState.showingResult && !questionEndedRef.current) {
@@ -167,7 +167,7 @@ function TeacherDashboard() {
         }
     }, [session, connected, quizState.currentQuestion, quizState.showingResult]);
 
-    // ✅ Timer effect được cải thiện
+    //  Timer effect được cải thiện
     useEffect(() => {
         // Cleanup previous timer
         if (timerRef.current) {
@@ -191,7 +191,7 @@ function TeacherDashboard() {
                 const newTimeLeft = prev.timeLeft - 1;
                 
                 if (newTimeLeft <= 0) {
-                    console.log("⏰ Time's up! Auto-ending question.");
+                    console.log(" Time's up! Auto-ending question.");
                     handleEndQuestion();
                     return { ...prev, timeLeft: 0 };
                 }
@@ -218,10 +218,10 @@ function TeacherDashboard() {
         }
 
         if (quizState.showingResult && questionResult) {
-            console.log("📊 Showing results for 5 seconds...");
+            console.log(" Showing results for 5 seconds...");
             
             resultTimerRef.current = setTimeout(() => {
-                console.log("⏰ Result display time ended. Moving to next question.");
+                console.log("Result display time ended. Moving to next question.");
                 setQuizState(prev => ({ ...prev, showingResult: false }));
                 setQuestionResult(null);
                 questionEndedRef.current = false;
@@ -247,29 +247,29 @@ function TeacherDashboard() {
 
             const sessionData = response.data;
             setSession(sessionData);
-            console.log('✅ Session created:', sessionData);
+            console.log(' Session created:', sessionData);
 
             await connectWebSocket(sessionData.sessionCode);
 
         } catch (error) {
-            console.error('❌ Error creating session:', error);
+            console.error(' Error creating session:', error);
             alert('Failed to create session: ' + error.message);
         } finally {
             setLoading(false);
         }
     };
 
-    // ✅ WebSocket connection với cleanup tốt hơn
+    //  WebSocket connection với cleanup tốt hơn
     const connectWebSocket = async (sessionCode) => {
         try {
             await QuizWebSocketService.connect(sessionCode, {
                 onConnected: () => {
-                    console.log('✅ WebSocket connected');
+                    console.log(' WebSocket connected');
                     setConnected(true);
                     QuizWebSocketService.getParticipants();
                 },
                 onParticipantJoined: (data) => {
-                    console.log('👤 Participant joined:', data);
+                    console.log(' Participant joined:', data);
                     setParticipants(prev => {
                         // Tránh duplicate
                         const exists = prev.find(p => p.participantId === data.participant.participantId);
@@ -278,15 +278,15 @@ function TeacherDashboard() {
                     });
                 },
                 onParticipantsList: (data) => {
-                    console.log('👥 Participants list:', data);
+                    console.log(' Participants list:', data);
                     setParticipants(data.participants);
                 },
                 onError: (error) => {
-                    console.error('❌ WebSocket error:', error);
+                    console.error(' WebSocket error:', error);
                     setConnected(false);
                 },
                 onQuestionStarted: (data) => {
-                    console.log('❓ New Question Started:', data);
+                    console.log(' New Question Started:', data);
                     questionEndedRef.current = false;
                     setQuizState(prev => ({
                         ...prev,
@@ -297,7 +297,7 @@ function TeacherDashboard() {
                     setQuestionResult(null);
                 },
                 onQuestionEnded: (data) => {
-                    console.log('🏁 Question ended, received results:', data);
+                    console.log(' Question ended, received results:', data);
                     setQuestionResult(data);
                     setQuizState(prev => ({
                         ...prev,
@@ -305,7 +305,7 @@ function TeacherDashboard() {
                         timerActive: false
                     }));
                     
-                    // ✅ Update participants với scores mới
+                    // Update participants với scores mới
                     if (data.results && Array.isArray(data.results)) {
                         setParticipants(prev => {
                             return prev.map(p => {
@@ -319,11 +319,11 @@ function TeacherDashboard() {
                     }
                 },
                 onQuizStarted: (data) => {
-                    console.log('🎉 Quiz started broadcast received!', data);
+                    console.log(' Quiz started broadcast received!', data);
                     setQuizState(prev => ({ ...prev, status: 'ACTIVE' }));
                 },
                 onQuizFinished: (data) => {
-                    console.log('🏁 Quiz finished broadcast received!', data);
+                    console.log(' Quiz finished broadcast received!', data);
                     setQuizState(prev => ({
                         ...prev,
                         status: 'FINISHED',
@@ -340,7 +340,7 @@ function TeacherDashboard() {
                 }
             });
         } catch (error) {
-            console.error('❌ Failed to connect WebSocket:', error);
+            console.error(' Failed to connect WebSocket:', error);
             alert('Failed to connect WebSocket');
         }
     };
@@ -356,7 +356,7 @@ function TeacherDashboard() {
 
     const handleStartQuiz = () => {
         if (session && connected && participants.length > 0) {
-            console.log(`🎬 Attempting to start quiz for session: ${session.sessionCode}`);
+            console.log(` Attempting to start quiz for session: ${session.sessionCode}`);
             QuizWebSocketService.startQuiz();
         } else {
             alert('Cannot start quiz. Check connection and participants.');
@@ -372,7 +372,7 @@ function TeacherDashboard() {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
                 <div className="bg-white rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                     <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 rounded-t-3xl">
-                        <h2 className="text-3xl font-black text-center">📊 Kết Quả Câu Hỏi</h2>
+                        <h2 className="text-3xl font-black text-center"> Kết Quả Câu Hỏi</h2>
                     </div>
 
                     <div className="p-6 grid md:grid-cols-2 gap-6">
@@ -380,7 +380,7 @@ function TeacherDashboard() {
                         <div>
                             <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-6 mb-6">
                                 <h3 className="text-xl font-bold text-green-700 mb-3 flex items-center gap-2">
-                                    <span className="text-2xl">✅</span>
+                                    <span className="text-2xl"></span>
                                     Đáp Án Đúng:
                                 </h3>
                                 <div className="text-2xl font-black text-green-600">
@@ -389,7 +389,7 @@ function TeacherDashboard() {
                             </div>
 
                             <div className="overflow-x-auto">
-                                <h3 className="text-xl font-bold text-gray-800 mb-3">📝 Chi Tiết Câu Trả Lời</h3>
+                                <h3 className="text-xl font-bold text-gray-800 mb-3">Chi Tiết Câu Trả Lời</h3>
                                 <table className="w-full">
                                     <thead>
                                         <tr className="bg-gray-100">

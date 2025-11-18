@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   CreditCard,
   ChevronDown,
+  ChevronLeft,
   Trophy,
   History,
   Wallet,
@@ -17,7 +18,24 @@ import { Link, useLocation } from "react-router-dom";
 const Sidebar = ({ isOpen, onToggle }) => {
   const location = useLocation();
   const [isCommercialOpen, setIsCommercialOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const sidebarRef = useRef(null);
+  
+  const isHomePage = location.pathname === "/";
+
+  // Theo dõi scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -40,6 +58,9 @@ const Sidebar = ({ isOpen, onToggle }) => {
     };
   }, [isOpen, onToggle]);
 
+  // Ẩn sidebar khi ở trang Home và chưa scroll
+  const shouldHideSidebar = isHomePage && !isScrolled;
+
   return (
     <>
       {/* Fixed Sidebar */}
@@ -47,17 +68,18 @@ const Sidebar = ({ isOpen, onToggle }) => {
         ref={sidebarRef}
         style={{
           position: "fixed",
-          left: "0",
-          top: "0",
-          height: "100vh",
+          left: shouldHideSidebar ? "-280px" : "0",
+          top: "85px",
+          height: "calc(100vh - 85px)",
           width: isOpen ? "280px" : "75px",
           backgroundColor: "white",
           boxShadow: "4px 0 16px rgba(6, 182, 212, 0.2)",
-          transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          zIndex: 1100,
+          transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+          zIndex: 40,
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
+          overflow: "hidden", // Quan trọng: ẩn mọi scrollbar
+          opacity: shouldHideSidebar ? 0 : 1,
         }}
       >
         {/* Toggle Button */}
@@ -68,7 +90,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
             top: "15px",
             right: isOpen ? "15px" : "50%",
             transform: isOpen ? "none" : "translateX(50%)",
-            zIndex: 1101,
+            zIndex: 41,
             cursor: "pointer",
             background: isOpen
               ? "linear-gradient(135deg, #f97316 0%, #ea580c 100%)"
@@ -86,14 +108,16 @@ const Sidebar = ({ isOpen, onToggle }) => {
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = isOpen ? "scale(1.05)" : "translateX(50%) scale(1.05)";
-            e.currentTarget.style.boxShadow = "0 6px 20px rgba(249, 115, 22, 0.5)";
+            e.currentTarget.style.boxShadow = isOpen 
+              ? "0 6px 20px rgba(249, 115, 22, 0.5)"
+              : "0 6px 20px rgba(6, 182, 212, 0.5)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = isOpen ? "scale(1)" : "translateX(50%) scale(1)";
             e.currentTarget.style.boxShadow = "0 4px 16px rgba(6, 182, 212, 0.4)";
           }}
         >
-          {isOpen ? <X size={18} /> : <Menu size={18} />}
+          {isOpen ? <ChevronLeft size={18} /> : <Menu size={18} />}
         </button>
 
         {/* Header */}
@@ -139,10 +163,23 @@ const Sidebar = ({ isOpen, onToggle }) => {
           style={{
             padding: "8px 0",
             flex: 1,
-            overflowY: "auto",
+            overflowY: "auto", // Cho phép scroll nhưng sẽ ẩn scrollbar
+            overflowX: "hidden", // Ẩn scrollbar ngang
             marginTop: isOpen ? "0" : "60px",
+            // CSS để ẩn scrollbar trên các trình duyệt
+            scrollbarWidth: "none", /* Firefox */
+            msOverflowStyle: "none", /* IE and Edge */
           }}
         >
+          {/* Thêm style để ẩn scrollbar trên Webkit browsers (Chrome, Safari) */}
+          <style>
+            {`
+              nav::-webkit-scrollbar {
+                display: none;
+              }
+            `}
+          </style>
+
           <Link
             to="/creator/create_course"
             style={{
@@ -206,6 +243,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
             {isOpen && <span>Create Your Course</span>}
           </Link>
 
+          {/* ... (các Link khác giữ nguyên) ... */}
           <Link
             to="/creator/courseList"
             style={{
@@ -393,7 +431,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
             {isOpen && <span>Creator Account</span>}
           </Link>
 
-          {/* Commercial Dropdown */}
+          {/* Commercial Dropdown - phần này vẫn giữ nguyên */}
           <div
             style={{
               borderTop: "1px solid rgba(6, 182, 212, 0.15)",
@@ -476,7 +514,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
               )}
             </button>
 
-            {/* Submenu */}
+            {/* Submenu - phần này vẫn giữ nguyên */}
             {isCommercialOpen && isOpen && (
               <div
                 style={{
@@ -492,6 +530,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
                   gap: "3px",
                 }}
               >
+                {/* ... (các Link trong submenu giữ nguyên) ... */}
                 <Link
                   to="/creator/commercial/dashboard"
                   style={{
@@ -803,7 +842,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 margin: "0 0 6px 0",
               }}
             >
-              © 2024 JPD Learning Platform
+              © 2025 Jaen Language Learning Platform
             </p>
             <div
               style={{
@@ -812,14 +851,6 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 gap: "8px",
               }}
             >
-              <div
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: "#06b6d4",
-                }}
-              ></div>
               <div
                 style={{
                   width: "8px",

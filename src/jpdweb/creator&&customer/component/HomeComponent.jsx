@@ -487,7 +487,7 @@ export default function HomepageComponent() {
               <div className="space-y-2 animate-fade-in-up mb-[50px]">
                 <div className="py-2">
                   <span className="inline-block ml-[110px] bg-white/20 backdrop-blur-md text-white px-5 py-1.5 rounded-full text-xs font-bold border border-white/30 shadow-lg">
-                    🚀 Nền tảng học ngôn ngữ #1
+                     Nền tảng học ngôn ngữ #1
                   </span>
                 </div>
 

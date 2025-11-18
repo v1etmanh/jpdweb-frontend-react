@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useState } from "react";
-
+import FailPayment from "./creator&&customer/page/FailPayment";
+import SuccessPayment from "./creator&&customer/page/SuccessPayment";
 import HomepageComponent from "./creator&&customer/component/HomeComponent";
 import CoursesResultPage from "./creator&&customer/page/CoursesResultPage";
 import "./JpdWebStyle.css";
@@ -300,9 +301,10 @@ function JpdWebContent({ isCreator, setCreator, showDirect, setShowDirect }) {
           <Route path="/" element={<HomepageComponent />} />
           <Route path="/login" element={<LoginComponent />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
-           <Route path="/auth/callback" element={<AuthCallback />} /> {/* ✅ THÊM ROUTE */}
-                
-           <Route path="/about" element={<AboutJaenPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} /> 
+          <Route path="/payment/success" element={<SuccessPayment />} />
+          <Route path="/payment/fail" element={<FailPayment />} />
+          <Route path="/about" element={<AboutJaenPage />} />
           <Route
             path="/course_result/:name"
             element={<CoursesResultPage />}
