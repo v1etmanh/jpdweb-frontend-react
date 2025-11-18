@@ -23,15 +23,12 @@ export default function SpeakingPage({ paragraphs, pictureAndQuestions, isSave, 
  
   // Reset isDone when isSave prop changes
 useEffect(() => {
-  if (!isSave) {
-    // bắt đầu session mới
-    setIsDone(false);
+   if (!isSave) {
+    // Khi bắt đầu session mới → reset
     setCompletedParas([]);
     setCompletedPics([]);
-  } else {
-    // save → chỉ set isDone = true, không reset completed
-    setIsDone(true);
-  }
+    setIsDone(false);
+  } 
 }, [isSave]);
 
   // Calculate if we've completed the required minimums
