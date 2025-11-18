@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   CreditCard,
   ChevronDown,
+  ChevronLeft,
   Trophy,
   History,
   Wallet,
@@ -48,13 +49,13 @@ const Sidebar = ({ isOpen, onToggle }) => {
         style={{
           position: "fixed",
           left: "0",
-          top: "0",
-          height: "100vh",
+          top: "85px", // Bắt đầu từ dưới header (chiều cao header ~ 85px)
+          height: "calc(100vh - 85px)", // Trừ đi chiều cao header
           width: isOpen ? "280px" : "75px",
           backgroundColor: "white",
           boxShadow: "4px 0 16px rgba(6, 182, 212, 0.2)",
           transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          zIndex: 1100,
+          zIndex: 40, // Thấp hơn header (header có z-50)
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -68,7 +69,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
             top: "15px",
             right: isOpen ? "15px" : "50%",
             transform: isOpen ? "none" : "translateX(50%)",
-            zIndex: 1101,
+            zIndex: 41,
             cursor: "pointer",
             background: isOpen
               ? "linear-gradient(135deg, #f97316 0%, #ea580c 100%)"
@@ -86,14 +87,16 @@ const Sidebar = ({ isOpen, onToggle }) => {
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = isOpen ? "scale(1.05)" : "translateX(50%) scale(1.05)";
-            e.currentTarget.style.boxShadow = "0 6px 20px rgba(249, 115, 22, 0.5)";
+            e.currentTarget.style.boxShadow = isOpen 
+              ? "0 6px 20px rgba(249, 115, 22, 0.5)"
+              : "0 6px 20px rgba(6, 182, 212, 0.5)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = isOpen ? "scale(1)" : "translateX(50%) scale(1)";
             e.currentTarget.style.boxShadow = "0 4px 16px rgba(6, 182, 212, 0.4)";
           }}
         >
-          {isOpen ? <X size={18} /> : <Menu size={18} />}
+          {isOpen ? <ChevronLeft size={18} /> : <Menu size={18} />}
         </button>
 
         {/* Header */}
@@ -803,7 +806,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 margin: "0 0 6px 0",
               }}
             >
-              © 2024 JPD Learning Platform
+              © 2025 Jaen Language Learning Platform
             </p>
             <div
               style={{
@@ -812,14 +815,6 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 gap: "8px",
               }}
             >
-              <div
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: "#06b6d4",
-                }}
-              ></div>
               <div
                 style={{
                   width: "8px",
