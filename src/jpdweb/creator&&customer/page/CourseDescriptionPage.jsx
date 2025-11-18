@@ -117,10 +117,10 @@ export default function CourseDescriptionPage() {
 
   const handleVNPayPayment = async () => {
     setIsProcessing(true);
-    console.log(course.price*1000)
+    console.log(course.price)
     const response = await paymentApi.createVNPAYOrder(
       course.courseId,
-      course.price*1000
+      course.price
     );
     if (response.success) {
       const { paymentUrl } = response.data;

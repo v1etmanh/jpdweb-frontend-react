@@ -4,6 +4,7 @@ import finallogo from "../../../images/finallogo.jpg";
 import logo from "../../../images/logo.png";
 import { useAuth } from "../../security/Authentication";
 import { logOutKeycloak } from "../../api/core/KeycloakService";
+import AuditLogNotification from "../page/AuditLogNotification";
 
 export default function HeaderComponent() {
   const auth = useAuth();
@@ -109,6 +110,11 @@ export default function HeaderComponent() {
                   My Learning
                   <span className="absolute left-0 bottom-[-3px] w-0 h-0.5 bg-gradient-to-r from-[#06B6D4] to-[#F97316] transition-all duration-300 group-hover:w-full"></span>
                 </Link>
+              </li>
+            )}
+             {auth.isCreator && (
+              <li>
+               <AuditLogNotification></AuditLogNotification>
               </li>
             )}
           </ul>

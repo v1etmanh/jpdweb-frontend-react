@@ -14,6 +14,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import AuditLogNotification from "./creator&&customer/page/AuditLogNotification";
 
 const Sidebar = ({ isOpen, onToggle }) => {
   const location = useLocation();
@@ -430,6 +431,22 @@ const Sidebar = ({ isOpen, onToggle }) => {
             </div>
             {isOpen && <span>Creator Account</span>}
           </Link>
+          <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "6px",
+    borderRadius: "8px",
+    justifyContent: "flex-start",   // 👈 Căn trái
+    backgroundColor: "#f3f4f6",
+    cursor: "pointer"
+  }}
+>
+  <AuditLogNotification />
+  {isOpen && <span>Audit Log</span>}
+</div>
+
 
           {/* Commercial Dropdown - phần này vẫn giữ nguyên */}
           <div
@@ -531,6 +548,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 }}
               >
                 {/* ... (các Link trong submenu giữ nguyên) ... */}
+               
                 <Link
                   to="/creator/commercial/dashboard"
                   style={{

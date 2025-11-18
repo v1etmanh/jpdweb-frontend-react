@@ -380,6 +380,11 @@ getCommercialCourse: () => {
             ),
             { errorMessage: 'Không thể phân tích ảnh' }
         );
+    }, getCreatorAuditLogs: () => {
+        return callApi(
+            () => apiclient.get(API_ENDPOINTS.CREATOR.AUDITLOG_RETRIEVE),
+            { errorMessage: 'Không thể tải log hoạt động của Creator' }
+        );
     },
     /** 
     *get enrollment detail for commercial course 

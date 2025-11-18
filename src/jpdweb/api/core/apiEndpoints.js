@@ -16,6 +16,8 @@ export const API_ENDPOINTS = {
     // Creator
     CREATOR: {
         GET_ACCOUNT: '/api/creator/getAccount',
+        AUDITLOG_RETRIEVE:'/api/creator/auditlog'
+        ,
         UPLOAD_PAYPAL_EMAIL: '/api/creator/upload/paypalEmail',
         UPLOAD_CERTIFICATE: '/api/creator/upade_certificate',
         CREATE_COURSE: '/api/creator/course/create',
